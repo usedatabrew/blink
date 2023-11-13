@@ -1,5 +1,8 @@
 package metrics
 
 type Metrics interface {
-	GetCounter()
+	IncrementReceivedCounter()
+	IncrementSentCounter()
+	IncrementSourceErrCounter()
+	IncrementSinkErrCounter()
 }

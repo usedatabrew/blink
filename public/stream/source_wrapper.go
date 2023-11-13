@@ -1,4 +1,4 @@
-package service
+package stream
 
 import "lunaflow/internal/sources"
 
@@ -11,6 +11,11 @@ type SourceLoader struct {
 func newProducerLoader(pluginType string) {}
 
 func (p *SourceLoader) Load() {}
-func (p *SourceLoader) Events() chan sources.MessageEvent {
-	return p.producerPlugin.Events()
+func (p *SourceLoader) Events() (stream chan sources.MessageEvent) {
+	for {
+		select {
+		case event := <-p.producerPlugin.Events():
+			stream <- event
+		}
+	}
 }

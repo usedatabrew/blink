@@ -6,12 +6,12 @@ import (
 	"lunaflow/internal/sinks"
 	luna_kafka "lunaflow/internal/sinks/kafka"
 	"lunaflow/internal/sources/postgres_cdc"
-	"lunaflow/public/service"
+	"lunaflow/public/stream"
 	"net/http"
 )
 
 func main() {
-	s, err := service.InitService()
+	s, err := stream.InitService()
 	if err != nil {
 		panic(err)
 	}

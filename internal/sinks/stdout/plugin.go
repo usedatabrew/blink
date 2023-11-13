@@ -21,7 +21,8 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 }
 
 func (s *SinkPlugin) Write(message message.Message) {
-	fmt.Println(message.Data, "message from source")
+	encodedMessage, _ := message.Data.MarshalJSON()
+	fmt.Println("message from source", string(encodedMessage))
 }
 
 func (s *SinkPlugin) GetType() sinks.SinkType {

@@ -56,24 +56,16 @@ func (p *SourcePlugin) Start() {
 	for {
 		select {
 		case snapshotMessage := <-p.stream.SnapshotMessageC():
-			m, err := snapshotMessage.Changes[0].Row.MarshalJSON()
+			m := snapshotMessage.Changes[0].Row
 			p.messagesStream <- sources.MessageEvent{
-				Message: message.Message{
-					ID:   1,
-					Data: string(m),
-					Meta: map[string]string{"table": snapshotMessage.Changes[0].Table},
-				},
-				Err: err,
+				Message: message.New(m),
+				Err:     nil,
 			}
 		case lrMessage := <-p.stream.LrMessageC():
-			m, err := lrMessage.Changes[0].Row.MarshalJSON()
+			m := lrMessage.Changes[0].Row
 			p.messagesStream <- sources.MessageEvent{
-				Message: message.Message{
-					ID:   1,
-					Data: string(m),
-					Meta: map[string]string{"table": lrMessage.Changes[0].Table},
-				},
-				Err: err,
+				Message: message.New(m),
+				Err:     nil,
 			}
 			p.stream.AckLSN(lrMessage.Lsn)
 		}

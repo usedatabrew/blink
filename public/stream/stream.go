@@ -1,4 +1,4 @@
-package service
+package stream
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"lunaflow/internal/sources"
 )
 
-type Service struct {
+type Stream struct {
 	ctx              context.Context
 	stream           chan rxgo.Item
 	observableStream rxgo.Observable
@@ -16,15 +16,15 @@ type Service struct {
 	producer sources.DataSource
 }
 
-func InitService() (*Service, error) {
-	s := Service{}
+func InitService() (*Stream, error) {
+	s := Stream{}
 	s.ctx = context.Background()
 	s.stream = make(chan rxgo.Item)
 	s.observableStream = rxgo.FromChannel(s.stream)
 	return &s, nil
 }
 
-func (s *Service) SetProducer(producer sources.DataSource) error {
+func (s *Stream) SetProducer(producer sources.DataSource) error {
 	if err := producer.Connect(s.ctx); err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (s *Service) SetProducer(producer sources.DataSource) error {
 	return nil
 }
 
-func (s *Service) SetSinks(sinks []sinks.DataSink) error {
+func (s *Stream) SetSinks(sinks []sinks.DataSink) error {
 	for _, sink := range sinks {
 		err := sink.Connect(context.Background())
 		if err != nil {
@@ -46,7 +46,7 @@ func (s *Service) SetSinks(sinks []sinks.DataSink) error {
 	return nil
 }
 
-func (s *Service) Start() error {
+func (s *Stream) Start() error {
 	go s.producer.Start()
 	go func() {
 		for {

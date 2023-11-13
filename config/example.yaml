@@ -1,1 +1,81 @@
-source:
+service:
+  enable_influx: true
+  reload_on_restart: false
+
+input:
+  label: postgres_cdc_input
+  schema:
+    - stream: public.flights
+      columns:
+        - name: flight_id
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: true
+          nullable: false
+        - name: flight_number
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: false
+          nullable: true
+        - name: departure_airport
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: arrival_airport
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: departure_date
+          databrewType: Date32
+          nativeConnectorType: date
+          pk: false
+          nullable: true
+        - name: arrival_date
+          databrewType: Date32
+          nativeConnectorType: date
+          pk: false
+          nullable: true
+        - name: departure_time
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: arrival_time
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: flight_duration
+          databrewType: Float64
+          nativeConnectorType: double precision
+          pk: false
+          nullable: true
+        - name: flight_status
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: id
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: true
+          nullable: false
+  config:
+    host: databrew-testing-instance.postgres.database.azure.com
+    slot_name: databrew_replication_slot_15_117
+    user: postgres
+    password: Lorem123
+    port: 5432
+    schema: public
+    stream_snapshot: true
+    snapshot_memory_safety_factor: 0.1
+    snapshot_batch_size: 10000
+    database: mocks
+    tables:
+      - flights
+
+target:
+  plugin: stdout
+  config: { }

@@ -44,9 +44,10 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 
 func (s *SinkPlugin) Write(mess message.Message) {
 	deliveryChan := make(chan gokafka.Event, 500)
+	marshaledMessage, _ := mess.Data.MarshalJSON()
 	err := s.writer.Produce(&gokafka.Message{
 		TopicPartition: gokafka.TopicPartition{Topic: &s.writerConfig.TopicName, Partition: gokafka.PartitionAny},
-		Value:          []byte(mess.Data)},
+		Value:          marshaledMessage},
 		deliveryChan,
 	)
 	if err != nil {
