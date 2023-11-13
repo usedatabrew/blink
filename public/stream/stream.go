@@ -25,7 +25,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	s.observableStream = rxgo.FromChannel(s.stream)
 	fmt.Println(config)
 
-	sl := NewSourceWrapper(config.Input.Driver, config)
+	sl := NewSourceWrapper(config.Source.Driver, config)
 	err := sl.Init()
 	if err != nil {
 		return s, nil

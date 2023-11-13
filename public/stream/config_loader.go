@@ -2,13 +2,11 @@ package stream
 
 import (
 	"astro/config"
-	"fmt"
 	"gopkg.in/yaml.v3"
 )
 
 func ReadInitConfigFromYaml(configBytes []byte) (config.Configuration, error) {
 	conf := config.Configuration{}
-	fmt.Println(string(configBytes))
 	err := yaml.Unmarshal(configBytes, &conf)
 
 	return conf, err

@@ -59,7 +59,7 @@ func (p *SourceWrapper) GetPluginConfigs(driver sources.SourceDriver, config *ya
 func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Configuration) sources.DataSource {
 	switch driver {
 	case sources.PostgresCDC:
-		driverConfig, err := ReadDriverConfig[postgres_cdc.Config](config.Input.Config, postgres_cdc.Config{})
+		driverConfig, err := ReadDriverConfig[postgres_cdc.Config](config.Source.Config, postgres_cdc.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}

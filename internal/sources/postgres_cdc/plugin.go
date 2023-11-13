@@ -57,6 +57,9 @@ func (p *SourcePlugin) Events() chan sources.MessageEvent {
 func (p *SourcePlugin) Start() {
 	for {
 		select {
+		// snapshot messages channel always opens first
+		// so, here we can be positive about message ordering
+		// logical replication messages will be streamed after the snapshot is processed
 		case snapshotMessage := <-p.stream.SnapshotMessageC():
 			m := snapshotMessage.Changes[0].Row
 			p.messagesStream <- sources.MessageEvent{
@@ -99,6 +102,6 @@ func (p *SourcePlugin) buildPluginsSchema() []pglogicalstream.DbTablesSchema {
 
 		tablesSchema = append(tablesSchema, tSch)
 	}
-	fmt.Println(tablesSchema)
+
 	return tablesSchema
 }

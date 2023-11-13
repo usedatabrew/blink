@@ -45,7 +45,7 @@ func (p *SinkWrapper) SetStreamContext(ctx *stream_context.Context) {
 func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configuration) sinks.DataSink {
 	switch driver {
 	case sinks.StdOutSinkType:
-		driverConfig, err := ReadDriverConfig[stdout.Config](cfg.Target.Config, stdout.Config{})
+		driverConfig, err := ReadDriverConfig[stdout.Config](cfg.Sink.Config, stdout.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}

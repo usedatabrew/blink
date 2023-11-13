@@ -52,7 +52,7 @@ target:
 		log.Fatal(err)
 	}
 
-	if cfg.Input.Driver != "postgres_cdc" {
+	if cfg.Source.Driver != "postgres_cdc" {
 		t.Fatal("Invalid driver in config")
 	}
 }

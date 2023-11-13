@@ -60,7 +60,7 @@ service:
           pk: true
           nullable: false
 
-input:
+source:
   driver: postgres_cdc
   config:
     host: databrew-testing-instance.postgres.database.azure.com
