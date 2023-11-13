@@ -1,13 +1,13 @@
 package sinks
 
 import (
+	"astro/internal/message"
 	"context"
-	"lunaflow/internal/message"
 )
 
 type DataSink interface {
 	Connect(context context.Context) error
-	GetType() SinkType
-	Write(m message.Message)
+	GetType() SinkDriver
+	Write(m message.Message) error
 	Stop()
 }

@@ -1,11 +1,11 @@
 package kafka
 
 import (
+	"astro/internal/message"
+	"astro/internal/sinks"
 	"context"
 	"fmt"
 	gokafka "github.com/confluentinc/confluent-kafka-go/kafka"
-	"lunaflow/internal/message"
-	"lunaflow/internal/sinks"
 	"strings"
 )
 
@@ -24,9 +24,10 @@ func NewKafkaSinkPlugin(config Config) sinks.DataSink {
 }
 
 func (s *SinkPlugin) Connect(ctx context.Context) error {
+	fmt.Println("connect")
 	p, err := gokafka.NewProducer(&gokafka.ConfigMap{
 		"bootstrap.servers": strings.Join(s.writerConfig.Brokers, ","),
-		"client.id":         "lunaflow-writer",
+		"client.id":         "astro-writer",
 		"acks":              "all",
 		"security.protocol": "SASL_SSL",
 		"sasl.mechanisms":   s.writerConfig.SaslMechanism,
@@ -42,7 +43,7 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 	return nil
 }
 
-func (s *SinkPlugin) Write(mess message.Message) {
+func (s *SinkPlugin) Write(mess message.Message) error {
 	deliveryChan := make(chan gokafka.Event, 500)
 	marshaledMessage, _ := mess.Data.MarshalJSON()
 	err := s.writer.Produce(&gokafka.Message{
@@ -52,10 +53,13 @@ func (s *SinkPlugin) Write(mess message.Message) {
 	)
 	if err != nil {
 		fmt.Println("error message", err)
+		return err
+
 	}
+	return err
 }
 
-func (s *SinkPlugin) GetType() sinks.SinkType {
+func (s *SinkPlugin) GetType() sinks.SinkDriver {
 	return sinks.StdOutSinkType
 }
 

@@ -1,8 +1,8 @@
 package processors
 
 import (
+	"astro/internal/message"
 	"context"
-	"lunaflow/internal/message"
 )
 
 type DataProcessor interface {

@@ -1,8 +1,8 @@
 package sources
 
 import (
+	"astro/internal/message"
 	"context"
-	"lunaflow/internal/message"
 )
 
 type MessageEvent struct {

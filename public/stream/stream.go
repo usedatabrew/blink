@@ -1,10 +1,12 @@
 package stream
 
 import (
+	"astro/config"
+	"astro/internal/sinks"
+	"astro/internal/sources"
 	"context"
+	"fmt"
 	"github.com/reactivex/rxgo/v2"
-	"lunaflow/internal/sinks"
-	"lunaflow/internal/sources"
 )
 
 type Stream struct {
@@ -16,7 +18,23 @@ type Stream struct {
 	producer sources.DataSource
 }
 
-func InitService() (*Stream, error) {
+func InitFromConfig(config config.Configuration) (*Stream, error) {
+	s := &Stream{}
+	s.ctx = context.Background()
+	s.stream = make(chan rxgo.Item)
+	s.observableStream = rxgo.FromChannel(s.stream)
+	fmt.Println(config)
+
+	sl := NewSourceWrapper(config.Input.Driver, config)
+	err := sl.Init()
+	if err != nil {
+		return s, nil
+	}
+
+	return s, nil
+}
+
+func InitManually() (*Stream, error) {
 	s := Stream{}
 	s.ctx = context.Background()
 	s.stream = make(chan rxgo.Item)

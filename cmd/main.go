@@ -1,58 +1,21 @@
 package main
 
 import (
+	"astro/public/stream"
 	"fmt"
-	"github.com/usedatabrew/pglogicalstream"
-	"lunaflow/internal/sinks"
-	luna_kafka "lunaflow/internal/sinks/kafka"
-	"lunaflow/internal/sources/postgres_cdc"
-	"lunaflow/public/stream"
 	"net/http"
+	"os"
 )
 
 func main() {
-	s, err := stream.InitService()
+	configFile, err := os.ReadFile("./config/example.yaml")
 	if err != nil {
 		panic(err)
 	}
-	if err = s.SetProducer(postgres_cdc.NewPostgresSourcePlugin(postgres_cdc.Config{
-		Host:     "databrew-testing-instance.postgres.database.azure.com",
-		Port:     5432,
-		Database: "mocks",
-		User:     "postgres",
-		Schema:   "public",
-		Password: "Lorem123",
-		TablesSchema: []pglogicalstream.DbTablesSchema{
-			{
-				Table: "public.flights",
-				Columns: []pglogicalstream.DbSchemaColumn{
-					{
-						Name:         "flight_id",
-						DatabrewType: "Int64",
-						Nullable:     false,
-					},
-				},
-			},
-		},
-		SSLRequired:    true,
-		StreamSnapshot: true,
-	})); err != nil {
-		panic(err)
-	}
 
-	kafkaSink := luna_kafka.NewKafkaSinkPlugin(luna_kafka.Config{
-		Brokers:           []string{"pkc-ygz0p.norwayeast.azure.confluent.cloud:9092"},
-		Sasl:              true,
-		SaslPassword:      "stm1jZufR0njS4hVHnYgX4zrziADac/BZUGv2qh7Z0RBU3alrNTbxdMDob0p0aLg",
-		SaslUser:          "2BUOXTEG5AKL4IEC",
-		SaslMechanism:     "PLAIN",
-		BindTopicToStream: false,
-		TopicName:         "llsobgnp-default",
-	})
-
-	err = s.SetSinks([]sinks.DataSink{
-		kafkaSink,
-	})
+	var streamService *stream.Stream
+	serviceConfiguration, err := stream.ReadInitConfigFromYaml(configFile)
+	streamService, err = stream.InitFromConfig(serviceConfiguration)
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +28,7 @@ func main() {
 		http.ListenAndServe(":8080", nil)
 	}()
 
-	if err = s.Start(); err != nil {
+	if err = streamService.Start(); err != nil {
 		panic(err)
 	}
 }

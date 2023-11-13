@@ -1,24 +1,26 @@
 package postgres_cdc
 
 import (
+	"astro/internal/message"
+	"astro/internal/schema"
+	"astro/internal/sources"
 	"context"
 	"fmt"
 	"github.com/usedatabrew/pglogicalstream"
-	"lunaflow/internal/message"
-	"lunaflow/internal/sources"
 )
 
 type SourcePlugin struct {
-	ctx    context.Context
-	config Config
-	stream *pglogicalstream.Stream
-
+	ctx            context.Context
+	config         Config
+	streamSchema   []schema.StreamSchema
+	stream         *pglogicalstream.Stream
 	messagesStream chan sources.MessageEvent
 }
 
-func NewPostgresSourcePlugin(config Config) sources.DataSource {
+func NewPostgresSourcePlugin(config Config, schema []schema.StreamSchema) sources.DataSource {
 	return &SourcePlugin{
 		config:         config,
+		streamSchema:   schema,
 		messagesStream: make(chan sources.MessageEvent),
 	}
 }
@@ -31,7 +33,7 @@ func (p *SourcePlugin) Connect(ctx context.Context) error {
 		DbPort:                     p.config.Port,
 		DbName:                     p.config.Database,
 		DbSchema:                   p.config.Schema,
-		DbTablesSchema:             p.config.TablesSchema,
+		DbTablesSchema:             p.buildPluginsSchema(),
 		ReplicationSlotName:        fmt.Sprintf("rs_%s", "random_slot_name"),
 		TlsVerify:                  "require",
 		StreamOldData:              p.config.StreamSnapshot,
@@ -78,4 +80,25 @@ func (p *SourcePlugin) Stop() {
 	if err != nil {
 		fmt.Println("Failed to close producer", err)
 	}
+}
+
+func (p *SourcePlugin) buildPluginsSchema() []pglogicalstream.DbTablesSchema {
+	var tablesSchema []pglogicalstream.DbTablesSchema
+	for _, stream := range p.streamSchema {
+		tSch := pglogicalstream.DbTablesSchema{}
+		tSch.Table = stream.StreamName
+		for _, schemaCol := range stream.Columns {
+			tSch.Columns = append(tSch.Columns, pglogicalstream.DbSchemaColumn{
+				Name:                schemaCol.Name,
+				DatabrewType:        schemaCol.DatabrewType,
+				NativeConnectorType: schemaCol.NativeConnectorType,
+				Pk:                  schemaCol.PK,
+				Nullable:            schemaCol.Nullable,
+			})
+		}
+
+		tablesSchema = append(tablesSchema, tSch)
+	}
+	fmt.Println(tablesSchema)
+	return tablesSchema
 }
