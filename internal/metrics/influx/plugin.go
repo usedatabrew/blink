@@ -2,10 +2,8 @@ package influx
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/influxdata/influxdb-client-go/v2/api"
+	influxdb3 "github.com/InfluxCommunity/influxdb3-go/influxdb3"
 	"github.com/rcrowley/go-metrics"
 	"time"
 )
@@ -16,27 +14,43 @@ type Plugin struct {
 	sinkErrorsCounter   metrics.Counter
 	sourceErrorsCounter metrics.Counter
 
-	writer api.WriteAPI
-	client influxdb2.Client
+	client       *influxdb3.Client
+	writeOptions influxdb3.WriteOptions
 
 	groupName  string
 	pipelineId int
+	orgId      string
+	bucket     string
 }
 
 func NewPlugin(config Config) (*Plugin, error) {
 	plugin := &Plugin{
-		groupName:  config.GroupName,
-		pipelineId: config.PipelineId,
+		groupName:           config.GroupName,
+		pipelineId:          config.PipelineId,
+		orgId:               config.Org,
+		bucket:              config.Bucket,
+		sentCounter:         metrics.NewCounter(),
+		receivedCounter:     metrics.NewCounter(),
+		sinkErrorsCounter:   metrics.NewCounter(),
+		sourceErrorsCounter: metrics.NewCounter(),
+	}
+	plugin.receivedCounter.Clear()
+	plugin.receivedCounter.Clear()
+	plugin.sinkErrorsCounter.Clear()
+	plugin.sourceErrorsCounter.Clear()
+
+	client, err := influxdb3.New(influxdb3.ClientConfig{
+		Host:  config.Host,
+		Token: config.Token,
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	plugin.client = influxdb2.NewClient(config.Url, config.Token)
-
-	if ok, err := plugin.client.Ready(context.TODO()); ok == nil || err != nil {
-		return nil, errors.New("metrics connection failed")
+	plugin.client = client
+	plugin.writeOptions = influxdb3.WriteOptions{
+		Database: config.Bucket,
 	}
-
-	writer := plugin.client.WriteAPI(config.Org, config.Bucket)
-	plugin.writer = writer
 
 	go func() {
 		for {
@@ -65,21 +79,21 @@ func (p *Plugin) IncrementSourceErrCounter() {
 }
 
 func (p *Plugin) flushMetrics() {
-	point := influxdb2.NewPoint(
-		"stream_data",
-		map[string]string{
-			"group":    p.groupName,
-			"pipeline": fmt.Sprintf("%d", p.pipelineId),
-		},
-		map[string]interface{}{
-			"received_messages": p.receivedCounter.Count(),
-			"sent_messages":     p.sentCounter.Count(),
-			"sink_errors":       p.sinkErrorsCounter.Count(),
-			"source_errors":     p.sourceErrorsCounter.Count(),
-		},
-		time.Now(),
-	)
+	pointsToWrite := map[string]int64{
+		"received_messages": p.receivedCounter.Count(),
+		"sent_messages":     p.sentCounter.Count(),
+		"sink_errors":       p.sinkErrorsCounter.Count(),
+		"source_errors":     p.sourceErrorsCounter.Count(),
+	}
 
-	// Write the point to InfluxDB
-	p.writer.WritePoint(point)
+	for k, v := range pointsToWrite {
+		point := influxdb3.NewPointWithMeasurement("astro_data").
+			SetTag("group", p.groupName).
+			SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
+			SetField(k, v)
+
+		if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
+			panic(err)
+		}
+	}
 }

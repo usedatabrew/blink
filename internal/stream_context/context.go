@@ -1,18 +1,30 @@
 package stream_context
 
 import (
+	"astro/internal/logger"
 	"astro/internal/metrics"
 	"context"
+	"github.com/charmbracelet/log"
 )
 
 type Context struct {
 	ctx     context.Context
 	Metrics metrics.Metrics
+	Logger  *log.Logger
 }
 
-func CreateContext(mtr metrics.Metrics) *Context {
+func CreateContext() *Context {
 	return &Context{
 		ctx:     context.Background(),
-		Metrics: mtr,
+		Metrics: nil,
+		Logger:  logger.GetInstance(),
 	}
+}
+
+func (c *Context) GetContext() context.Context {
+	return c.ctx
+}
+
+func (c *Context) SetMetrics(mtr metrics.Metrics) {
+	c.Metrics = mtr
 }

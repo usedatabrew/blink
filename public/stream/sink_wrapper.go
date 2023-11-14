@@ -23,7 +23,7 @@ func NewSinkWrapper(pluginType sinks.SinkDriver, config config.Configuration) Si
 	return loader
 }
 
-func (p *SinkWrapper) Init() error {
+func (p *SinkWrapper) Connect() error {
 	return p.sinkDriver.Connect(context.TODO())
 }
 

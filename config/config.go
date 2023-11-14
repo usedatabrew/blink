@@ -19,8 +19,9 @@ type Columns struct {
 	Nullable            bool   `yaml:"nullable"`
 }
 type Service struct {
-	EnableInflux    bool                  `yaml:"enable_influx"`
 	ReloadOnRestart bool                  `yaml:"reload_on_restart"`
+	InfluxEnabled   bool                  `yaml:"enable_influx"`
+	Influx          interface{}           `yaml:"influx"`
 	StreamSchema    []schema.StreamSchema `yaml:"stream_schema"`
 }
 
@@ -30,6 +31,6 @@ type Source struct {
 }
 
 type Sink struct {
-	Driver sinks.DataSink `yaml:"driver"`
-	Config interface{}    `yaml:"config"`
+	Driver sinks.SinkDriver `yaml:"driver"`
+	Config interface{}      `yaml:"config"`
 }
