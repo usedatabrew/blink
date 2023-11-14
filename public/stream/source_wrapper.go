@@ -5,12 +5,10 @@ import (
 	"astro/internal/sources"
 	"astro/internal/sources/postgres_cdc"
 	"astro/internal/stream_context"
-	"context"
-	"fmt"
 	"gopkg.in/yaml.v3"
 )
 
-// SourceWrapper wraps plan producer plugin in order to
+// SourceWrapper wraps plan source plugin in order to
 // measure performance, build proper configuration and control the context
 type SourceWrapper struct {
 	sourceDriver sources.DataSource
@@ -19,14 +17,14 @@ type SourceWrapper struct {
 
 func NewSourceWrapper(pluginType sources.SourceDriver, config config.Configuration) SourceWrapper {
 	loader := SourceWrapper{}
-	fmt.Println(config.Service.StreamSchema)
 	loadedDriver := loader.LoadDriver(pluginType, config)
 	loader.sourceDriver = loadedDriver
 	return loader
 }
 
-func (p *SourceWrapper) Init() error {
-	return p.sourceDriver.Connect(context.TODO())
+func (p *SourceWrapper) Init(appctx *stream_context.Context) error {
+	p.ctx = appctx
+	return p.sourceDriver.Connect(appctx.GetContext())
 }
 
 func (p *SourceWrapper) Events() (stream chan sources.MessageEvent) {
@@ -41,6 +39,10 @@ func (p *SourceWrapper) Events() (stream chan sources.MessageEvent) {
 			stream <- event
 		}
 	}
+}
+
+func (p *SourceWrapper) Start() {
+	p.sourceDriver.Start()
 }
 
 func (p *SourceWrapper) SetStreamContext(ctx *stream_context.Context) {

@@ -3,7 +3,7 @@ package influx
 import "gopkg.in/yaml.v3"
 
 type Config struct {
-	Url    string `json:"url" yaml:"url"`
+	Host   string `json:"host" yaml:"host"`
 	Token  string `json:"token" yaml:"token"`
 	Org    string `json:"org" yaml:"org"`
 	Bucket string `json:"bucket" yaml:"bucket"`

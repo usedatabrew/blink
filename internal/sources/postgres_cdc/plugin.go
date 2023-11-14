@@ -34,7 +34,7 @@ func (p *SourcePlugin) Connect(ctx context.Context) error {
 		DbName:                     p.config.Database,
 		DbSchema:                   p.config.Schema,
 		DbTablesSchema:             p.buildPluginsSchema(),
-		ReplicationSlotName:        fmt.Sprintf("rs_%s", "random_slot_name"),
+		ReplicationSlotName:        fmt.Sprintf("rs_%s", p.config.SlotName),
 		TlsVerify:                  "require",
 		StreamOldData:              p.config.StreamSnapshot,
 		SnapshotMemorySafetyFactor: 0.3,
@@ -68,10 +68,12 @@ func (p *SourcePlugin) Start() {
 			}
 		case lrMessage := <-p.stream.LrMessageC():
 			m := lrMessage.Changes[0].Row
+			fmt.Println("push message")
 			p.messagesStream <- sources.MessageEvent{
 				Message: message.New(m),
 				Err:     nil,
 			}
+			fmt.Println("pushed")
 			p.stream.AckLSN(lrMessage.Lsn)
 		}
 	}

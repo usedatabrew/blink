@@ -11,7 +11,7 @@ type MessageEvent struct {
 }
 
 type DataSource interface {
-	Connect(context context.Context) error
+	Connect(ctx context.Context) error
 	Start()
 	Events() chan MessageEvent
 	Stop()

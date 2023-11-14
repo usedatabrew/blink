@@ -12,4 +12,5 @@ type Config struct {
 	TablesSchema   []pglogicalstream.DbTablesSchema `json:"tables_schema" yaml:"tables_schema"`
 	SSLRequired    bool                             `json:"ssl_required" yaml:"ssl_required"`
 	StreamSnapshot bool                             `json:"stream_snapshot" yaml:"stream_snapshot"`
+	SlotName       string                           `json:"slot_name" yaml:"slot_name"`
 }

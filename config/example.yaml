@@ -1,5 +1,14 @@
 service:
   enable_influx: true
+  group_name: org_id_12
+  pipeline_id: 120
+  influx:
+    host: https://eu-central-1-1.aws.cloud2.influxdata.com
+    token: dwWFG-NXl8uy0dmiptLjN1-B1-5JIlyEnwCHVxmPgY-6o6f62-G09dtYDg1SEYk6mL3wGG_7DIMVer8Yoe-e9Q==
+    org: DataBrew, Inc.
+    bucket: databrew_ingestor
+    group_name: org_11
+    pipeline_id: 123
   reload_on_restart: false
   stream_schema:
     - stream: public.flights
@@ -64,7 +73,7 @@ source:
   driver: postgres_cdc
   config:
     host: databrew-testing-instance.postgres.database.azure.com
-    slot_name: databrew_replication_slot_15_117
+    slot_name: databrew_replication_slot_15_1123
     user: postgres
     password: Lorem123
     port: 5432
