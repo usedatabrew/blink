@@ -2,7 +2,7 @@ package stream
 
 import (
 	"astro/config"
-	"astro/internal/sources"
+	"astro/internal/message"
 	"astro/internal/stream_context"
 	"context"
 	"errors"
@@ -92,7 +92,7 @@ func (s *Stream) Start() error {
 	s.observableStream.Connect(context.Background())
 	for v := range s.observableStream.Observe() {
 		for _, sink := range s.sinks {
-			sink.Write(v.V.(sources.MessageEvent))
+			sink.Write(v.V.(message.Message))
 		}
 	}
 	select {}
