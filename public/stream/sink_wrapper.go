@@ -16,16 +16,16 @@ type SinkWrapper struct {
 	ctx        *stream_context.Context
 }
 
-func NewSinkWrapper(pluginType sinks.SinkDriver, config config.Configuration) SinkWrapper {
+func NewSinkWrapper(pluginType sinks.SinkDriver, config config.Configuration, appctx *stream_context.Context) SinkWrapper {
 	loader := SinkWrapper{}
+	loader.ctx = appctx
 	loadedDriver := loader.LoadDriver(pluginType, config)
 	loader.sinkDriver = loadedDriver
 	return loader
 }
 
-func (p *SinkWrapper) Init(appctx *stream_context.Context) error {
-	p.ctx = appctx
-	return p.sinkDriver.Connect(appctx.GetContext())
+func (p *SinkWrapper) Init() error {
+	return p.sinkDriver.Connect(p.ctx.GetContext())
 }
 
 func (p *SinkWrapper) Write(msg message.Message) error {
@@ -50,7 +50,7 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 		if err != nil {
 			panic("can read driver config")
 		}
-		return stdout.NewStdOutSinkPlugin(driverConfig, cfg.Service.StreamSchema)
+		return stdout.NewStdOutSinkPlugin(driverConfig, cfg.Service.StreamSchema, p.ctx)
 	case sinks.KafkaSinkType:
 		driverConfig, err := ReadDriverConfig[kafka.Config](cfg.Sink.Config, kafka.Config{})
 		if err != nil {

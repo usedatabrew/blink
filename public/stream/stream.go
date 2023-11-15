@@ -43,7 +43,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	streamContext.Logger.WithPrefix("Source").Info("Loaded")
 
 	streamContext.Logger.WithPrefix("Sinks").Info("Loading driver")
-	sinkWrapper := NewSinkWrapper(config.Sink.Driver, config)
+	sinkWrapper := NewSinkWrapper(config.Sink.Driver, config, s.ctx)
 	streamContext.Logger.WithPrefix("Sinks").Info("Loaded")
 
 	if err := s.SetSinks([]SinkWrapper{sinkWrapper}); err != nil {
@@ -74,7 +74,7 @@ func (s *Stream) SetProducer(producer SourceWrapper) error {
 
 func (s *Stream) SetSinks(sinks []SinkWrapper) error {
 	for _, sink := range sinks {
-		err := sink.Init(s.ctx)
+		err := sink.Init()
 		if err != nil {
 			return err
 		}

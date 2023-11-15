@@ -27,7 +27,6 @@ func NewKafkaSinkPlugin(config Config, schema []schema.StreamSchema) sinks.DataS
 }
 
 func (s *SinkPlugin) Connect(ctx context.Context) error {
-	fmt.Println("connect")
 	p, err := gokafka.NewProducer(&gokafka.ConfigMap{
 		"bootstrap.servers": strings.Join(s.writerConfig.Brokers, ","),
 		"client.id":         "astro-writer",

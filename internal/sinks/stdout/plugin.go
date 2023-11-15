@@ -4,31 +4,34 @@ import (
 	"astro/internal/message"
 	"astro/internal/schema"
 	"astro/internal/sinks"
+	"astro/internal/stream_context"
 	"context"
-	"fmt"
+	"github.com/charmbracelet/log"
 )
 
 type SinkPlugin struct {
-	ctx          context.Context
+	appCtx       *stream_context.Context
 	streamSchema []schema.StreamSchema
 	config       Config
+	logger       *log.Logger
 }
 
-func NewStdOutSinkPlugin(config Config, schema []schema.StreamSchema) sinks.DataSink {
+func NewStdOutSinkPlugin(config Config, schema []schema.StreamSchema, appCtx *stream_context.Context) sinks.DataSink {
 	return &SinkPlugin{
 		streamSchema: schema,
 		config:       config,
+		appCtx:       appCtx,
+		logger:       appCtx.Logger.WithPrefix("[sink]: stdout"),
 	}
 }
 
 func (s *SinkPlugin) Connect(ctx context.Context) error {
-	s.ctx = ctx
 	return nil
 }
 
 func (s *SinkPlugin) Write(message message.Message) error {
 	encodedMessage, _ := message.Data.MarshalJSON()
-	fmt.Println("message from source", string(encodedMessage))
+	s.logger.Info("Message from source received", string(encodedMessage))
 
 	return nil
 }
@@ -38,5 +41,5 @@ func (s *SinkPlugin) GetType() sinks.SinkDriver {
 }
 
 func (s *SinkPlugin) Stop() {
-	s.ctx.Done()
+	s.appCtx.GetContext().Done()
 }
