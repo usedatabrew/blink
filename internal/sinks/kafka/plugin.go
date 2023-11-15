@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"astro/internal/message"
+	"astro/internal/schema"
 	"astro/internal/sinks"
 	"context"
 	"fmt"
@@ -14,11 +15,13 @@ type SinkPlugin struct {
 	writer *gokafka.Producer
 
 	writerConfig Config
+	schema       []schema.StreamSchema
 }
 
-func NewKafkaSinkPlugin(config Config) sinks.DataSink {
+func NewKafkaSinkPlugin(config Config, schema []schema.StreamSchema) sinks.DataSink {
 	plugin := &SinkPlugin{}
 	plugin.writerConfig = config
+	plugin.schema = schema
 	plugin.ctx = context.Background()
 	return plugin
 }

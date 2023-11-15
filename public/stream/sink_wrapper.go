@@ -4,6 +4,7 @@ import (
 	"astro/config"
 	"astro/internal/message"
 	"astro/internal/sinks"
+	"astro/internal/sinks/kafka"
 	"astro/internal/sinks/stdout"
 	"astro/internal/stream_context"
 )
@@ -50,6 +51,12 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 			panic("can read driver config")
 		}
 		return stdout.NewStdOutSinkPlugin(driverConfig, cfg.Service.StreamSchema)
+	case sinks.KafkaSinkType:
+		driverConfig, err := ReadDriverConfig[kafka.Config](cfg.Sink.Config, kafka.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return kafka.NewKafkaSinkPlugin(driverConfig, cfg.Service.StreamSchema)
 	}
 
 	return nil
