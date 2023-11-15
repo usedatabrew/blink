@@ -27,18 +27,23 @@ func (p *SourceWrapper) Init(appctx *stream_context.Context) error {
 	return p.sourceDriver.Connect(appctx.GetContext())
 }
 
-func (p *SourceWrapper) Events() (stream chan sources.MessageEvent) {
-	for {
-		select {
-		case event := <-p.sourceDriver.Events():
-			if event.Err != nil {
-				p.ctx.Metrics.IncrementSourceErrCounter()
-			} else {
-				p.ctx.Metrics.IncrementReceivedCounter()
+func (p *SourceWrapper) Events() chan sources.MessageEvent {
+	stream := make(chan sources.MessageEvent)
+	go func() {
+		for {
+			select {
+			case event := <-p.sourceDriver.Events():
+				if event.Err != nil {
+					p.ctx.Metrics.IncrementSourceErrCounter()
+				} else {
+					p.ctx.Metrics.IncrementReceivedCounter()
+				}
+				stream <- event
 			}
-			stream <- event
 		}
-	}
+	}()
+
+	return stream
 }
 
 func (p *SourceWrapper) Start() {

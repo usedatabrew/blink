@@ -62,18 +62,22 @@ func (p *SourcePlugin) Start() {
 		// logical replication messages will be streamed after the snapshot is processed
 		case snapshotMessage := <-p.stream.SnapshotMessageC():
 			m := snapshotMessage.Changes[0].Row
+			builtMessage := message.New(m)
+			builtMessage.SetEvent(snapshotMessage.Changes[0].Kind)
+			builtMessage.SetStream(snapshotMessage.Changes[0].Table)
 			p.messagesStream <- sources.MessageEvent{
-				Message: message.New(m),
+				Message: builtMessage,
 				Err:     nil,
 			}
 		case lrMessage := <-p.stream.LrMessageC():
 			m := lrMessage.Changes[0].Row
-			fmt.Println("push message")
+			builtMessage := message.New(m)
+			builtMessage.SetEvent(lrMessage.Changes[0].Kind)
+			builtMessage.SetStream(lrMessage.Changes[0].Table)
 			p.messagesStream <- sources.MessageEvent{
-				Message: message.New(m),
+				Message: builtMessage,
 				Err:     nil,
 			}
-			fmt.Println("pushed")
 			p.stream.AckLSN(lrMessage.Lsn)
 		}
 	}

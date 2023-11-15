@@ -24,10 +24,11 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	if config.Service.InfluxEnabled {
 		metrics, err := loadInfluxMetrics(config.Service.Influx)
 		if err != nil {
-			streamContext.Logger.WithPrefix("metrics").Error("failed to load influx metrics")
+			streamContext.Logger.WithPrefix("Metrics").Error("failed to load influx metrics")
 			return nil, err
 		}
 		streamContext.SetMetrics(metrics)
+		streamContext.Logger.WithPrefix("Metrics").Info("Component has been loaded")
 	}
 
 	s := &Stream{}
@@ -39,7 +40,11 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	sourceWrapper := NewSourceWrapper(config.Source.Driver, config)
 	sinkWrapper := NewSinkWrapper(config.Sink.Driver, config)
 	s.source = &sourceWrapper
-	s.sinks = append(s.sinks, sinkWrapper)
+
+	if err := s.SetSinks([]SinkWrapper{sinkWrapper}); err != nil {
+		s.ctx.Logger.WithPrefix("Sinks").Errorf("failed to initialize sinks for pipeline %v", err)
+		return nil, err
+	}
 
 	return s, nil
 }
@@ -64,7 +69,7 @@ func (s *Stream) SetProducer(producer SourceWrapper) error {
 
 func (s *Stream) SetSinks(sinks []SinkWrapper) error {
 	for _, sink := range sinks {
-		err := sink.Connect()
+		err := sink.Init(s.ctx)
 		if err != nil {
 			return err
 		}
@@ -95,7 +100,8 @@ func (s *Stream) Start() error {
 			sink.Write(v.V.(message.Message))
 		}
 	}
-	select {}
+
+	return nil
 }
 
 func (s *Stream) validateAndInit() error {

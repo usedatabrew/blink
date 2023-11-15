@@ -85,6 +85,6 @@ source:
     tables:
       - flights
 
-target:
+sink:
   driver: stdout
   config: { }
