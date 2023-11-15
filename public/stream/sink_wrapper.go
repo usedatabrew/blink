@@ -6,7 +6,6 @@ import (
 	"astro/internal/sinks"
 	"astro/internal/sinks/stdout"
 	"astro/internal/stream_context"
-	"context"
 )
 
 // SinkWrapper wraps plan sink writer plugin in order to
@@ -23,8 +22,9 @@ func NewSinkWrapper(pluginType sinks.SinkDriver, config config.Configuration) Si
 	return loader
 }
 
-func (p *SinkWrapper) Connect() error {
-	return p.sinkDriver.Connect(context.TODO())
+func (p *SinkWrapper) Init(appctx *stream_context.Context) error {
+	p.ctx = appctx
+	return p.sinkDriver.Connect(appctx.GetContext())
 }
 
 func (p *SinkWrapper) Write(msg message.Message) error {
