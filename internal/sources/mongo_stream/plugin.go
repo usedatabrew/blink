@@ -5,13 +5,15 @@ import (
 	"astro/internal/schema"
 	"astro/internal/sources"
 	"context"
+	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/apache/arrow/go/v14/arrow/array"
 	"github.com/apache/arrow/go/v14/arrow/memory"
+	"github.com/cloudquery/plugin-sdk/v4/scalar" // todo: check it
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type SourcePlugin struct {
@@ -19,21 +21,25 @@ type SourcePlugin struct {
 	config        Config
 	client        *mongo.Client
 	database      *mongo.Database
-	collection    *mongo.Collection
-	streamSchema  []schema.StreamSchema
+	inputSchema   []schema.StreamSchema
+	outputSchema  map[string]*arrow.Schema
 	messageStream chan sources.MessageEvent
 }
 
 func NewMongoStreamSourcePlugin(config Config, schema []schema.StreamSchema) sources.DataSource {
-	return &SourcePlugin{
+	instance := &SourcePlugin{
 		config:        config,
-		streamSchema:  schema,
+		inputSchema:   schema,
 		messageStream: make(chan sources.MessageEvent),
 	}
+
+	instance.buildPluginSchema()
+
+	return instance
 }
 
 func (p *SourcePlugin) Connect(ctx context.Context) error {
-	client, err := mongo.Connect(p.ctx, options.Client().ApplyURI(p.config.Uri))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(p.config.Uri))
 
 	if err != nil {
 		return err
@@ -43,7 +49,6 @@ func (p *SourcePlugin) Connect(ctx context.Context) error {
 	p.ctx = ctx
 
 	p.database = client.Database(p.config.Database)
-	p.collection = p.database.Collection(p.config.Collection)
 
 	return nil
 }
@@ -52,7 +57,7 @@ func (p *SourcePlugin) Start() {
 	if p.config.StreamSnapshot {
 		go p.takeSnapshot()
 	} else {
-		p.watch()
+		go p.watch()
 	}
 }
 
@@ -67,79 +72,115 @@ func (p *SourcePlugin) Events() chan sources.MessageEvent {
 }
 
 func (p *SourcePlugin) takeSnapshot() {
-	cursor, err := p.collection.Find(p.ctx, bson.D{})
+	for _, v := range p.inputSchema {
+		fmt.Println("start taking snapshot", v.StreamName)
 
-	if err != nil {
-		panic(err)
-	}
+		cursor, err := p.database.Collection(v.StreamName).Find(p.ctx, bson.D{})
 
-	defer cursor.Close(p.ctx)
-
-	for cursor.Next(p.ctx) {
-		var data bson.M
-
-		if err := cursor.Decode(&data); err != nil {
+		if err != nil {
 			panic(err)
 		}
 
-		p.process(data)
+		defer cursor.Close(p.ctx)
+
+		for cursor.Next(p.ctx) {
+			var data bson.M
+
+			if err := cursor.Decode(&data); err != nil {
+				panic(err)
+			}
+
+			p.process(v.StreamName, data)
+		}
 	}
 
 	p.watch()
 }
 
 func (p *SourcePlugin) watch() {
-	stream, err := p.collection.Watch(p.ctx, mongo.Pipeline{}, options.ChangeStream().SetFullDocument(options.UpdateLookup))
+	for _, v := range p.inputSchema {
+		fmt.Println("start watching", v.StreamName)
 
-	if err != nil {
-		panic(err)
-	}
+		stream, err := p.database.Collection(v.StreamName).Watch(p.ctx, mongo.Pipeline{}, options.ChangeStream().SetFullDocument(options.UpdateLookup))
 
-	defer stream.Close()
-
-	for stream.Next(p.ctx) {
-		var data bson.M
-
-		if err := stream.Decode(&data); err != nil {
+		if err != nil {
 			panic(err)
 		}
 
-		p.process(data)
-	}
+		defer stream.Close(p.ctx)
 
+		for stream.Next(p.ctx) {
+			var data bson.M
+
+			if err := stream.Decode(&data); err != nil {
+				panic(err)
+			}
+
+			p.process(v.StreamName, data)
+		}
+	}
 }
 
-func (p *SourcePlugin) process(data map[string]interface{}) {
-	event := make(map[string]interface{})
+func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
+	fmt.Println("received data", data)
 
-	event["Schema"] = p.database
-	event["Table"] = p.collection
+	builder := array.NewRecordBuilder(memory.DefaultAllocator, p.outputSchema[stream])
+
+	var eventOperation string
+	var eventData map[string]interface{}
 
 	if operation, ok := data["operationType"]; ok {
 		switch operation {
 		case "delete":
-			event["Kind"] = operation
-			event["Row"] = data["documentKey"]
+			eventOperation = operation.(string)
+			eventData = data["documentKey"].(map[string]interface{})
 		default:
-			event["Kind"] = operation
-			event["Row"] = data["fullDocument"]
+			eventOperation = operation.(string)
+			eventData = data["fullDocument"].(map[string]interface{})
 		}
 	} else {
-		event["Kind"] = "insert"
-		event["Row"] = data
+		eventOperation = "insert"
+		eventData = data
 	}
 
-	tableSchema := arrow.NewSchema([]arrow.Field{
-		{
-			Name: "action",
-			Type: arrow.PrimitiveTypes.String
-		},
-	})
+	for i, v := range p.outputSchema[stream].Fields() {
+		value := eventData[v.Name]
 
-	builder := array.NewRecordBuilder(memory.DefaultAllocator, tableSchema)
+		s := scalar.NewScalar(p.outputSchema[stream].Field(i).Type)
+
+		if err := s.Set(value); err != nil {
+			panic(err)
+		}
+
+		scalar.AppendToBuilder(builder.Field(i), s)
+	}
+
+	m := message.New(builder.NewRecord())
+	m.SetEvent(eventOperation)
+	m.SetStream(stream)
 
 	p.messageStream <- sources.MessageEvent{
-		Message: message.New(event),
+		Message: m,
 		Err:     nil,
 	}
+}
+
+func (p *SourcePlugin) buildPluginSchema() {
+	outputSchemas := make(map[string]*arrow.Schema)
+	for _, collection := range p.inputSchema {
+		var outputSchemaFields []arrow.Field
+		for _, col := range collection.Columns {
+			outputSchemaFields = append(outputSchemaFields, arrow.Field{
+				Name: col.Name,
+				//Type:     helpers.MapPlainTypeToArrow(col.DatabrewType),
+				Type:     arrow.BinaryTypes.String,
+				Nullable: col.Nullable,
+				Metadata: arrow.Metadata{},
+			})
+		}
+		outputSchema := arrow.NewSchema(outputSchemaFields, nil)
+		outputSchemas[collection.StreamName] = outputSchema
+	}
+
+	p.outputSchema = outputSchemas
 }
