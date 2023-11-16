@@ -31,11 +31,11 @@ func (p *SinkWrapper) Init() error {
 
 func (p *SinkWrapper) Write(msg message.Message) error {
 	err := p.sinkDriver.Write(msg)
-	//if err != nil {
-	//	p.ctx.Metrics.IncrementSinkErrCounter()
-	//} else {
-	//	p.ctx.Metrics.IncrementSentCounter()
-	//}
+	if err != nil {
+		p.ctx.Metrics.IncrementSinkErrCounter()
+	} else {
+		p.ctx.Metrics.IncrementSentCounter()
+	}
 
 	return err
 }
