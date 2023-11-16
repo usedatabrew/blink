@@ -33,7 +33,7 @@ func NewMongoStreamSourcePlugin(config Config, schema []schema.StreamSchema) sou
 		messageStream: make(chan sources.MessageEvent),
 	}
 
-	instance.buildPluginSchema()
+	instance.buildOutputSchema()
 
 	return instance
 }
@@ -73,7 +73,7 @@ func (p *SourcePlugin) Events() chan sources.MessageEvent {
 
 func (p *SourcePlugin) takeSnapshot() {
 	for _, v := range p.inputSchema {
-		fmt.Println("start taking snapshot", v.StreamName)
+		fmt.Println("start taking snapshot for", v.StreamName)
 
 		cursor, err := p.database.Collection(v.StreamName).Find(p.ctx, bson.D{})
 
@@ -99,9 +99,11 @@ func (p *SourcePlugin) takeSnapshot() {
 
 func (p *SourcePlugin) watch() {
 	for _, v := range p.inputSchema {
-		fmt.Println("start watching", v.StreamName)
+		fmt.Println("start watching changes for", v.StreamName)
 
-		stream, err := p.database.Collection(v.StreamName).Watch(p.ctx, mongo.Pipeline{}, options.ChangeStream().SetFullDocument(options.UpdateLookup))
+		collection := p.database.Collection(v.StreamName)
+
+		stream, err := collection.Watch(p.ctx, mongo.Pipeline{}, options.ChangeStream().SetFullDocument(options.UpdateLookup))
 
 		if err != nil {
 			panic(err)
@@ -122,8 +124,6 @@ func (p *SourcePlugin) watch() {
 }
 
 func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
-	fmt.Println("received data", data)
-
 	builder := array.NewRecordBuilder(memory.DefaultAllocator, p.outputSchema[stream])
 
 	var eventOperation string
@@ -133,10 +133,10 @@ func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
 		switch operation {
 		case "delete":
 			eventOperation = operation.(string)
-			eventData = data["documentKey"].(map[string]interface{})
+			eventData = data["documentKey"].(bson.M)
 		default:
 			eventOperation = operation.(string)
-			eventData = data["fullDocument"].(map[string]interface{})
+			eventData = data["fullDocument"].(bson.M)
 		}
 	} else {
 		eventOperation = "insert"
@@ -165,7 +165,7 @@ func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
 	}
 }
 
-func (p *SourcePlugin) buildPluginSchema() {
+func (p *SourcePlugin) buildOutputSchema() {
 	outputSchemas := make(map[string]*arrow.Schema)
 	for _, collection := range p.inputSchema {
 		var outputSchemaFields []arrow.Field

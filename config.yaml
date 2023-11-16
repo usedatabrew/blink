@@ -1,0 +1,69 @@
+service:
+  enable_influx: true
+  reload_on_restart: false
+  stream_schema:
+    - stream: public.flights
+      columns:
+        - name: flight_id
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: true
+          nullable: false
+        - name: flight_number
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: false
+          nullable: true
+        - name: departure_airport
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: arrival_airport
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: departure_date
+          databrewType: Date32
+          nativeConnectorType: date
+          pk: false
+          nullable: true
+        - name: arrival_date
+          databrewType: Date32
+          nativeConnectorType: date
+          pk: false
+          nullable: true
+        - name: departure_time
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: arrival_time
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: flight_duration
+          databrewType: Float64
+          nativeConnectorType: double precision
+          pk: false
+          nullable: true
+        - name: flight_status
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: id
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: true
+          nullable: false
+
+source:
+  driver: mongo_stream
+  #config:
+
+target:
+  driver: stdout
+  config: { }
