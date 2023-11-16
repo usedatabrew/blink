@@ -2,18 +2,19 @@ package stream
 
 import (
 	"astro/config"
-	"astro/internal/message"
+	"astro/internal/sources"
 	"astro/internal/stream_context"
-	"context"
 	"errors"
 
 	"github.com/reactivex/rxgo/v2"
+	"sync"
 )
 
 type Stream struct {
 	ctx              *stream_context.Context
-	stream           chan rxgo.Item
+	stream           chan sources.MessageEvent
 	observableStream rxgo.Observable
+	lock             sync.Mutex
 
 	sinks  []SinkWrapper
 	source *SourceWrapper
@@ -34,8 +35,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 
 	s := &Stream{}
 	s.ctx = streamContext
-	s.stream = make(chan rxgo.Item)
-	s.observableStream = rxgo.FromChannel(s.stream)
+	s.stream = make(chan sources.MessageEvent)
 
 	streamContext.Logger.WithPrefix("Source").Info("Loading driver")
 	sourceWrapper := NewSourceWrapper(config.Source.Driver, config)
@@ -44,7 +44,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	streamContext.Logger.WithPrefix("Source").Info("Loaded")
 
 	streamContext.Logger.WithPrefix("Sinks").Info("Loading driver")
-	sinkWrapper := NewSinkWrapper(config.Sink.Driver, config)
+	sinkWrapper := NewSinkWrapper(config.Sink.Driver, config, s.ctx)
 	streamContext.Logger.WithPrefix("Sinks").Info("Loaded")
 
 	if err := s.SetSinks([]SinkWrapper{sinkWrapper}); err != nil {
@@ -58,8 +58,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 func InitManually() (*Stream, error) {
 	s := Stream{}
 	s.ctx = stream_context.CreateContext()
-	s.stream = make(chan rxgo.Item)
-	s.observableStream = rxgo.FromChannel(s.stream)
+	s.stream = make(chan sources.MessageEvent)
 	return &s, nil
 }
 
@@ -75,7 +74,7 @@ func (s *Stream) SetProducer(producer SourceWrapper) error {
 
 func (s *Stream) SetSinks(sinks []SinkWrapper) error {
 	for _, sink := range sinks {
-		err := sink.Init(s.ctx)
+		err := sink.Init()
 		if err != nil {
 			return err
 		}
@@ -91,23 +90,15 @@ func (s *Stream) Start() error {
 	}
 
 	go s.source.Start()
-	go func() {
-		for {
-			select {
-			case producerMessage := <-s.source.Events():
-				s.stream <- rxgo.Of(producerMessage.Message)
+	for {
+		select {
+		case producerMessage := <-s.source.Events():
+			err := s.sinks[0].Write(producerMessage.Message)
+			if err != nil {
+				s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)
 			}
 		}
-	}()
-
-	s.observableStream.Connect(context.Background())
-	for v := range s.observableStream.Observe() {
-		for _, sink := range s.sinks {
-			sink.Write(v.V.(message.Message))
-		}
 	}
-
-	return nil
 }
 
 func (s *Stream) validateAndInit() error {

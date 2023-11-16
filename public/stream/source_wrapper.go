@@ -14,11 +14,14 @@ import (
 // measure performance, build proper configuration and control the context
 type SourceWrapper struct {
 	sourceDriver sources.DataSource
+	stream       chan sources.MessageEvent
 	ctx          *stream_context.Context
 }
 
 func NewSourceWrapper(pluginType sources.SourceDriver, config config.Configuration) SourceWrapper {
-	loader := SourceWrapper{}
+	loader := SourceWrapper{
+		stream: make(chan sources.MessageEvent),
+	}
 	loadedDriver := loader.LoadDriver(pluginType, config)
 	loader.sourceDriver = loadedDriver
 	return loader
@@ -30,7 +33,6 @@ func (p *SourceWrapper) Init(appctx *stream_context.Context) error {
 }
 
 func (p *SourceWrapper) Events() chan sources.MessageEvent {
-	stream := make(chan sources.MessageEvent)
 	go func() {
 		for {
 			select {
@@ -40,12 +42,12 @@ func (p *SourceWrapper) Events() chan sources.MessageEvent {
 				} else {
 					p.ctx.Metrics.IncrementReceivedCounter()
 				}
-				stream <- event
+				p.stream <- event
 			}
 		}
 	}()
 
-	return stream
+	return p.stream
 }
 
 func (p *SourceWrapper) Start() {
