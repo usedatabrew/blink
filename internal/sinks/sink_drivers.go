@@ -3,6 +3,7 @@ package sinks
 type SinkDriver string
 
 const (
-	StdOutSinkType SinkDriver = "stdout"
-	KafkaSinkType  SinkDriver = "kafka"
+	StdOutSinkType    SinkDriver = "stdout"
+	WebSocketSinkType SinkDriver = "websocket"
+	KafkaSinkType     SinkDriver = "kafka"
 )

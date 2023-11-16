@@ -73,18 +73,19 @@ source:
   driver: postgres_cdc
   config:
     host: databrew-testing-instance.postgres.database.azure.com
-    slot_name: databrew_replication_slot_15_1123
+    slot_name: databrew_replication_slot_15_11918
     user: postgres
     password: Lorem123
     port: 5432
     schema: public
     stream_snapshot: true
     snapshot_memory_safety_factor: 0.1
-    snapshot_batch_size: 10000
+    snapshot_batch_size: 5000
     database: mocks
     tables:
       - flights
 
 sink:
-  driver: stdout
-  config: { }
+  driver: websocket
+  config:
+    url: wss://databrew-ws-sink.fly.dev/ws
