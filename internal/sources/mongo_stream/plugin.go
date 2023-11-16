@@ -171,9 +171,8 @@ func (p *SourcePlugin) buildOutputSchema() {
 		var outputSchemaFields []arrow.Field
 		for _, col := range collection.Columns {
 			outputSchemaFields = append(outputSchemaFields, arrow.Field{
-				Name: col.Name,
-				//Type:     helpers.MapPlainTypeToArrow(col.DatabrewType),
-				Type:     arrow.BinaryTypes.String,
+				Name:     col.Name,
+				Type:     MapPlainTypeToArrow(col.DatabrewType),
 				Nullable: col.Nullable,
 				Metadata: arrow.Metadata{},
 			})

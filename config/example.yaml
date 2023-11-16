@@ -20,7 +20,7 @@ service:
           nullable: false
         - name: message
           databrewType: String
-          nativeConnectorType: character varying
+          nativeConnectorType: String
           pk: false
           nullable: false
 
