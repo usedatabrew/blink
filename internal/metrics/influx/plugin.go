@@ -35,7 +35,7 @@ func NewPlugin(config Config) (*Plugin, error) {
 		sourceErrorsCounter: metrics.NewCounter(),
 	}
 	plugin.receivedCounter.Clear()
-	plugin.receivedCounter.Clear()
+	plugin.sentCounter.Clear()
 	plugin.sinkErrorsCounter.Clear()
 	plugin.sourceErrorsCounter.Clear()
 
@@ -80,8 +80,8 @@ func (p *Plugin) IncrementSourceErrCounter() {
 
 func (p *Plugin) flushMetrics() {
 	pointsToWrite := map[string]int64{
-		"received_messages": p.receivedCounter.Count(),
 		"sent_messages":     p.sentCounter.Count(),
+		"received_messages": p.receivedCounter.Count(),
 		"sink_errors":       p.sinkErrorsCounter.Count(),
 		"source_errors":     p.sourceErrorsCounter.Count(),
 	}
