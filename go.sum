@@ -124,8 +124,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/teivah/onecontext v0.0.0-20200513185103-40f981bfd775 h1:BLNsFR8l/hj/oGjnJXkd4Vi3s4kQD3/3x8HSAE4bzN0=
 github.com/teivah/onecontext v0.0.0-20200513185103-40f981bfd775/go.mod h1:XUZ4x3oGhWfiOnUvTslnKKs39AWUct3g3yJvXTQSJOQ=
-github.com/usedatabrew/pglogicalstream v0.0.13 h1:Q7u1XrZTlGVO8g0W8zglaDwvvQHgMYOJzi/GhztEMRc=
-github.com/usedatabrew/pglogicalstream v0.0.13/go.mod h1:jLD0Mt9OGF1cbuBfO6CB4SuEcAFEihs4IKC5n2k7qik=
+github.com/usedatabrew/pglogicalstream v0.0.14 h1:2plg4yCGT2HOQ2BTqV0LOF3+t/A24+A90jenIaLN2p4=
+github.com/usedatabrew/pglogicalstream v0.0.14/go.mod h1:jLD0Mt9OGF1cbuBfO6CB4SuEcAFEihs4IKC5n2k7qik=
 github.com/zeebo/assert v1.3.0 h1:g7C04CbJuIDKNPFHmsk4hwZDO5O+kntRxzaUoNXj+IQ=
 github.com/zeebo/assert v1.3.0/go.mod h1:Pq9JiuJQpG8JLJdtkwrJESF0Foym2/D9XMU5ciN/wJ0=
 github.com/zeebo/xxh3 v1.0.2 h1:xZmwmqxHZA8AI603jOQ0tMqmBr9lPeFwGg6d+xy9DC0=
