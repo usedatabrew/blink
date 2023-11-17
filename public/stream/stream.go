@@ -39,15 +39,23 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	s.stream = make(chan rxgo.Item)
 	s.observableStream = rxgo.FromChannel(s.stream)
 
-	streamContext.Logger.WithPrefix("Source").Info("Loading driver")
+	streamContext.Logger.WithPrefix("Source").With(
+		"driver", config.Source.Driver,
+	).Info("Loading driver")
 	sourceWrapper := NewSourceWrapper(config.Source.Driver, config)
 	s.source = &sourceWrapper
 
-	streamContext.Logger.WithPrefix("Source").Info("Loaded")
+	streamContext.Logger.WithPrefix("Source").With(
+		"driver", config.Source.Driver,
+	).Info("Loaded")
 
-	streamContext.Logger.WithPrefix("Sinks").Info("Loading driver")
+	streamContext.Logger.WithPrefix("Sinks").With(
+		"driver", config.Sink.Driver,
+	).Info("Loading driver")
 	sinkWrapper := NewSinkWrapper(config.Sink.Driver, config, s.ctx)
-	streamContext.Logger.WithPrefix("Sinks").Info("Loaded")
+	streamContext.Logger.WithPrefix("Sinks").With(
+		"driver", config.Sink.Driver,
+	).Info("Loaded")
 
 	if err := s.SetSinks([]SinkWrapper{sinkWrapper}); err != nil {
 		s.ctx.Logger.WithPrefix("Sinks").Errorf("failed to initialize sinks for pipeline %v", err)

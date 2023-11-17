@@ -1,7 +1,9 @@
 service:
+  id: 123
+  enable_service_registry: true
+  etcd:
+    host: "123314234"
   enable_influx: true
-  group_name: org_id_12
-  pipeline_id: 120
   influx:
     host: https://eu-central-1-1.aws.cloud2.influxdata.com
     token: dwWFG-NXl8uy0dmiptLjN1-B1-5JIlyEnwCHVxmPgY-6o6f62-G09dtYDg1SEYk6mL3wGG_7DIMVer8Yoe-e9Q==
@@ -86,6 +88,13 @@ source:
       - flights
 
 sink:
-  driver: websocket
+  driver: kafka
   config:
-    url: wss://databrew-ws-sink.fly.dev/ws
+    brokers:
+      - "pkc-ygz0p.norwayeast.azure.confluent.cloud:9092"
+    sasl: true
+    sasl_user: 2BUOXTEG5AKL4IEC
+    sasl_password: stm1jZufR0njS4hVHnYgX4zrziADac/BZUGv2qh7Z0RBU3alrNTbxdMDob0p0aLg
+    sasl_mechanism: PLAIN
+    bind_topic_to_stream: true
+    topic_name: llsobgnp-mangust
