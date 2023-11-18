@@ -33,6 +33,7 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 		"client.id":         "astro-writer",
 		"acks":              "all",
 		"security.protocol": "SASL_SSL",
+		"go.batch.producer": true,
 		"sasl.mechanisms":   s.writerConfig.SaslMechanism,
 		"sasl.username":     s.writerConfig.SaslUser,
 		"sasl.password":     s.writerConfig.SaslPassword,

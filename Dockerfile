@@ -13,4 +13,5 @@ RUN go mod tidy
 
 RUN cd cmd &&  go build astro/cmd
 
+ENV GOMAXPROCS=2
 CMD ["./cmd/cmd"]
