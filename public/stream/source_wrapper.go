@@ -33,6 +33,10 @@ func (p *SourceWrapper) Init(appctx *stream_context.Context) error {
 }
 
 func (p *SourceWrapper) Events() chan sources.MessageEvent {
+	return p.stream
+}
+
+func (p *SourceWrapper) Start() {
 	go func() {
 		for {
 			select {
@@ -47,10 +51,6 @@ func (p *SourceWrapper) Events() chan sources.MessageEvent {
 		}
 	}()
 
-	return p.stream
-}
-
-func (p *SourceWrapper) Start() {
 	p.sourceDriver.Start()
 }
 

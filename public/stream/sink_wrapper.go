@@ -6,6 +6,7 @@ import (
 	"astro/internal/sinks"
 	"astro/internal/sinks/kafka"
 	"astro/internal/sinks/stdout"
+	websocket "astro/internal/sinks/websockets"
 	"astro/internal/stream_context"
 )
 
@@ -57,6 +58,12 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 			panic("can read driver config")
 		}
 		return kafka.NewKafkaSinkPlugin(driverConfig, cfg.Service.StreamSchema)
+	case sinks.WebSocketSinkType:
+		driverConfig, err := ReadDriverConfig[websocket.Config](cfg.Sink.Config, websocket.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return websocket.NewWebSocketSinkPlugin(driverConfig, cfg.Service.StreamSchema, p.ctx)
 	}
 
 	return nil

@@ -38,7 +38,7 @@ func (p *SourcePlugin) Connect(ctx context.Context) error {
 		TlsVerify:                  "require",
 		StreamOldData:              p.config.StreamSnapshot,
 		SnapshotMemorySafetyFactor: 0.3,
-		BatchSize:                  10000,
+		BatchSize:                  13500,
 		SeparateChanges:            true,
 	})
 	if err != nil {

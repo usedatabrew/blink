@@ -5,14 +5,16 @@ import (
 	"astro/internal/sources"
 	"astro/internal/stream_context"
 	"errors"
+	"fmt"
+	"sync"
+	"time"
 
 	"github.com/reactivex/rxgo/v2"
-	"sync"
 )
 
 type Stream struct {
 	ctx              *stream_context.Context
-	stream           chan sources.MessageEvent
+	stream           chan rxgo.Item
 	observableStream rxgo.Observable
 	lock             sync.Mutex
 
@@ -35,17 +37,26 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 
 	s := &Stream{}
 	s.ctx = streamContext
-	s.stream = make(chan sources.MessageEvent)
+	s.stream = make(chan rxgo.Item)
+	s.observableStream = rxgo.FromChannel(s.stream)
 
-	streamContext.Logger.WithPrefix("Source").Info("Loading driver")
+	streamContext.Logger.WithPrefix("Source").With(
+		"driver", config.Source.Driver,
+	).Info("Loading driver")
 	sourceWrapper := NewSourceWrapper(config.Source.Driver, config)
 	s.source = &sourceWrapper
 
-	streamContext.Logger.WithPrefix("Source").Info("Loaded")
+	streamContext.Logger.WithPrefix("Source").With(
+		"driver", config.Source.Driver,
+	).Info("Loaded")
 
-	streamContext.Logger.WithPrefix("Sinks").Info("Loading driver")
+	streamContext.Logger.WithPrefix("Sinks").With(
+		"driver", config.Sink.Driver,
+	).Info("Loading driver")
 	sinkWrapper := NewSinkWrapper(config.Sink.Driver, config, s.ctx)
-	streamContext.Logger.WithPrefix("Sinks").Info("Loaded")
+	streamContext.Logger.WithPrefix("Sinks").With(
+		"driver", config.Sink.Driver,
+	).Info("Loaded")
 
 	if err := s.SetSinks([]SinkWrapper{sinkWrapper}); err != nil {
 		s.ctx.Logger.WithPrefix("Sinks").Errorf("failed to initialize sinks for pipeline %v", err)
@@ -58,7 +69,9 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 func InitManually() (*Stream, error) {
 	s := Stream{}
 	s.ctx = stream_context.CreateContext()
-	s.stream = make(chan sources.MessageEvent)
+	s.stream = make(chan rxgo.Item)
+	//s.observableStream = rxgo.FromChannel(s.stream)
+	s.observableStream = rxgo.FromChannel(s.stream, rxgo.WithBufferedChannel(5))
 	return &s, nil
 }
 
@@ -89,16 +102,36 @@ func (s *Stream) Start() error {
 		return err
 	}
 
+	var messagesProcessed = 0
+
+	go func() {
+		for {
+			time.Sleep(time.Second * 5)
+			fmt.Println("Messages processed", messagesProcessed)
+		}
+	}()
+
 	go s.source.Start()
-	for {
-		select {
-		case producerMessage := <-s.source.Events():
-			err := s.sinks[0].Write(producerMessage.Message)
-			if err != nil {
-				s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)
+	go func() {
+		for {
+			select {
+			case producerMessage := <-s.source.Events():
+				s.stream <- rxgo.Of(producerMessage)
 			}
 		}
+	}()
+
+	s.observableStream.Connect(s.ctx.GetContext())
+	for event := range s.observableStream.Observe() {
+		err := s.sinks[0].Write(event.V.(sources.MessageEvent).Message)
+		if err != nil {
+			s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)
+		} else {
+			messagesProcessed += 1
+		}
 	}
+
+	select {}
 }
 
 func (s *Stream) validateAndInit() error {

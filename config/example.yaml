@@ -1,7 +1,9 @@
 service:
+  id: 123
+  enable_service_registry: true
+  etcd:
+    host: "123314234"
   enable_influx: true
-  group_name: org_id_12
-  pipeline_id: 120
   influx:
     host: https://eu-central-1-1.aws.cloud2.influxdata.com
     token: dwWFG-NXl8uy0dmiptLjN1-B1-5JIlyEnwCHVxmPgY-6o6f62-G09dtYDg1SEYk6mL3wGG_7DIMVer8Yoe-e9Q==

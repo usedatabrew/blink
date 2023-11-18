@@ -35,7 +35,7 @@ func NewPlugin(config Config) (*Plugin, error) {
 		sourceErrorsCounter: metrics.NewCounter(),
 	}
 	plugin.receivedCounter.Clear()
-	plugin.receivedCounter.Clear()
+	plugin.sentCounter.Clear()
 	plugin.sinkErrorsCounter.Clear()
 	plugin.sourceErrorsCounter.Clear()
 
@@ -79,21 +79,39 @@ func (p *Plugin) IncrementSourceErrCounter() {
 }
 
 func (p *Plugin) flushMetrics() {
-	pointsToWrite := map[string]int64{
-		"received_messages": p.receivedCounter.Count(),
-		"sent_messages":     p.sentCounter.Count(),
-		"sink_errors":       p.sinkErrorsCounter.Count(),
-		"source_errors":     p.sourceErrorsCounter.Count(),
+	point := influxdb3.NewPointWithMeasurement("astro_data").
+		SetTag("group", p.groupName).
+		SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
+		SetField("sent_messages", p.sentCounter.Count())
+
+	if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
+		panic(err)
 	}
 
-	for k, v := range pointsToWrite {
-		point := influxdb3.NewPointWithMeasurement("astro_data").
-			SetTag("group", p.groupName).
-			SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
-			SetField(k, v)
+	point = influxdb3.NewPointWithMeasurement("astro_data").
+		SetTag("group", p.groupName).
+		SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
+		SetField("received_messages", p.receivedCounter.Count())
 
-		if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
-			panic(err)
-		}
+	if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
+		panic(err)
+	}
+
+	point = influxdb3.NewPointWithMeasurement("astro_data").
+		SetTag("group", p.groupName).
+		SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
+		SetField("sink_errors", p.sinkErrorsCounter.Count())
+
+	if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
+		panic(err)
+	}
+
+	point = influxdb3.NewPointWithMeasurement("astro_data").
+		SetTag("group", p.groupName).
+		SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
+		SetField("source_errors", p.sourceErrorsCounter.Count())
+
+	if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
+		panic(err)
 	}
 }
