@@ -95,7 +95,7 @@ func (p *SourcePlugin) buildPluginsSchema() []pglogicalstream.DbTablesSchema {
 	var tablesSchema []pglogicalstream.DbTablesSchema
 	for _, stream := range p.streamSchema {
 		tSch := pglogicalstream.DbTablesSchema{}
-		tSch.Table = stream.StreamName
+		tSch.Table = fmt.Sprintf("%s.%s", p.config.Schema, stream.StreamName)
 		for _, schemaCol := range stream.Columns {
 			tSch.Columns = append(tSch.Columns, pglogicalstream.DbSchemaColumn{
 				Name:                schemaCol.Name,

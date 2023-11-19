@@ -2,6 +2,9 @@ package message
 
 import (
 	"github.com/apache/arrow/go/v14/arrow"
+	"github.com/apache/arrow/go/v14/arrow/array"
+	"github.com/apache/arrow/go/v14/arrow/memory"
+	"github.com/cloudquery/plugin-sdk/v4/scalar"
 	"github.com/google/uuid"
 )
 
@@ -49,4 +52,29 @@ func (m *Message) GetEvent() string {
 	v, _ := m.meta["event"]
 
 	return v
+}
+
+func (m *Message) SetNewField(name string, value interface{}, fieldType arrow.DataType) {
+	newSchemaFields := m.Data.Schema().Fields()
+	newFieldType := inferArrowType(value)
+	updatedSchema := arrow.NewSchema(append(newSchemaFields, arrow.Field{Name: name, Type: newFieldType}), nil)
+	updatedBuilder := array.NewRecordBuilder(memory.DefaultAllocator, updatedSchema)
+	for i, field := range updatedSchema.Fields() {
+		var s scalar.Scalar
+		if field.Name == name {
+			s = scalar.NewScalar(newFieldType)
+			if err := s.Set(value); err != nil {
+				panic(err)
+			}
+		} else {
+			s = scalar.NewScalar(field.Type)
+			if err := s.Set(getValue(m.Data.Column(i), 0)); err != nil {
+				panic(err)
+			}
+		}
+
+		scalar.AppendToBuilder(updatedBuilder.Field(i), s)
+	}
+
+	m.Data = updatedBuilder.NewRecord()
 }

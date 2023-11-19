@@ -30,14 +30,17 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 }
 
 func (s *SinkPlugin) Write(message message.Message) error {
-	encodedMessage, _ := message.Data.MarshalJSON()
-	s.logger.Info("Message from source received", string(encodedMessage))
+	s.logger.Info("Message from source received", message.Data)
 
 	return nil
 }
 
 func (s *SinkPlugin) GetType() sinks.SinkDriver {
 	return sinks.StdOutSinkType
+}
+
+func (s *SinkPlugin) SetExpectedSchema(schema *schema.StreamSchemaObj) {
+
 }
 
 func (s *SinkPlugin) Stop() {

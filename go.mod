@@ -12,11 +12,12 @@ require (
 	github.com/InfluxCommunity/influxdb3-go v0.4.0
 	github.com/apache/arrow/go/v14 v14.0.1
 	github.com/charmbracelet/log v0.3.0
+	github.com/cloudquery/plugin-sdk/v4 v4.16.1
 	github.com/confluentinc/confluent-kafka-go v1.9.0
 	github.com/google/uuid v1.3.1
 	github.com/gorilla/websocket v1.5.0
+	github.com/mariomac/gostream v0.8.1
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475
-	github.com/reactivex/rxgo/v2 v2.5.0
 	github.com/usedatabrew/pglogicalstream v0.0.14
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -24,11 +25,7 @@ require (
 require (
 	github.com/apache/arrow/go/v13 v13.0.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/charmbracelet/lipgloss v0.9.1 // indirect
-	github.com/cloudquery/plugin-sdk/v4 v4.16.1 // indirect
-	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
@@ -48,13 +45,8 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/stretchr/objx v0.5.1 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
-	github.com/teivah/onecontext v0.0.0-20200513185103-40f981bfd775 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
-	go.uber.org/goleak v1.2.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/mod v0.13.0 // indirect
