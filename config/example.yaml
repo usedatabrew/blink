@@ -75,20 +75,30 @@ source:
   driver: postgres_cdc
   config:
     host: databrew-testing-instance.postgres.database.azure.com
-    slot_name: databrew_replication_slot_15_11918
+    slot_name: databrew_replication_slot_15_11910
     user: postgres
     password: Lorem123
     port: 5432
     schema: public
-    stream_snapshot: true
+    stream_snapshot: false
     snapshot_memory_safety_factor: 0.1
     snapshot_batch_size: 5000
     database: mocks
     tables:
       - flights
 
+processors:
+  - driver: openai
+    config:
+      api_key: ""
+      model: ""
+      source_field: "example"
+      target_field: "open_ai_result"
+      prompt: "Test OpenAI Prompt"
+      stream_name: "flights"
+
 sink:
-  driver: kafka
+  driver: stdout
   config:
     brokers:
       - "pkc-ygz0p.norwayeast.azure.confluent.cloud:9092"

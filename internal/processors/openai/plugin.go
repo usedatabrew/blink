@@ -12,10 +12,11 @@ import (
 type Plugin struct {
 	config       Config
 	resultSchema []schema.StreamSchema
+	ctx          *stream_context.Context
 }
 
-func NewOpenAIPlugin(appctx stream_context.Context, config Config) (*Plugin, error) {
-	return &Plugin{config: config}, nil
+func NewOpenAIPlugin(appctx *stream_context.Context, config Config) (*Plugin, error) {
+	return &Plugin{config: config, ctx: appctx}, nil
 }
 
 func (p *Plugin) Process(context context.Context, msg message.Message) (message.Message, error) {

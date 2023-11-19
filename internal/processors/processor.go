@@ -6,13 +6,13 @@ import (
 	"context"
 )
 
-type ProcessorType string
+type ProcessorDriver string
 
 const (
-	OpenAIProcessor    ProcessorType = "openai"
-	LambdaProcessor    ProcessorType = "lambda"
-	HttpGetProcessor   ProcessorType = "http_get"
-	SQLEnrichProcessor ProcessorType = "sql_enrich"
+	OpenAIProcessor    ProcessorDriver = "openai"
+	LambdaProcessor    ProcessorDriver = "lambda"
+	HttpGetProcessor   ProcessorDriver = "http_get"
+	SQLEnrichProcessor ProcessorDriver = "sql_enrich"
 )
 
 type DataProcessor interface {
