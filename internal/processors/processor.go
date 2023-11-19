@@ -21,9 +21,9 @@ type DataProcessor interface {
 	// !Important! Try to not copy the message inside a pipeline to avoid redundant
 	// memory allocations and make overall performance worth :(
 	Process(context context.Context, message message.Message) (message.Message, error)
-	// MutateStreamSchema is being called before starting the pipeline
+	// EvolveSchema is being called before starting the pipeline
 	// to form the schema that will be used as a result of the processing
 	// If your processor doesn't add/delete any fields for the message
 	// you can simply return the schema you received as an argument
-	MutateStreamSchema(schema []schema.StreamSchema) ([]schema.StreamSchema, error)
+	EvolveSchema(schema *schema.StreamSchemaObj) error
 }

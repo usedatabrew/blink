@@ -4,6 +4,7 @@ import (
 	"astro/internal/message"
 	"astro/internal/processors"
 	"astro/internal/processors/openai"
+	"astro/internal/schema"
 	"astro/internal/sources"
 	"astro/internal/stream_context"
 	"errors"
@@ -29,6 +30,10 @@ func NewProcessorWrapper(pluginType processors.ProcessorDriver, config interface
 
 func (p *ProcessorWrapper) Process(msg sources.MessageEvent) (message.Message, error) {
 	return p.processorDriver.Process(p.ctx.GetContext(), msg.Message)
+}
+
+func (p *ProcessorWrapper) EvolveSchema(s *schema.StreamSchemaObj) error {
+	return p.processorDriver.EvolveSchema(s)
 }
 
 func (p *ProcessorWrapper) SetStreamContext(ctx *stream_context.Context) {

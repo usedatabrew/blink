@@ -5,7 +5,6 @@ import (
 	"astro/internal/schema"
 	"astro/internal/stream_context"
 	"context"
-	"errors"
 	"github.com/apache/arrow/go/v14/arrow"
 )
 
@@ -29,29 +28,8 @@ func (p *Plugin) Process(context context.Context, msg message.Message) (message.
 	return msg, nil
 }
 
-// MutateStreamSchema will add a string column to the schema in order to store OpenAI response
-func (p *Plugin) MutateStreamSchema(streamSchema []schema.StreamSchema) ([]schema.StreamSchema, error) {
-	var foundStream = false
-	for _, stream := range streamSchema {
-		if stream.StreamName == p.config.StreamName {
-			foundStream = true
-			arrowColumn := schema.Column{
-				Name:                p.config.TargetField,
-				DatabrewType:        "String",
-				NativeConnectorType: "String",
-				PK:                  false,
-				Nullable:            true,
-			}
-			stream.Columns = append(stream.Columns, arrowColumn)
-
-			break
-		}
-	}
-
-	if !foundStream {
-		return streamSchema, errors.New("stream not found. check configuration")
-	}
-
-	p.resultSchema = streamSchema
-	return streamSchema, nil
+// EvolveSchema will add a string column to the schema in order to store OpenAI response
+func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
+	streamSchema.AddField(p.config.StreamName, p.config.TargetField, arrow.BinaryTypes.String)
+	return nil
 }

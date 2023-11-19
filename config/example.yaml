@@ -13,7 +13,7 @@ service:
     pipeline_id: 123
   reload_on_restart: false
   stream_schema:
-    - stream: public.flights
+    - stream: flights
       columns:
         - name: flight_id
           databrewType: Int32

@@ -2,6 +2,7 @@ package stream
 
 import (
 	"astro/config"
+	"astro/internal/schema"
 	"astro/internal/sources"
 	"astro/internal/stream_context"
 	"errors"
@@ -14,6 +15,8 @@ import (
 type Stream struct {
 	ctx  *stream_context.Context
 	lock sync.Mutex
+
+	schema *schema.StreamSchemaObj
 
 	processors []ProcessorWrapper
 	sinks      []SinkWrapper
@@ -37,6 +40,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 
 	s := &Stream{}
 	s.ctx = streamContext
+	s.schema = schema.NewStreamSchemaObj(config.Service.StreamSchema)
 
 	streamContext.Logger.WithPrefix("Source").With(
 		"driver", config.Source.Driver,
@@ -71,6 +75,9 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 		s.ctx.Logger.WithPrefix("Sinks").Errorf("failed to initialize sinks for pipeline %v", err)
 		return nil, err
 	}
+
+	s.evolveSchemaForSinks(s.schema)
+	s.sinks[0].sinkDriver.SetExpectedSchema(s.schema)
 
 	s.dataStream = stream.OfChannel(s.source.Events())
 
@@ -156,4 +163,14 @@ func (s *Stream) validateAndInit() error {
 	}
 
 	return nil
+}
+
+func (s *Stream) evolveSchemaForSinks(streamSchema *schema.StreamSchemaObj) {
+	for _, processor := range s.processors {
+		err := processor.EvolveSchema(streamSchema)
+		if err != nil {
+			s.ctx.Logger.Fatalf("error evolving schema %s", err.Error())
+		}
+
+	}
 }
