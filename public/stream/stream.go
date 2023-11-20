@@ -64,8 +64,6 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 			Info("Loaded")
 	}
 
-	s.evolveSchemaForSinks(s.schema)
-
 	streamContext.Logger.WithPrefix("Sinks").With(
 		"driver", config.Sink.Driver,
 	).Info("Loading...")
@@ -79,6 +77,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 		return nil, err
 	}
 
+	s.evolveSchemaForSinks(s.schema)
 	s.sinks[0].SetExpectedSchema(s.schema)
 
 	s.dataStream = stream.OfChannel(s.source.Events())

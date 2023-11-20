@@ -37,8 +37,9 @@ func (s *StreamSchemaObj) GetLatestSchema() []StreamSchema {
 
 func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.DataType) {
 	streamSchema := s.streamSchemaVersions[s.lastVersion]
-	streamSchema = *&streamSchema
-	for idx, stream := range streamSchema {
+	var streamSchemaCopy = make([]StreamSchema, len(streamSchema))
+	copy(streamSchemaCopy, streamSchema)
+	for idx, stream := range streamSchemaCopy {
 		if stream.StreamName == streamName {
 			arrowColumn := Column{
 				Name:                name,
@@ -49,12 +50,12 @@ func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.Data
 			}
 
 			stream.Columns = append(stream.Columns, arrowColumn)
-			streamSchema[idx] = stream
+			streamSchemaCopy[idx] = stream
 		}
 	}
 
 	s.lastVersion += 1
-	s.streamSchemaVersions[s.lastVersion] = streamSchema
+	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
 }
 
 // TODO:: add columns removal
