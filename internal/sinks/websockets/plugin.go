@@ -56,7 +56,7 @@ func (s *SinkPlugin) GetType() sinks.SinkDriver {
 	return sinks.StdOutSinkType
 }
 
-func (s *SinkPlugin) SetExpectedSchema(schema *schema.StreamSchemaObj) {
+func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
 
 }
 

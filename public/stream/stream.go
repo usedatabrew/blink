@@ -40,11 +40,11 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 
 	s := &Stream{}
 	s.ctx = streamContext
-	s.schema = schema.NewStreamSchemaObj(config.Service.StreamSchema)
 
 	streamContext.Logger.WithPrefix("Source").With(
 		"driver", config.Source.Driver,
 	).Info("Loading...")
+
 	sourceWrapper := NewSourceWrapper(config.Source.Driver, config)
 	s.source = &sourceWrapper
 
@@ -52,6 +52,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 		"driver", config.Source.Driver,
 	).Info("Loaded")
 
+	s.schema = schema.NewStreamSchemaObj(config.Service.StreamSchema)
 	for _, processorCfg := range config.Processors {
 		streamContext.Logger.WithPrefix("Processors").
 			With("driver", processorCfg.Driver).
@@ -62,6 +63,8 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 			With("driver", processorCfg.Driver).
 			Info("Loaded")
 	}
+
+	s.evolveSchemaForSinks(s.schema)
 
 	streamContext.Logger.WithPrefix("Sinks").With(
 		"driver", config.Sink.Driver,
@@ -76,8 +79,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 		return nil, err
 	}
 
-	s.evolveSchemaForSinks(s.schema)
-	s.sinks[0].sinkDriver.SetExpectedSchema(s.schema)
+	s.sinks[0].SetExpectedSchema(s.schema)
 
 	s.dataStream = stream.OfChannel(s.source.Events())
 

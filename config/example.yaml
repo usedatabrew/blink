@@ -80,7 +80,7 @@ source:
     password: Lorem123
     port: 5432
     schema: public
-    stream_snapshot: false
+    stream_snapshot: true
     snapshot_memory_safety_factor: 0.1
     snapshot_batch_size: 5000
     database: mocks

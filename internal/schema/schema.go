@@ -18,15 +18,27 @@ type Column struct {
 }
 
 type StreamSchemaObj struct {
-	streamSchema []StreamSchema
+	streamSchemaVersions map[int][]StreamSchema
+	lastVersion          int
 }
 
 func NewStreamSchemaObj(s []StreamSchema) *StreamSchemaObj {
-	return &StreamSchemaObj{streamSchema: s}
+	obj := &StreamSchemaObj{
+		streamSchemaVersions: map[int][]StreamSchema{},
+		lastVersion:          0,
+	}
+	obj.streamSchemaVersions[obj.lastVersion] = s
+	return obj
 }
 
-func (s StreamSchemaObj) AddField(streamName, name string, fieldType arrow.DataType) {
-	for idx, stream := range s.streamSchema {
+func (s *StreamSchemaObj) GetLatestSchema() []StreamSchema {
+	return s.streamSchemaVersions[s.lastVersion]
+}
+
+func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.DataType) {
+	streamSchema := s.streamSchemaVersions[s.lastVersion]
+	streamSchema = *&streamSchema
+	for idx, stream := range streamSchema {
 		if stream.StreamName == streamName {
 			arrowColumn := Column{
 				Name:                name,
@@ -35,14 +47,18 @@ func (s StreamSchemaObj) AddField(streamName, name string, fieldType arrow.DataT
 				PK:                  false,
 				Nullable:            true,
 			}
+
 			stream.Columns = append(stream.Columns, arrowColumn)
-			s.streamSchema[idx] = stream
+			streamSchema[idx] = stream
 		}
 	}
+
+	s.lastVersion += 1
+	s.streamSchemaVersions[s.lastVersion] = streamSchema
 }
 
 // TODO:: add columns removal
-func (s StreamSchemaObj) RemoveField(name string) {
+func (s *StreamSchemaObj) RemoveField(name string) {
 	//for idx, col := range s.Columns {
 	//	if col.Name == name {
 	//		s.Columns = remove(s.Columns, idx)

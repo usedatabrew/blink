@@ -8,7 +8,7 @@ import (
 
 type DataSink interface {
 	Connect(context context.Context) error
-	SetExpectedSchema(schema *schema.StreamSchemaObj)
+	SetExpectedSchema(schema []schema.StreamSchema)
 	GetType() SinkDriver
 	Write(m message.Message) error
 	Stop()
