@@ -35,7 +35,7 @@ func (s *StreamSchemaObj) GetLatestSchema() []StreamSchema {
 	return s.streamSchemaVersions[s.lastVersion]
 }
 
-func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.DataType) {
+func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.DataType, driverType string) {
 	streamSchema := s.streamSchemaVersions[s.lastVersion]
 	var streamSchemaCopy = make([]StreamSchema, len(streamSchema))
 	copy(streamSchemaCopy, streamSchema)
@@ -44,7 +44,7 @@ func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.Data
 			arrowColumn := Column{
 				Name:                name,
 				DatabrewType:        fieldType.String(),
-				NativeConnectorType: "String",
+				NativeConnectorType: driverType,
 				PK:                  false,
 				Nullable:            true,
 			}
