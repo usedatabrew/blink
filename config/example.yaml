@@ -10,10 +10,10 @@ service:
     org: DataBrew, Inc.
     bucket: databrew_ingestor
     group_name: org_11
-    pipeline_id: 123
+    pipeline_id: 1233
   reload_on_restart: false
   stream_schema:
-    - stream: test
+    - stream: flights
       columns:
         - name: _id
           databrewType: UUID
@@ -32,6 +32,16 @@ source:
     uri: mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.6.2
     database: test
     stream_snapshot: true
+
+processors:
+  - driver: openai
+    config:
+      api_key: ""
+      model: ""
+      source_field: "example"
+      target_field: "open_ai_result"
+      prompt: "Test OpenAI Prompt"
+      stream_name: "flights"
 
 sink:
   driver: stdout

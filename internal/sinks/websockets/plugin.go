@@ -56,6 +56,10 @@ func (s *SinkPlugin) GetType() sinks.SinkDriver {
 	return sinks.StdOutSinkType
 }
 
+func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
+
+}
+
 func (s *SinkPlugin) Stop() {
 	s.appCtx.GetContext().Done()
 }

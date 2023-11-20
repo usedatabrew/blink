@@ -3,6 +3,7 @@ package stream
 import (
 	"astro/config"
 	"astro/internal/message"
+	"astro/internal/schema"
 	"astro/internal/sinks"
 	"astro/internal/sinks/kafka"
 	"astro/internal/sinks/stdout"
@@ -38,6 +39,10 @@ func (p *SinkWrapper) Write(msg message.Message) error {
 	}
 
 	return err
+}
+
+func (p *SinkWrapper) SetExpectedSchema(s *schema.StreamSchemaObj) {
+	p.sinkDriver.SetExpectedSchema(s.GetLatestSchema())
 }
 
 func (p *SinkWrapper) SetStreamContext(ctx *stream_context.Context) {
