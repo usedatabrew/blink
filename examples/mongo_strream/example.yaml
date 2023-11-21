@@ -1,0 +1,39 @@
+service:
+  id: 123
+  pipeline_id: 1234
+  enable_etcd_registry: true
+  etcd:
+    host: http://137.135.132.105:2379
+  enable_influx: true
+  influx:
+    host: https://eu-central-1-1.aws.cloud2.influxdata.com
+    token: dwWFG-NXl8uy0dmiptLjN1-B1-5JIlyEnwCHVxmPgY-6o6f62-G09dtYDg1SEYk6mL3wGG_7DIMVer8Yoe-e9Q==
+    org: DataBrew, Inc.
+    bucket: databrew_ingestor
+    group_name: org_11
+    pipeline_id: 1233
+  reload_on_restart: false
+  stream_schema:
+    - stream: test
+      columns:
+        - name: _id
+          databrewType: UUID
+          nativeConnectorType: ObjectID
+          pk: true
+          nullable: false
+        - name: message
+          databrewType: String
+          nativeConnectorType: String
+          pk: false
+          nullable: false
+
+source:
+  driver: mongo_stream
+  config:
+    uri: mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.6.2
+    database: test
+    stream_snapshot: true
+
+sink:
+  driver: stdout
+  config: { }

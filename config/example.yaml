@@ -16,23 +16,77 @@ service:
   stream_schema:
     - stream: flights
       columns:
-        - name: _id
-          databrewType: UUID
-          nativeConnectorType: ObjectID
+        - name: flight_id
+          databrewType: Int32
+          nativeConnectorType: integer
           pk: true
           nullable: false
-        - name: message
-          databrewType: String
-          nativeConnectorType: String
+        - name: flight_number
+          databrewType: Int32
+          nativeConnectorType: integer
           pk: false
+          nullable: true
+        - name: departure_airport
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: arrival_airport
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: departure_date
+          databrewType: Date32
+          nativeConnectorType: date
+          pk: false
+          nullable: true
+        - name: arrival_date
+          databrewType: Date32
+          nativeConnectorType: date
+          pk: false
+          nullable: true
+        - name: departure_time
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: arrival_time
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: flight_duration
+          databrewType: Float64
+          nativeConnectorType: double precision
+          pk: false
+          nullable: true
+        - name: flight_status
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: true
+        - name: id
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: true
           nullable: false
 
 source:
-  driver: mongo_stream
+  driver: postgres_cdc
   config:
-    uri: mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.6.2
-    database: test
+    host: databrew-testing-instance.postgres.database.azure.com
+    slot_name: databrew_replication_slot_15_11910
+    user: postgres
+    password: Lorem123
+    port: 5432
+    schema: public
     stream_snapshot: true
+    snapshot_memory_safety_factor: 0.1
+    snapshot_batch_size: 5000
+    database: mocks
+    tables:
+      - flights
 
 processors:
   - driver: openai
@@ -46,4 +100,12 @@ processors:
 
 sink:
   driver: stdout
-  config: { }
+  config:
+    brokers:
+      - "pkc-ygz0p.norwayeast.azure.confluent.cloud:9092"
+    sasl: true
+    sasl_user: 2BUOXTEG5AKL4IEC
+    sasl_password: stm1jZufR0njS4hVHnYgX4zrziADac/BZUGv2qh7Z0RBU3alrNTbxdMDob0p0aLg
+    sasl_mechanism: PLAIN
+    bind_topic_to_stream: true
+    topic_name: llsobgnp-mangust
