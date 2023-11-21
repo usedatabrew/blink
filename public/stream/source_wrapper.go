@@ -3,8 +3,10 @@ package stream
 import (
 	"astro/config"
 	"astro/internal/sources"
+	"astro/internal/sources/mongo_stream"
 	"astro/internal/sources/postgres_cdc"
 	"astro/internal/stream_context"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -60,6 +62,8 @@ func (p *SourceWrapper) GetPluginConfigs(driver sources.SourceDriver, config *ya
 	switch driver {
 	case sources.PostgresCDC:
 		return ReadDriverConfig[postgres_cdc.Config](config, postgres_cdc.Config{})
+	case sources.MongoStream:
+		return ReadDriverConfig[mongo_stream.Config](config, mongo_stream.Config{})
 	}
 
 	return nil, nil
@@ -73,6 +77,14 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 			panic("can read driver config")
 		}
 		return postgres_cdc.NewPostgresSourcePlugin(driverConfig, config.Service.StreamSchema)
+	case sources.MongoStream:
+		driverConfig, err := ReadDriverConfig[mongo_stream.Config](config.Source.Config, mongo_stream.Config{})
+
+		if err != nil {
+			panic("cannot ready driver config")
+		}
+
+		return mongo_stream.NewMongoStreamSourcePlugin(driverConfig, config.Service.StreamSchema)
 	}
 
 	return nil

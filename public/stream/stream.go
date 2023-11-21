@@ -7,9 +7,10 @@ import (
 	"astro/internal/sources"
 	"astro/internal/stream_context"
 	"errors"
-	"github.com/mariomac/gostream/stream"
 	"sync"
 	"time"
+
+	"github.com/mariomac/gostream/stream"
 )
 
 type Stream struct {

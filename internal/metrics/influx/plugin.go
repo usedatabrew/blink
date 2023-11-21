@@ -2,10 +2,11 @@ package influx
 
 import (
 	"context"
-	"fmt"
+	"strconv"
+	"time"
+
 	influxdb3 "github.com/InfluxCommunity/influxdb3-go/influxdb3"
 	"github.com/rcrowley/go-metrics"
-	"time"
 )
 
 type Plugin struct {
@@ -79,10 +80,13 @@ func (p *Plugin) IncrementSourceErrCounter() {
 }
 
 func (p *Plugin) flushMetrics() {
+	t := time.Now()
+
 	point := influxdb3.NewPointWithMeasurement("astro_data").
 		SetTag("group", p.groupName).
-		SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
-		SetField("sent_messages", p.sentCounter.Count())
+		SetTag("pipeline", strconv.Itoa(p.pipelineId)).
+		SetField("sent_messages", p.sentCounter.Count()).
+		SetTimestamp(t)
 
 	if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
 		panic(err)
@@ -90,8 +94,9 @@ func (p *Plugin) flushMetrics() {
 
 	point = influxdb3.NewPointWithMeasurement("astro_data").
 		SetTag("group", p.groupName).
-		SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
-		SetField("received_messages", p.receivedCounter.Count())
+		SetTag("pipeline", strconv.Itoa(p.pipelineId)).
+		SetField("received_messages", p.receivedCounter.Count()).
+		SetTimestamp(t)
 
 	if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
 		panic(err)
@@ -99,8 +104,9 @@ func (p *Plugin) flushMetrics() {
 
 	point = influxdb3.NewPointWithMeasurement("astro_data").
 		SetTag("group", p.groupName).
-		SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
-		SetField("sink_errors", p.sinkErrorsCounter.Count())
+		SetTag("pipeline", strconv.Itoa(p.pipelineId)).
+		SetField("sink_errors", p.sinkErrorsCounter.Count()).
+		SetTimestamp(t)
 
 	if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
 		panic(err)
@@ -108,8 +114,9 @@ func (p *Plugin) flushMetrics() {
 
 	point = influxdb3.NewPointWithMeasurement("astro_data").
 		SetTag("group", p.groupName).
-		SetTag("pipeline", fmt.Sprintf("%d", p.pipelineId)).
-		SetField("source_errors", p.sourceErrorsCounter.Count())
+		SetTag("pipeline", strconv.Itoa(p.pipelineId)).
+		SetField("source_errors", p.sourceErrorsCounter.Count()).
+		SetTimestamp(t)
 
 	if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
 		panic(err)
