@@ -1,8 +1,9 @@
 service:
   id: 123
-  enable_service_registry: true
+  pipeline_id: 1234
+  enable_etcd_registry: true
   etcd:
-    host: "123314234"
+    host: http://137.135.132.105:2379
   enable_influx: true
   influx:
     host: https://eu-central-1-1.aws.cloud2.influxdata.com

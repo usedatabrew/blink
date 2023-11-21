@@ -23,10 +23,17 @@ type Columns struct {
 }
 
 type Service struct {
-	ReloadOnRestart bool                  `yaml:"reload_on_restart"`
-	InfluxEnabled   bool                  `yaml:"enable_influx"`
-	Influx          interface{}           `yaml:"influx"`
-	StreamSchema    []schema.StreamSchema `yaml:"stream_schema"`
+	ReloadOnRestart    bool                  `yaml:"reload_on_restart"`
+	PipelineId         int                   `yaml:"pipeline_id"`
+	InfluxEnabled      bool                  `yaml:"enable_influx"`
+	EnableETCDRegistry bool                  `yaml:"enable_etcd_registry"`
+	ETCD               ETCD                  `yaml:"etcd"`
+	Influx             interface{}           `yaml:"influx"`
+	StreamSchema       []schema.StreamSchema `yaml:"stream_schema"`
+}
+
+type ETCD struct {
+	Host string `yaml:"host"`
 }
 
 type Source struct {

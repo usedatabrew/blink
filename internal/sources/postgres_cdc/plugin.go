@@ -6,6 +6,7 @@ import (
 	"astro/internal/sources"
 	"context"
 	"fmt"
+	"github.com/charmbracelet/log"
 	"github.com/usedatabrew/pglogicalstream"
 )
 
@@ -40,7 +41,7 @@ func (p *SourcePlugin) Connect(ctx context.Context) error {
 		SnapshotMemorySafetyFactor: 0.3,
 		BatchSize:                  13500,
 		SeparateChanges:            true,
-	})
+	}, log.WithPrefix("PostgreSQL-CDC"))
 	if err != nil {
 		return err
 	}

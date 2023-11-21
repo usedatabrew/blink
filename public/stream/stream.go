@@ -3,10 +3,12 @@ package stream
 import (
 	"astro/config"
 	"astro/internal/schema"
+	"astro/internal/service_registry"
 	"astro/internal/sources"
 	"astro/internal/stream_context"
 	"errors"
 	"fmt"
+	"github.com/mariomac/gostream/stream"
 	"sync"
 	"time"
 
@@ -17,7 +19,8 @@ type Stream struct {
 	ctx  *stream_context.Context
 	lock sync.Mutex
 
-	schema *schema.StreamSchemaObj
+	schema   *schema.StreamSchemaObj
+	registry *service_registry.Registry
 
 	processors []ProcessorWrapper
 	sinks      []SinkWrapper
@@ -41,6 +44,8 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 
 	s := &Stream{}
 	s.ctx = streamContext
+	s.registry = service_registry.NewServiceRegistry(s.ctx, config.Service.ETCD, config.Service.PipelineId)
+	s.registry.Start()
 
 	streamContext.Logger.WithPrefix("Source").With(
 		"driver", config.Source.Driver,
@@ -82,6 +87,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	s.sinks[0].SetExpectedSchema(s.schema)
 
 	s.dataStream = stream.OfChannel(s.source.Events())
+	s.registry.SetState(service_registry.Loaded)
 
 	return s, nil
 }
@@ -117,8 +123,8 @@ func (s *Stream) Start() error {
 
 	go func() {
 		for {
-			time.Sleep(time.Second * 5)
-			fmt.Println("Messages processed", messagesProcessed)
+			time.Sleep(time.Second * 25)
+			s.ctx.Logger.WithPrefix("Stream").Infof("Total messages processed: %d", messagesProcessed)
 		}
 	}()
 
@@ -126,6 +132,7 @@ func (s *Stream) Start() error {
 		s.dataStream = s.dataStream.Map(func(event sources.MessageEvent) sources.MessageEvent {
 			result, err := proc.Process(event)
 			if err != nil {
+
 				panic(err)
 			}
 
@@ -136,6 +143,7 @@ func (s *Stream) Start() error {
 		})
 	}
 
+	s.registry.SetState(service_registry.Started)
 	s.dataStream.ForEach(func(event sources.MessageEvent) {
 		err := s.sinks[0].Write(event.Message)
 		if err != nil {
