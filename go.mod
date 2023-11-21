@@ -19,10 +19,9 @@ require (
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/mariomac/gostream v0.8.1
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475
-	github.com/usedatabrew/pglogicalstream v0.0.14
-	go.mongodb.org/mongo-driver v1.13.0
 	github.com/usedatabrew/pglogicalstream v0.0.18
 	go.etcd.io/etcd/client/v3 v3.5.10
+	go.mongodb.org/mongo-driver v1.13.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
