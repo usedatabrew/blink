@@ -16,9 +16,11 @@ require (
 	github.com/confluentinc/confluent-kafka-go v1.9.0
 	github.com/google/uuid v1.3.1
 	github.com/gorilla/websocket v1.5.0
+	github.com/jackc/pgx/v5 v5.4.3
 	github.com/mariomac/gostream v0.8.1
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475
-	github.com/usedatabrew/pglogicalstream v0.0.14
+	github.com/usedatabrew/pglogicalstream v0.0.18
+	go.etcd.io/etcd/client/v3 v3.5.10
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -38,7 +40,6 @@ require (
 	github.com/jackc/pglogrepl v0.0.0-20230826184802-9ed16cb201f6 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
-	github.com/jackc/pgx/v5 v5.4.3 // indirect
 	github.com/klauspost/compress v1.17.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/lib/pq v1.10.9 // indirect
@@ -52,7 +53,6 @@ require (
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.10 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.10 // indirect
-	go.etcd.io/etcd/client/v3 v3.5.10 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect

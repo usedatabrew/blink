@@ -58,7 +58,7 @@ func (r *Registry) Start() {
 			_, err = r.etcdClient.Put(context.Background(), fmt.Sprintf(serviceKeyTemplate, r.pipelineId), string(r.state), clientv3.WithLease(leaseResp.ID))
 			r.logger.Info("Ping registry with", "state", r.state)
 			if err != nil {
-				fmt.Println(err)
+				r.logger.Errorf("Failed to set the key into registry %s", err.Error())
 				return
 			}
 			time.Sleep(time.Second * 10)
