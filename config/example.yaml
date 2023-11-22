@@ -4,14 +4,6 @@ service:
   enable_etcd_registry: true
   etcd:
     host: http://137.135.132.105:2379
-  enable_influx: true
-  influx:
-    host: https://eu-central-1-1.aws.cloud2.influxdata.com
-    token: dwWFG-NXl8uy0dmiptLjN1-B1-5JIlyEnwCHVxmPgY-6o6f62-G09dtYDg1SEYk6mL3wGG_7DIMVer8Yoe-e9Q==
-    org: DataBrew, Inc.
-    bucket: databrew_ingestor
-    group_name: org_11
-    pipeline_id: 1233
   reload_on_restart: false
   stream_schema:
     - stream: flights

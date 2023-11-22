@@ -1,9 +1,8 @@
 package main
 
 import (
+	"astro/public/server"
 	"astro/public/stream"
-	"fmt"
-	"net/http"
 	"os"
 )
 
@@ -20,14 +19,7 @@ func main() {
 		panic(err)
 	}
 
-	go func() {
-		http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-			fmt.Fprintf(writer, "Hello")
-		})
-
-		http.ListenAndServe(":8080", nil)
-	}()
-
+	go server.CreateAndStartHttpServer(streamService)
 	if err = streamService.Start(); err != nil {
 		panic(err)
 	}

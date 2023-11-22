@@ -8,7 +8,7 @@ import (
 func ReadInitConfigFromYaml(configBytes []byte) (config.Configuration, error) {
 	conf := config.Configuration{}
 	err := yaml.Unmarshal(configBytes, &conf)
-
+	config.ValidateConfigSchema(conf)
 	return conf, err
 }
 

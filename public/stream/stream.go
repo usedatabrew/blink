@@ -38,6 +38,16 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 		}
 		streamContext.SetMetrics(metrics)
 		streamContext.Logger.WithPrefix("Metrics").Info("Component has been loaded")
+	} else {
+		streamContext.Logger.WithPrefix("Metrics").Warn("No influx config has been provided. Fallback to local prometheus metrics")
+		// fallback to local prometheus metrics
+		metrics, err := loadPrometheusMetrics(config)
+		if err != nil {
+			streamContext.Logger.WithPrefix("Metrics").Error("failed to load local prometheus metrics")
+			return nil, err
+		}
+		streamContext.SetMetrics(metrics)
+		streamContext.Logger.WithPrefix("Metrics").Info("Component has been loaded")
 	}
 
 	s := &Stream{}

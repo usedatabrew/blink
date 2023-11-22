@@ -8,10 +8,10 @@ import (
 )
 
 type Configuration struct {
-	Service    Service     `yaml:"service"`
-	Source     Source      `yaml:"source"`
+	Service    Service     `yaml:"service" validate:"required"`
+	Source     Source      `yaml:"source" validate:"required"`
 	Processors []Processor `yaml:"processors"`
-	Sink       Sink        `yaml:"sink"`
+	Sink       Sink        `yaml:"sink" validate:"required"`
 }
 
 type Columns struct {
@@ -24,16 +24,16 @@ type Columns struct {
 
 type Service struct {
 	ReloadOnRestart    bool                  `yaml:"reload_on_restart"`
-	PipelineId         int                   `yaml:"pipeline_id"`
+	PipelineId         int                   `yaml:"pipeline_id" validate:"required"`
 	InfluxEnabled      bool                  `yaml:"enable_influx"`
 	EnableETCDRegistry bool                  `yaml:"enable_etcd_registry"`
 	ETCD               ETCD                  `yaml:"etcd"`
 	Influx             interface{}           `yaml:"influx"`
-	StreamSchema       []schema.StreamSchema `yaml:"stream_schema"`
+	StreamSchema       []schema.StreamSchema `yaml:"stream_schema" validate:"required"`
 }
 
 type ETCD struct {
-	Host string `yaml:"host"`
+	Host string `yaml:"host" validate:"required,http_url"`
 }
 
 type Source struct {
