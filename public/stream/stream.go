@@ -55,10 +55,6 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	s.registry = service_registry.NewServiceRegistry(s.ctx, config.Service.ETCD, config.Service.PipelineId)
 	s.registry.Start()
 
-	streamContext.Logger.WithPrefix("Source").With(
-		"driver", config.Source.Driver,
-	).Info("Loading...")
-
 	sourceWrapper := NewSourceWrapper(config.Source.Driver, config)
 	s.source = &sourceWrapper
 
@@ -68,9 +64,6 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 
 	s.schema = schema.NewStreamSchemaObj(config.Service.StreamSchema)
 	for _, processorCfg := range config.Processors {
-		streamContext.Logger.WithPrefix("Processors").
-			With("driver", processorCfg.Driver).
-			Info("Loading...")
 		procWrapper := NewProcessorWrapper(processorCfg.Driver, processorCfg.Config, s.ctx)
 		s.processors = append(s.processors, procWrapper)
 		streamContext.Logger.WithPrefix("Processors").
@@ -78,9 +71,6 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 			Info("Loaded")
 	}
 
-	streamContext.Logger.WithPrefix("Sinks").With(
-		"driver", config.Sink.Driver,
-	).Info("Loading...")
 	sinkWrapper := NewSinkWrapper(config.Sink.Driver, config, s.ctx)
 	streamContext.Logger.WithPrefix("Sinks").With(
 		"driver", config.Sink.Driver,

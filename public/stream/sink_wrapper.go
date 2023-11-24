@@ -6,6 +6,7 @@ import (
 	"astro/internal/schema"
 	"astro/internal/sinks"
 	"astro/internal/sinks/kafka"
+	"astro/internal/sinks/postgres"
 	"astro/internal/sinks/stdout"
 	websocket "astro/internal/sinks/websockets"
 	"astro/internal/stream_context"
@@ -69,6 +70,14 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 			panic("can read driver config")
 		}
 		return websocket.NewWebSocketSinkPlugin(driverConfig, cfg.Service.StreamSchema, p.ctx)
+	case sinks.PostgresSinkType:
+		driverConfig, err := ReadDriverConfig[postgres.Config](cfg.Sink.Config, postgres.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return postgres.NewPostgresSinkPlugin(driverConfig, cfg.Service.StreamSchema, p.ctx)
+	default:
+		p.ctx.Logger.WithPrefix("Sink loader").Fatal("Failed to load driver", "driver", driver)
 	}
 
 	return nil

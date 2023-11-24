@@ -11,7 +11,7 @@ service:
         - name: flight_id
           databrewType: Int32
           nativeConnectorType: integer
-          pk: true
+          pk: false
           nullable: false
         - name: flight_number
           databrewType: Int32
@@ -91,13 +91,11 @@ processors:
       stream_name: "flights"
 
 sink:
-  driver: stdout
+  driver: postgres
   config:
-    brokers:
-      - "pkc-ygz0p.norwayeast.azure.confluent.cloud:9092"
-    sasl: true
-    sasl_user: 2BUOXTEG5AKL4IEC
-    sasl_password: stm1jZufR0njS4hVHnYgX4zrziADac/BZUGv2qh7Z0RBU3alrNTbxdMDob0p0aLg
-    sasl_mechanism: PLAIN
-    bind_topic_to_stream: true
-    topic_name: llsobgnp-mangust
+    host: databrew-testing-instance.postgres.database.azure.com
+    user: postgres
+    password: Lorem123
+    port: 5432
+    schema: public
+    database: mocks_manual_target
