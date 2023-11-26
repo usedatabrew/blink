@@ -1,8 +1,8 @@
 package postgres
 
 import (
-	"astro/internal/message"
-	"astro/internal/schema"
+	"blink/internal/message"
+	"blink/internal/schema"
 	"fmt"
 	"github.com/apache/arrow/go/v14/arrow"
 	"strings"

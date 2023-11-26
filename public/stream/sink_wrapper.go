@@ -1,15 +1,15 @@
 package stream
 
 import (
-	"astro/config"
-	"astro/internal/message"
-	"astro/internal/schema"
-	"astro/internal/sinks"
-	"astro/internal/sinks/kafka"
-	"astro/internal/sinks/postgres"
-	"astro/internal/sinks/stdout"
-	websocket "astro/internal/sinks/websockets"
-	"astro/internal/stream_context"
+	"blink/config"
+	"blink/internal/message"
+	"blink/internal/schema"
+	"blink/internal/sinks"
+	"blink/internal/sinks/kafka"
+	"blink/internal/sinks/postgres"
+	"blink/internal/sinks/stdout"
+	websocket "blink/internal/sinks/websockets"
+	"blink/internal/stream_context"
 )
 
 // SinkWrapper wraps plan sink writer plugin in order to

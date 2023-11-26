@@ -1,10 +1,10 @@
 package stream
 
 import (
-	"astro/config"
-	"astro/internal/metrics"
-	"astro/internal/metrics/influx"
-	"astro/internal/metrics/prometheus"
+	"blink/config"
+	"blink/internal/metrics"
+	"blink/internal/metrics/influx"
+	"blink/internal/metrics/prometheus"
 	"gopkg.in/yaml.v3"
 )
 

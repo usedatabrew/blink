@@ -1,9 +1,9 @@
 package postgres_cdc
 
 import (
-	"astro/internal/message"
-	"astro/internal/schema"
-	"astro/internal/sources"
+	"blink/internal/message"
+	"blink/internal/schema"
+	"blink/internal/sources"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"

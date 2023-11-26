@@ -1,7 +1,7 @@
 package sources
 
 import (
-	"astro/internal/message"
+	"blink/internal/message"
 	"context"
 )
 

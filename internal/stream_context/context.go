@@ -1,8 +1,8 @@
 package stream_context
 
 import (
-	"astro/internal/logger"
-	"astro/internal/metrics"
+	"blink/internal/logger"
+	"blink/internal/metrics"
 	"context"
 	"github.com/charmbracelet/log"
 )

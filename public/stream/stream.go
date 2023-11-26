@@ -1,11 +1,11 @@
 package stream
 
 import (
-	"astro/config"
-	"astro/internal/schema"
-	"astro/internal/service_registry"
-	"astro/internal/sources"
-	"astro/internal/stream_context"
+	"blink/config"
+	"blink/internal/schema"
+	"blink/internal/service_registry"
+	"blink/internal/sources"
+	"blink/internal/stream_context"
 	"errors"
 	"sync"
 	"time"
@@ -29,7 +29,7 @@ type Stream struct {
 
 func InitFromConfig(config config.Configuration) (*Stream, error) {
 	streamContext := stream_context.CreateContext()
-	streamContext.Logger.Info("Bootstrapping Astro Stream-ETL")
+	streamContext.Logger.Info("Bootstrapping blink Stream-ETL")
 	if config.Service.InfluxEnabled {
 		metrics, err := loadInfluxMetrics(config.Service.Influx)
 		if err != nil {

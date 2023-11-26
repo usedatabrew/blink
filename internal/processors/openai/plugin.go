@@ -1,9 +1,9 @@
 package openai
 
 import (
-	"astro/internal/message"
-	"astro/internal/schema"
-	"astro/internal/stream_context"
+	"blink/internal/message"
+	"blink/internal/schema"
+	"blink/internal/stream_context"
 	"context"
 	"github.com/apache/arrow/go/v14/arrow"
 )

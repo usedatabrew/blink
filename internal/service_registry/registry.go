@@ -1,8 +1,8 @@
 package service_registry
 
 import (
-	"astro/config"
-	"astro/internal/stream_context"
+	"blink/config"
+	"blink/internal/stream_context"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"
