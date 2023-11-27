@@ -64,7 +64,7 @@ func (p *SourcePlugin) Start() {
 		case snapshotMessage := <-p.stream.SnapshotMessageC():
 			m := snapshotMessage.Changes[0].Row
 			builtMessage := message.New(m)
-			builtMessage.SetEvent(snapshotMessage.Changes[0].Kind)
+			builtMessage.SetEvent("snapshot")
 			builtMessage.SetStream(snapshotMessage.Changes[0].Table)
 			p.messagesStream <- sources.MessageEvent{
 				Message: builtMessage,

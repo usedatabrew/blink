@@ -9,23 +9,34 @@ import (
 	"fmt"
 	"github.com/charmbracelet/log"
 	"github.com/jackc/pgx/v5"
+	"sync"
+	"time"
 )
 
 type SinkPlugin struct {
-	appctx        *stream_context.Context
-	config        Config
-	streamSchema  []schema.StreamSchema
-	conn          *pgx.Conn
-	logger        *log.Logger
-	rowStatements map[string]map[string]string
+	appctx                *stream_context.Context
+	config                Config
+	streamSchema          []schema.StreamSchema
+	conn                  *pgx.Conn
+	logger                *log.Logger
+	rowStatements         map[string]map[string]string
+	pkColumnNamesByStream map[string]string
+	mutex                 sync.Mutex
+	messagesBuffer        []message.Message
+	snapshotMaxBufferSize int
+	prevEvent             string
+	prevSnapshotStream    string
+	snapshotTicker        *time.Timer
 }
 
 func NewPostgresSinkPlugin(config Config, schema []schema.StreamSchema, appctx *stream_context.Context) sinks.DataSink {
 	return &SinkPlugin{
-		config:       config,
-		appctx:       appctx,
-		streamSchema: schema,
-		logger:       log.WithPrefix("PostgreSQL Sink"),
+		config:                config,
+		appctx:                appctx,
+		streamSchema:          schema,
+		logger:                log.WithPrefix("PostgreSQL Sink"),
+		messagesBuffer:        []message.Message{},
+		snapshotMaxBufferSize: 5000,
 	}
 }
 
@@ -54,13 +65,138 @@ func (s *SinkPlugin) GetType() sinks.SinkDriver {
 }
 
 func (s *SinkPlugin) Write(m message.Message) error {
-	tableStatement := s.rowStatements[m.GetStream()][m.GetEvent()]
-	s.logger.Info("Perform SQL operation", "op", tableStatement)
-	var colValues []interface{}
-	for idx := range m.Data.Columns() {
-		colValues = append(colValues, message.GetValue(m.Data.Column(idx), 0))
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	// for snapshot event we have to perform inserts in bulk using COPY command
+	// to achieve higher insert efficiency
+
+	if m.GetEvent() == "snapshot" && s.prevEvent == "snapshot" && s.prevSnapshotStream != m.GetStream() {
+		// we have to drain snapshot message for prev stream
+		// before we can process snapshot for another stream
+		s.logger.Info("Changed stream for snapshot. Draining message buffer to continue")
+		err := s.writeSnapshotBatch()
+		if err != nil {
+			return err
+		}
 	}
-	_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
+
+	s.prevSnapshotStream = m.GetStream()
+	if m.GetEvent() == "snapshot" {
+		s.messagesBuffer = append(s.messagesBuffer, m)
+
+		if len(s.messagesBuffer) >= s.snapshotMaxBufferSize {
+			err := s.writeSnapshotBatch()
+			if err != nil {
+				return err
+			}
+
+			s.messagesBuffer = []message.Message{}
+			return nil
+		} else if s.snapshotTicker == nil {
+			// Start a timer if not already running
+			s.snapshotTicker = time.AfterFunc(time.Second, func() {
+				s.mutex.Lock()
+				defer s.mutex.Unlock()
+				err := s.writeSnapshotBatch()
+				if err != nil {
+					panic("Failed to write snapshot batch")
+				}
+				s.messagesBuffer = []message.Message{}
+				s.snapshotTicker.Stop()
+				s.snapshotTicker = nil
+			})
+			return nil
+		} else {
+			return nil
+		}
+	}
+	// means we finished snapshot streaming. Here we must ensure that we flushed all the
+	// messages from snapshot before we start pushing rest of the messages
+	if s.prevEvent == "snapshot" && s.prevEvent != m.GetEvent() {
+		s.logger.Info("Snapshot streaming finished. Draining message buffer to continue")
+		err := s.writeSnapshotBatch()
+		if err != nil {
+			return err
+		}
+	}
+	s.prevEvent = m.GetEvent()
+
+	tableStatement := s.rowStatements[m.GetStream()][m.GetEvent()]
+	var colValues []interface{}
+	var pkColValue interface{}
+	// we apply different flow for deletion requests
+	// since we don't have to bind all the params, we are interested only in PK
+	s.logger.Info("Applying operation", "op", m.GetEvent(), "stream", m.GetStream())
+	if m.GetEvent() == "delete" {
+		for idx, _ := range m.Data.Columns() {
+			if m.Data.Schema().Field(idx).Name == s.pkColumnNamesByStream[m.GetStream()] {
+				fmt.Println("Pk value found")
+				pkColValue = message.GetValue(m.Data.Column(idx), 0)
+				break
+			}
+		}
+
+		colValues = append(colValues, pkColValue)
+		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
+		if err != nil {
+			return err
+		}
+	} else {
+		for idx, c := range m.Data.Columns() {
+			if m.Data.Schema().Field(idx).Name == s.pkColumnNamesByStream[m.GetStream()] {
+				pkColValue = message.GetValue(m.Data.Column(idx), 0)
+			} else {
+				colValues = append(colValues, c.GetOneForMarshal(0))
+			}
+		}
+		colValues = append(colValues, pkColValue)
+		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// writeSnapshotBatch is used only when we restore snapshot / to back-filling
+// from the sink. in order to writeSnapshotBatch to be supported - source plugin
+// must emit "snapshot" event instead of stream event
+func (s *SinkPlugin) writeSnapshotBatch() error {
+	var messagesToInsert [][]interface{}
+	var colNames []string
+
+	if len(s.messagesBuffer) == 0 {
+		return nil
+	}
+
+	for bufMIdx, bufMessage := range s.messagesBuffer {
+		if bufMIdx == 0 {
+			var pkColName string
+			for i, field := range bufMessage.Data.Schema().Fields() {
+				if bufMessage.Data.Schema().Field(i).Name == s.pkColumnNamesByStream[s.prevSnapshotStream] {
+					pkColName = field.Name
+				} else {
+					colNames = append(colNames, field.Name)
+				}
+			}
+			colNames = append(colNames, pkColName)
+		}
+		var colValues []interface{}
+		var pkColValue interface{}
+		for idx, c := range bufMessage.Data.Columns() {
+			if bufMessage.Data.Schema().Field(idx).Name == s.pkColumnNamesByStream[s.prevSnapshotStream] {
+				pkColValue = message.GetValue(bufMessage.Data.Column(idx), 0)
+			} else {
+				colValues = append(colValues, c.GetOneForMarshal(0))
+			}
+		}
+
+		colValues = append(colValues, pkColValue)
+		messagesToInsert = append(messagesToInsert, colValues)
+	}
+
+	_, err := s.conn.CopyFrom(context.TODO(), pgx.Identifier{s.prevSnapshotStream}, colNames, pgx.CopyFromRows(messagesToInsert))
 
 	return err
 }
@@ -72,6 +208,7 @@ func (s *SinkPlugin) Stop() {
 func (s *SinkPlugin) createInitStatements() {
 	var dbCreateTableStatements []string
 	var rowStatements = make(map[string]map[string]string)
+	var pkColumnNames = make(map[string]string)
 
 	for _, stream := range s.streamSchema {
 		dbCreateTableStatements = append(dbCreateTableStatements, generateCreateTableStatement(stream.StreamName, stream.Columns))
@@ -84,7 +221,14 @@ func (s *SinkPlugin) createInitStatements() {
 			"update": updateStatement,
 			"insert": insertStatement,
 		}
+
+		for _, col := range stream.Columns {
+			if col.PK {
+				pkColumnNames[stream.StreamName] = col.Name
+			}
+		}
 	}
+	s.pkColumnNamesByStream = pkColumnNames
 	s.rowStatements = rowStatements
 
 	s.logger.Info("Generated init statements to create table for the sink database", "statements", dbCreateTableStatements)
@@ -104,5 +248,4 @@ func (s *SinkPlugin) createInitStatements() {
 	}
 
 	tx.Commit(s.appctx.GetContext())
-	//s.logger.Fatal("Intentionally exited")
 }

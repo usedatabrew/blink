@@ -6,62 +6,57 @@ service:
     host: http://137.135.132.105:2379
   reload_on_restart: false
   stream_schema:
-    - stream: flights
+    - stream: taxi_rides
       columns:
-        - name: flight_id
-          databrewType: Int32
-          nativeConnectorType: integer
-          pk: false
-          nullable: false
-        - name: flight_number
-          databrewType: Int32
-          nativeConnectorType: integer
-          pk: false
-          nullable: true
-        - name: departure_airport
-          databrewType: String
-          nativeConnectorType: character varying
-          pk: false
-          nullable: true
-        - name: arrival_airport
-          databrewType: String
-          nativeConnectorType: character varying
-          pk: false
-          nullable: true
-        - name: departure_date
-          databrewType: Date32
-          nativeConnectorType: date
-          pk: false
-          nullable: true
-        - name: arrival_date
-          databrewType: Date32
-          nativeConnectorType: date
-          pk: false
-          nullable: true
-        - name: departure_time
-          databrewType: String
-          nativeConnectorType: character varying
-          pk: false
-          nullable: true
-        - name: arrival_time
-          databrewType: String
-          nativeConnectorType: character varying
-          pk: false
-          nullable: true
-        - name: flight_duration
-          databrewType: Float64
-          nativeConnectorType: double precision
-          pk: false
-          nullable: true
-        - name: flight_status
-          databrewType: String
-          nativeConnectorType: character varying
-          pk: false
-          nullable: true
-        - name: id
+        - name: log_id
           databrewType: Int32
           nativeConnectorType: integer
           pk: true
+          nullable: false
+        - name: timestamp
+          databrewType: String
+          nativeConnectorType: varchar
+          pk: false
+          nullable: true
+        - name: driver_id
+          databrewType: Int32
+          nativeConnectorType: numeric
+          pk: false
+          nullable: false
+        - name: passenger_id
+          databrewType: Int32
+          nativeConnectorType: numeric
+          pk: false
+          nullable: false
+        - name: start_location
+          databrewType: String
+          nativeConnectorType: varchar
+          pk: false
+          nullable: false
+        - name: end_location
+          databrewType: String
+          nativeConnectorType: varchar
+          pk: false
+          nullable: false
+        - name: fare_amount
+          databrewType: Float64
+          nativeConnectorType: numeric
+          pk: false
+          nullable: false
+        - name: payment_method
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: false
+        - name: distance_traveled
+          databrewType: Float64
+          nativeConnectorType: numeric
+          pk: false
+          nullable: false
+        - name: duration
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: false
           nullable: false
 
 source:

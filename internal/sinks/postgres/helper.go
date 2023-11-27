@@ -65,11 +65,11 @@ func generateBatchInsertStatement(table schema.StreamSchema) string {
 	columnNames := getColumnNames(table.Columns)
 	valuesPlaceholder := getValuesPlaceholder(len(table.Columns))
 
-	return fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;\n", table.StreamName, columnNames, valuesPlaceholder)
+	return fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;", table.StreamName, columnNames, valuesPlaceholder)
 }
 
 func generateBatchUpdateStatement(table schema.StreamSchema) string {
-	pkColumns := getPrimaryKeyColumns(table.Columns)
+	pkColumns := getPrimaryKeyColumnsForUpdate(table.Columns)
 	setClause := getSetClause(table.Columns)
 
 	return fmt.Sprintf("UPDATE %s SET %s WHERE %s;\n", table.StreamName, setClause, pkColumns)
@@ -83,25 +83,41 @@ func generateBatchDeleteStatement(table schema.StreamSchema) string {
 
 func getColumnNames(columns []schema.Column) string {
 	var columnNames []string
+	var pkColumn string
 	for _, column := range columns {
-		columnNames = append(columnNames, column.Name)
+		if column.PK {
+			pkColumn = column.Name
+		} else {
+			columnNames = append(columnNames, column.Name)
+		}
 	}
-	return strings.Join(columnNames, " ")
+	columnNames = append(columnNames, pkColumn)
+	return strings.Join(columnNames, ", ")
 }
 
 func getValuesPlaceholder(numColumns int) string {
 	var valuePlaceholders []string
 	for i := 0; i < numColumns; i++ {
-		valuePlaceholders = append(valuePlaceholders, "?")
+		valuePlaceholders = append(valuePlaceholders, fmt.Sprintf("$%d", i+1))
 	}
-	return fmt.Sprintf("(%s)", strings.Join(valuePlaceholders, " "))
+	return fmt.Sprintf("(%s )", strings.Join(valuePlaceholders, ", "))
 }
 
 func getPrimaryKeyColumns(columns []schema.Column) string {
 	var pkColumns []string
 	for _, column := range columns {
 		if column.PK {
-			pkColumns = append(pkColumns, fmt.Sprintf("%s = ?", column.Name))
+			pkColumns = append(pkColumns, fmt.Sprintf("%s = $1", column.Name))
+		}
+	}
+	return strings.Join(pkColumns, " AND ")
+}
+
+func getPrimaryKeyColumnsForUpdate(columns []schema.Column) string {
+	var pkColumns []string
+	for _, column := range columns {
+		if column.PK {
+			pkColumns = append(pkColumns, fmt.Sprintf("%s = $%d", column.Name, len(columns)))
 		}
 	}
 	return strings.Join(pkColumns, " AND ")
@@ -109,10 +125,12 @@ func getPrimaryKeyColumns(columns []schema.Column) string {
 
 func getSetClause(columns []schema.Column) string {
 	var setClauses []string
+	var bindIndex = 1
 	for _, column := range columns {
 		// Exclude primary key columns from the set clause
 		if !column.PK {
-			setClauses = append(setClauses, fmt.Sprintf("%s = ?", column.Name))
+			setClauses = append(setClauses, fmt.Sprintf("%s = $%d", column.Name, bindIndex))
+			bindIndex += 1
 		}
 	}
 	return strings.Join(setClauses, ", ")
