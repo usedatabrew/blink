@@ -17,14 +17,13 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.21.3'
-      - name: Create SVU
-        run: |
-            echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | sudo tee /etc/apt/sources.list.d/caarlos0.list
-            apt update
-            apt install svu
-            git tag "$(svu next)"
-            git push --tags
-            goreleaser release --clean
+
+      - uses: obfu5c8/action-svu
+        id: generate_next_version
+        with:
+          force-increment: true
+      - run: |
+          git tag ${{ steps.generate_next_version.outputs.version }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
