@@ -25,6 +25,7 @@ jobs:
           force-increment: true
       - run: |
           git tag ${{ steps.generate_next_version.outputs.version }}
+          git push --tags
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
