@@ -28,6 +28,9 @@ jobs:
           git push --tags
           git stash && git reset --hard
 
+      - name: "Install confluent Kafka-Go"
+        run: go get gopkg.in/confluentinc/confluent-kafka-go.v1/kafka
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
