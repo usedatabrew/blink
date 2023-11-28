@@ -1,10 +1,10 @@
 package config
 
 import (
-	"astro/internal/processors"
-	"astro/internal/schema"
-	"astro/internal/sinks"
-	"astro/internal/sources"
+	"blink/internal/processors"
+	"blink/internal/schema"
+	"blink/internal/sinks"
+	"blink/internal/sources"
 )
 
 type Configuration struct {

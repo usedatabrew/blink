@@ -1,9 +1,9 @@
 package kafka
 
 import (
-	"astro/internal/message"
-	"astro/internal/schema"
-	"astro/internal/sinks"
+	"blink/internal/message"
+	"blink/internal/schema"
+	"blink/internal/sinks"
 	"context"
 	"github.com/charmbracelet/log"
 	gokafka "github.com/confluentinc/confluent-kafka-go/kafka"
@@ -30,7 +30,7 @@ func NewKafkaSinkPlugin(config Config, schema []schema.StreamSchema) sinks.DataS
 func (s *SinkPlugin) Connect(ctx context.Context) error {
 	p, err := gokafka.NewProducer(&gokafka.ConfigMap{
 		"bootstrap.servers": strings.Join(s.writerConfig.Brokers, ","),
-		"client.id":         "astro-writer",
+		"client.id":         "blink-writer",
 		"acks":              "all",
 		"security.protocol": "SASL_SSL",
 		"go.batch.producer": true,

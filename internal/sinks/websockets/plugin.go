@@ -1,10 +1,10 @@
 package websockets
 
 import (
-	"astro/internal/message"
-	"astro/internal/schema"
-	"astro/internal/sinks"
-	"astro/internal/stream_context"
+	"blink/internal/message"
+	"blink/internal/schema"
+	"blink/internal/sinks"
+	"blink/internal/stream_context"
 	"context"
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"

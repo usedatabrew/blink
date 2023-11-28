@@ -1,12 +1,12 @@
 package stream
 
 import (
-	"astro/internal/message"
-	"astro/internal/processors"
-	"astro/internal/processors/openai"
-	"astro/internal/schema"
-	"astro/internal/sources"
-	"astro/internal/stream_context"
+	"blink/internal/message"
+	"blink/internal/processors"
+	"blink/internal/processors/openai"
+	"blink/internal/schema"
+	"blink/internal/sources"
+	"blink/internal/stream_context"
 	"errors"
 )
 

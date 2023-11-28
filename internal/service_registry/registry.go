@@ -1,8 +1,8 @@
 package service_registry
 
 import (
-	"astro/config"
-	"astro/internal/stream_context"
+	"blink/config"
+	"blink/internal/stream_context"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"
@@ -56,7 +56,7 @@ func (r *Registry) Start() {
 			}
 
 			_, err = r.etcdClient.Put(context.Background(), fmt.Sprintf(serviceKeyTemplate, r.pipelineId), string(r.state), clientv3.WithLease(leaseResp.ID))
-			r.logger.Info("Ping registry with", "state", r.state)
+			r.logger.Info("State update", "state", r.state)
 			if err != nil {
 				r.logger.Errorf("Failed to set the key into registry %s", err.Error())
 				return

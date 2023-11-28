@@ -6,62 +6,57 @@ service:
     host: http://137.135.132.105:2379
   reload_on_restart: false
   stream_schema:
-    - stream: flights
+    - stream: taxi_rides
       columns:
-        - name: flight_id
+        - name: log_id
           databrewType: Int32
           nativeConnectorType: integer
           pk: true
           nullable: false
-        - name: flight_number
+        - name: timestamp
+          databrewType: String
+          nativeConnectorType: varchar
+          pk: false
+          nullable: true
+        - name: driver_id
           databrewType: Int32
-          nativeConnectorType: integer
+          nativeConnectorType: numeric
           pk: false
-          nullable: true
-        - name: departure_airport
+          nullable: false
+        - name: passenger_id
+          databrewType: Int32
+          nativeConnectorType: numeric
+          pk: false
+          nullable: false
+        - name: start_location
           databrewType: String
-          nativeConnectorType: character varying
+          nativeConnectorType: varchar
           pk: false
-          nullable: true
-        - name: arrival_airport
+          nullable: false
+        - name: end_location
           databrewType: String
-          nativeConnectorType: character varying
+          nativeConnectorType: varchar
           pk: false
-          nullable: true
-        - name: departure_date
-          databrewType: Date32
-          nativeConnectorType: date
-          pk: false
-          nullable: true
-        - name: arrival_date
-          databrewType: Date32
-          nativeConnectorType: date
-          pk: false
-          nullable: true
-        - name: departure_time
-          databrewType: String
-          nativeConnectorType: character varying
-          pk: false
-          nullable: true
-        - name: arrival_time
-          databrewType: String
-          nativeConnectorType: character varying
-          pk: false
-          nullable: true
-        - name: flight_duration
+          nullable: false
+        - name: fare_amount
           databrewType: Float64
-          nativeConnectorType: double precision
+          nativeConnectorType: numeric
           pk: false
-          nullable: true
-        - name: flight_status
+          nullable: false
+        - name: payment_method
           databrewType: String
           nativeConnectorType: character varying
           pk: false
-          nullable: true
-        - name: id
+          nullable: false
+        - name: distance_traveled
+          databrewType: Float64
+          nativeConnectorType: numeric
+          pk: false
+          nullable: false
+        - name: duration
           databrewType: Int32
           nativeConnectorType: integer
-          pk: true
+          pk: false
           nullable: false
 
 source:
@@ -91,13 +86,11 @@ processors:
       stream_name: "flights"
 
 sink:
-  driver: stdout
+  driver: postgres
   config:
-    brokers:
-      - "pkc-ygz0p.norwayeast.azure.confluent.cloud:9092"
-    sasl: true
-    sasl_user: 2BUOXTEG5AKL4IEC
-    sasl_password: stm1jZufR0njS4hVHnYgX4zrziADac/BZUGv2qh7Z0RBU3alrNTbxdMDob0p0aLg
-    sasl_mechanism: PLAIN
-    bind_topic_to_stream: true
-    topic_name: llsobgnp-mangust
+    host: databrew-testing-instance.postgres.database.azure.com
+    user: postgres
+    password: Lorem123
+    port: 5432
+    schema: public
+    database: mocks_manual_target

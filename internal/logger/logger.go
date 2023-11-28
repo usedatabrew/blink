@@ -19,7 +19,7 @@ func GetInstance() *log.Logger {
 			ReportCaller:    true,
 			ReportTimestamp: true,
 			TimeFormat:      time.DateTime,
-			Prefix:          "Astro",
+			Prefix:          "blink",
 		})
 	})
 

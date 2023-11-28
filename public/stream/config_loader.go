@@ -1,7 +1,7 @@
 package stream
 
 import (
-	"astro/config"
+	"blink/config"
 	"gopkg.in/yaml.v3"
 )
 
