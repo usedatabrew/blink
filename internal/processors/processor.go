@@ -1,8 +1,8 @@
 package processors
 
 import (
-	"astro/internal/message"
-	"astro/internal/schema"
+	"blink/internal/message"
+	"blink/internal/schema"
 	"context"
 )
 

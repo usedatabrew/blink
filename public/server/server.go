@@ -1,7 +1,7 @@
 package server
 
 import (
-	"astro/public/stream"
+	"blink/public/stream"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"io"
 	"net/http"

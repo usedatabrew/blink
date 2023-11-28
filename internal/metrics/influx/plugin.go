@@ -82,7 +82,7 @@ func (p *Plugin) IncrementSourceErrCounter() {
 func (p *Plugin) flushMetrics() {
 	t := time.Now()
 
-	point := influxdb3.NewPointWithMeasurement("astro_data").
+	point := influxdb3.NewPointWithMeasurement("blink_data").
 		SetTag("group", p.groupName).
 		SetTag("pipeline", strconv.Itoa(p.pipelineId)).
 		SetField("sent_messages", p.sentCounter.Count()).
@@ -92,7 +92,7 @@ func (p *Plugin) flushMetrics() {
 		panic(err)
 	}
 
-	point = influxdb3.NewPointWithMeasurement("astro_data").
+	point = influxdb3.NewPointWithMeasurement("blink_data").
 		SetTag("group", p.groupName).
 		SetTag("pipeline", strconv.Itoa(p.pipelineId)).
 		SetField("received_messages", p.receivedCounter.Count()).
@@ -102,7 +102,7 @@ func (p *Plugin) flushMetrics() {
 		panic(err)
 	}
 
-	point = influxdb3.NewPointWithMeasurement("astro_data").
+	point = influxdb3.NewPointWithMeasurement("blink_data").
 		SetTag("group", p.groupName).
 		SetTag("pipeline", strconv.Itoa(p.pipelineId)).
 		SetField("sink_errors", p.sinkErrorsCounter.Count()).
@@ -112,7 +112,7 @@ func (p *Plugin) flushMetrics() {
 		panic(err)
 	}
 
-	point = influxdb3.NewPointWithMeasurement("astro_data").
+	point = influxdb3.NewPointWithMeasurement("blink_data").
 		SetTag("group", p.groupName).
 		SetTag("pipeline", strconv.Itoa(p.pipelineId)).
 		SetField("source_errors", p.sourceErrorsCounter.Count()).

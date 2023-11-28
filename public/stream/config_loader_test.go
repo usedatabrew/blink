@@ -1,7 +1,7 @@
 package stream
 
 import (
-	"astro/config"
+	"blink/config"
 	"gopkg.in/yaml.v3"
 	"log"
 	"testing"
@@ -13,7 +13,7 @@ service:
   enable_influx: true
   reload_on_restart: false
 
-input:
+source:
   driver: postgres_cdc
   schema:
     - stream: public.flights

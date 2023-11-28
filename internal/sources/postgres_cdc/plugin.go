@@ -1,9 +1,9 @@
 package postgres_cdc
 
 import (
-	"astro/internal/message"
-	"astro/internal/schema"
-	"astro/internal/sources"
+	"blink/internal/message"
+	"blink/internal/schema"
+	"blink/internal/sources"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"
@@ -64,7 +64,7 @@ func (p *SourcePlugin) Start() {
 		case snapshotMessage := <-p.stream.SnapshotMessageC():
 			m := snapshotMessage.Changes[0].Row
 			builtMessage := message.New(m)
-			builtMessage.SetEvent(snapshotMessage.Changes[0].Kind)
+			builtMessage.SetEvent("snapshot")
 			builtMessage.SetStream(snapshotMessage.Changes[0].Table)
 			p.messagesStream <- sources.MessageEvent{
 				Message: builtMessage,

@@ -26,8 +26,8 @@ func inferArrowType(value interface{}) arrow.DataType {
 	}
 }
 
-// getValue extracts the value at the specified row index from a column using reflection
-func getValue(column arrow.Array, rowIndex int) interface{} {
+// GetValue extracts the value at the specified row index from a column using reflection
+func GetValue(column arrow.Array, rowIndex int) interface{} {
 	switch column.(type) {
 	case *array.Int8:
 		return column.(*array.Int8).Value(rowIndex)

@@ -1,11 +1,11 @@
 package stream
 
 import (
-	"astro/config"
-	"astro/internal/sources"
-	"astro/internal/sources/mongo_stream"
-	"astro/internal/sources/postgres_cdc"
-	"astro/internal/stream_context"
+	"blink/config"
+	"blink/internal/sources"
+	"blink/internal/sources/mongo_stream"
+	"blink/internal/sources/postgres_cdc"
+	"blink/internal/stream_context"
 
 	"gopkg.in/yaml.v3"
 )

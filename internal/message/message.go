@@ -68,7 +68,7 @@ func (m *Message) SetNewField(name string, value interface{}, fieldType arrow.Da
 			}
 		} else {
 			s = scalar.NewScalar(field.Type)
-			if err := s.Set(getValue(m.Data.Column(i), 0)); err != nil {
+			if err := s.Set(GetValue(m.Data.Column(i), 0)); err != nil {
 				panic(err)
 			}
 		}

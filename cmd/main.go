@@ -1,8 +1,8 @@
 package main
 
 import (
-	"astro/public/server"
-	"astro/public/stream"
+	"blink/public/server"
+	"blink/public/stream"
 	"os"
 )
 
