@@ -18,8 +18,9 @@ jobs:
         with:
           go-version: '1.21.3'
 
-      - uses: obfu5c8/action-svu
+      - name: "Generate semantic version"
         id: generate_next_version
+        uses: obfu5c8/action-svu
         with:
           force-increment: true
       - run: |
