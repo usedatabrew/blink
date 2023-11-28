@@ -1,19 +1,8 @@
 builds:
   - main: ./cmd/blink/
-  - env:
+    env:
       - CGO_ENABLED=0
     targets:
       - linux_amd64
       - darwin_amd64
       - darwin_arm64
-    main: ./
-    flags:
-      - -trimpath
-      - -buildvcs=false
-      - -tags=dynamic
-    ldflags:
-      - -extldflags '-static'
-      - -s -w
-      - -X main.version={{.Version}}
-      - -X main.commitSHA={{.FullCommit}}
-      - -X main.buildDate={{.Date}}
