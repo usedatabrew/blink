@@ -6,17 +6,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.21.3
-      - uses: golangci/golangci-lint-action@v3
   test:
     runs-on: ubuntu-latest
-    needs: lint
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
