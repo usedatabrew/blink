@@ -5,10 +5,11 @@ on:
       - main
 
 jobs:
-  goreleaser:
+  build_release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -20,8 +21,10 @@ jobs:
         with:
           force-increment: true
 
-      - run: |
+      - name: "Create and push tag"
+        run: |
           git tag ${{ steps.generate_next_version.outputs.version }}
+          svu
           git push --tags
           git stash && git reset --hard
 
