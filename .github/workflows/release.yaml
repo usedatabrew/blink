@@ -42,5 +42,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.generate_next_version.outputs.version }}
-          labels: ${{ steps.generate_next_version.outputs.version }}
+          tags: ${{ github.event.release.tag_name }}
+          labels: ${{ github.event.release.tag_name }}
