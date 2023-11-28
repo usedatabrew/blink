@@ -2,7 +2,7 @@ name: Create release
 on:
   push:
     tags:
-      - '*'
+      - v1.*
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
