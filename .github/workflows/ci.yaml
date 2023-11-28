@@ -20,7 +20,7 @@ jobs:
 
       - name: "Generate semantic version"
         id: generate_next_version
-        uses: obfu5c8/action-svu
+        uses: obfu5c8/action-svu@v1.0.0
         with:
           force-increment: true
       - run: |
