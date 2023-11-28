@@ -1,7 +1,7 @@
 builds:
   - main: ./cmd/blink/
     env:
-      - CGO_ENABLED=0
+      - CGO_ENABLED=1
     flags:
       - -tags=dynamic
     targets:
