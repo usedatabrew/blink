@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 RUN go get gopkg.in/confluentinc/confluent-kafka-go.v1/kafka
 RUN go mod tidy
 
-RUN cd cmd &&  go build blink/cmd
+RUN cd cmd/blink &&  go build blink/cmd/blink
 
 ENV GOMAXPROCS=2
 CMD ["./cmd/cmd"]

@@ -1,0 +1,28 @@
+version: '3'
+
+tasks:
+  prebuild:
+    - rm -rf ./build/
+    - mkdir build
+  build_windows:
+    platforms: [windows/amd64]
+    cmds:
+      - cd cmd/blink &&  go build -tags=dynamic blink/cmd/blink
+      - mv cmd/blink/blink ./build/blink-macos
+    silent: true
+  build_macos:
+    deps: [prebuild]
+    cmds:
+      - cd cmd/blink && go build -tags=dynamic blink/cmd/blink
+      - mv cmd/blink/blink ./build/blink-macos
+    silent: true
+  build_linux:
+    deps: [ prebuild ]
+    cmds:
+      - cd cmd/blink && GOOS=linux GOARCH=amd64 go build -tags=dynamic blink/cmd/blink
+      - mv cmd/blink/blink ./build/blink-macos
+    silent: true
+  build_docker:
+    cmds:
+      - docker build -t usedatabrew/blink:latest .
+    silent: true
