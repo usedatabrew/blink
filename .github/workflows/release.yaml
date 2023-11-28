@@ -19,6 +19,7 @@ jobs:
         uses: obfu5c8/action-svu@v1.0.0
         with:
           force-increment: true
+
       - run: |
           git tag ${{ steps.generate_next_version.outputs.version }}
           git push --tags
