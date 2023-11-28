@@ -1,9 +1,7 @@
 builds:
   - main: ./cmd/blink/
     env:
-      - CGO_ENABLED=1
-    flags:
-      - -tags dynamic
+      - CGO_ENABLED=0
     targets:
       - linux_amd64
       - darwin_amd64
