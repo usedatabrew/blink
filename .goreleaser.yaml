@@ -3,7 +3,7 @@ builds:
     env:
       - CGO_ENABLED=1
     flags:
-      - -tags=dynamic
+      - -tags dynamic
     targets:
       - linux_amd64
       - darwin_amd64

@@ -26,3 +26,4 @@ jobs:
       - run: |
           git tag ${{ steps.generate_next_version.outputs.version }}
           git push --tags
+          
