@@ -6,7 +6,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  goreleaser:
+  svu:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
