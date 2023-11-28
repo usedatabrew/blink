@@ -6,26 +6,30 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
+  goreleaser:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          go-version: 1.21.3
-      - run: go test -v ./...
-  release:
-    runs-on: ubuntu-latest
-    needs: test
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.21.3
-      - uses: go-semantic-release/action@v1
+          go-version: '1.21.3'
+      - name: Create SVU
+        run: |
+            echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | sudo tee /etc/apt/sources.list.d/caarlos0.list
+            apt update
+            apt install svu
+            git tag "$(svu next)"
+            git push --tags
+            goreleaser release --clean
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
         with:
-          hooks: goreleaser
+          distribution: goreleaser
+          version: latest
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

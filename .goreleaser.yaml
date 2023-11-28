@@ -17,3 +17,7 @@ builds:
       - -X main.version={{.Version}}
       - -X main.commitSHA={{.FullCommit}}
       - -X main.buildDate={{.Date}}
+
+dockers:
+  - image_templates:
+      - usedatabrew/blink
