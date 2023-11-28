@@ -1,13 +1,28 @@
 name: Create release
 on:
   push:
-    tags:
-      - v1.*
+    branches:
+      - main
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.3'
+
+      - name: "Generate semantic version"
+        id: generate_next_version
+        uses: obfu5c8/action-svu@v1.0.0
+        with:
+          force-increment: true
+      - run: |
+          git tag ${{ steps.generate_next_version.outputs.version }}
+          git push --tags
+          git stash && git reset --hard
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
@@ -16,7 +31,7 @@ jobs:
           version: latest
           args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
@@ -35,5 +50,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.generate_next_version.outputs.version }}
+          labels: ${{ steps.generate_next_version.outputs.version }}
