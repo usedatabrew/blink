@@ -54,11 +54,13 @@ func replaceEnvVariables(config []byte, lookupFunc func(string) (string, bool)) 
 					value = string(defaultVal)
 				}
 			}
-			value = strings.ReplaceAll(value, []byte("$$$1"))
+			value = strings.ReplaceAll(value, "\n", "\\n")
 		}
 
 		return []byte(value)
 	})
+
+	replaced = escapedEnvRegex.ReplaceAll(replaced, []byte("$$$1"))
 
 	return replaced
 }
