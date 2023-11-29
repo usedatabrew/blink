@@ -18,7 +18,7 @@ jobs:
       - name: "Create and push tag"
         run: |
           go install github.com/caarlos0/svu@latest
-          git tag svu next
+          git tag svu
           git push --tags
 
       - name: Log in to Docker Hub
