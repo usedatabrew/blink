@@ -2,7 +2,6 @@ package stream
 
 import (
 	"blink/config"
-	"bytes"
 	"os"
 	"regexp"
 	"strings"
@@ -38,28 +37,16 @@ func ReadDriverConfig[T any](driverConfig interface{}, targetConfig T) (T, error
 	return targetConfig, err
 }
 
-func replaceEnvVariables(config []byte, lookupFunc func(string) (string, bool)) []byte {
+func replaceEnvVariables(config []byte, lookupFn func(string) (string, bool)) []byte {
 	replaced := envRegex.ReplaceAllFunc(config, func(content []byte) []byte {
 		var value string
-
 		if len(content) > 3 {
-			if colonIndex := bytes.IndexByte(content, ':'); colonIndex == -1 {
-				varName := string(content[2 : len(content)-1])
-				value, _ = lookupFunc(varName)
-			} else {
-				targetVar := content[2:colonIndex]
-				defaultVal := content[colonIndex+1 : len(content)-1]
-				value, _ := lookupFunc(string(targetVar))
-				if value == "" {
-					value = string(defaultVal)
-				}
-			}
+			varName := string(content[2 : len(content)-1])
+			value, _ = lookupFn(varName)
 			value = strings.ReplaceAll(value, "\n", "\\n")
 		}
-
 		return []byte(value)
 	})
-
 	replaced = escapedEnvRegex.ReplaceAll(replaced, []byte("$$$1"))
 
 	return replaced
