@@ -2,15 +2,15 @@ package stream
 
 import (
 	"blink/config"
+	"blink/internal/message"
 	"blink/internal/schema"
 	"blink/internal/service_registry"
 	"blink/internal/sources"
 	"blink/internal/stream_context"
 	"errors"
+	"github.com/usedatabrew/tango"
 	"sync"
 	"time"
-
-	"github.com/mariomac/gostream/stream"
 )
 
 type Stream struct {
@@ -23,8 +23,6 @@ type Stream struct {
 	processors []ProcessorWrapper
 	sinks      []SinkWrapper
 	source     *SourceWrapper
-
-	dataStream stream.Stream[sources.MessageEvent]
 }
 
 func InitFromConfig(config config.Configuration) (*Stream, error) {
@@ -84,7 +82,6 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	s.evolveSchemaForSinks(s.schema)
 	s.sinks[0].SetExpectedSchema(s.schema)
 
-	s.dataStream = stream.OfChannel(s.source.Events())
 	s.registry.SetState(service_registry.Loaded)
 
 	return s, nil
@@ -126,32 +123,53 @@ func (s *Stream) Start() error {
 		}
 	}()
 
+	dataStream := tango.NewTango()
+
+	var dataStreamStages []tango.Stage
 	for _, proc := range s.processors {
-		s.dataStream = s.dataStream.Map(func(event sources.MessageEvent) sources.MessageEvent {
-			result, err := proc.Process(event)
-			if err != nil {
-
-				panic(err)
-			}
-
-			return sources.MessageEvent{
-				Message: result,
-				Err:     err,
-			}
-		})
+		stage := tango.Stage{
+			Channel: make(chan interface{}),
+			Function: func(i interface{}) (interface{}, error) {
+				return proc.Process(i.(sources.MessageEvent))
+			},
+		}
+		dataStreamStages = append(dataStreamStages, stage)
 	}
 
-	s.registry.SetState(service_registry.Started)
-	s.dataStream.ForEach(func(event sources.MessageEvent) {
-		err := s.sinks[0].Write(event.Message)
-		if err != nil {
-			s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)
-		} else {
-			messagesProcessed += 1
-		}
+	sinkStage := tango.Stage{
+		Channel: make(chan interface{}),
+		Function: func(i interface{}) (interface{}, error) {
+			err := s.sinks[0].Write(i.(message.Message))
+			if err != nil {
+				s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)
+			} else {
+				messagesProcessed += 1
+			}
+
+			return nil, err
+		},
+	}
+	dataStreamStages = append(dataStreamStages, sinkStage)
+	dataStream.SetStages(dataStreamStages)
+
+	streamProxyChan := make(chan interface{})
+	dataStream.SetProducerChannel(streamProxyChan)
+	dataStream.OnProcessed(func(i interface{}, err error) {
+
 	})
 
-	return nil
+	go func() {
+		for {
+			select {
+			case sourceEvent := <-s.source.Events():
+				streamProxyChan <- sourceEvent
+			}
+		}
+	}()
+
+	s.registry.SetState(service_registry.Started)
+
+	return dataStream.Start()
 }
 
 func (s *Stream) validateAndInit() error {

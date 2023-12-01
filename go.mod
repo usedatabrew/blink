@@ -11,7 +11,7 @@ replace go.etcd.io/bbolt v1.3.4 => github.com/coreos/bbolt v1.3.4
 require (
 	github.com/InfluxCommunity/influxdb3-go v0.4.0
 	github.com/apache/arrow/go/v14 v14.0.1
-	github.com/charmbracelet/log v0.3.0
+	github.com/charmbracelet/log v0.3.1
 	github.com/cloudquery/plugin-sdk/v4 v4.16.1
 	github.com/confluentinc/confluent-kafka-go v1.9.0
 	github.com/go-playground/validator/v10 v10.14.0
@@ -25,6 +25,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.17.0
 	github.com/usedatabrew/pglogicalstream v0.0.20
+	github.com/usedatabrew/tango v0.0.2
 	go.etcd.io/etcd/client/v3 v3.5.10
 	go.mongodb.org/mongo-driver v1.13.0
 	gopkg.in/yaml.v3 v3.0.1

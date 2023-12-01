@@ -28,16 +28,7 @@ func NewKafkaSinkPlugin(config Config, schema []schema.StreamSchema) sinks.DataS
 }
 
 func (s *SinkPlugin) Connect(ctx context.Context) error {
-	p, err := gokafka.NewProducer(&gokafka.ConfigMap{
-		"bootstrap.servers": strings.Join(s.writerConfig.Brokers, ","),
-		"client.id":         "blink-writer",
-		"acks":              "all",
-		"security.protocol": "SASL_SSL",
-		"go.batch.producer": true,
-		"sasl.mechanisms":   s.writerConfig.SaslMechanism,
-		"sasl.username":     s.writerConfig.SaslUser,
-		"sasl.password":     s.writerConfig.SaslPassword,
-	})
+	p, err := gokafka.NewProducer(s.GetConfig())
 
 	if err != nil {
 		return err
@@ -73,6 +64,27 @@ func (s *SinkPlugin) GetType() sinks.SinkDriver {
 
 func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
 
+}
+
+func (s *SinkPlugin) GetConfig() *gokafka.ConfigMap {
+	if s.writerConfig.Sasl {
+		return &gokafka.ConfigMap{
+			"bootstrap.servers": strings.Join(s.writerConfig.Brokers, ","),
+			"client.id":         "blink-writer",
+			"acks":              "all",
+			"security.protocol": "SASL_SSL",
+			"go.batch.producer": true,
+			"sasl.mechanisms":   s.writerConfig.SaslMechanism,
+			"sasl.username":     s.writerConfig.SaslUser,
+			"sasl.password":     s.writerConfig.SaslPassword,
+		}
+	}
+
+	return &gokafka.ConfigMap{
+		"bootstrap.servers": strings.Join(s.writerConfig.Brokers, ","),
+		"client.id":         "blink-writer",
+		"acks":              "all",
+	}
 }
 
 func (s *SinkPlugin) Stop() {

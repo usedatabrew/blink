@@ -24,3 +24,5 @@ go.work
 
 build/
 __tools/
+example.data
+blink.yaml
