@@ -2,12 +2,14 @@ package stream
 
 import (
 	"blink/internal/message"
+	"blink/internal/metrics"
 	"blink/internal/processors"
 	"blink/internal/processors/openai"
 	"blink/internal/schema"
 	"blink/internal/sources"
 	"blink/internal/stream_context"
 	"errors"
+	"time"
 )
 
 // ProcessorWrapper wraps plan sink writer plugin in order to
@@ -15,10 +17,15 @@ import (
 type ProcessorWrapper struct {
 	processorDriver processors.DataProcessor
 	ctx             *stream_context.Context
+	metrics         metrics.Metrics
+	procDriver      string
 }
 
 func NewProcessorWrapper(pluginType processors.ProcessorDriver, config interface{}, appctx *stream_context.Context) ProcessorWrapper {
-	loader := ProcessorWrapper{}
+	loader := ProcessorWrapper{
+		metrics:    appctx.Metrics,
+		procDriver: string(pluginType),
+	}
 	loader.ctx = appctx
 	loadedDriver, err := loader.LoadDriver(pluginType, config)
 	if err != nil {
@@ -29,7 +36,16 @@ func NewProcessorWrapper(pluginType processors.ProcessorDriver, config interface
 }
 
 func (p *ProcessorWrapper) Process(msg sources.MessageEvent) (message.Message, error) {
-	return p.processorDriver.Process(p.ctx.GetContext(), msg.Message)
+	p.metrics.IncrementProcessorReceivedMessages(p.procDriver)
+	execStart := time.Now()
+	procMsg, err := p.processorDriver.Process(p.ctx.GetContext(), msg.Message)
+	if err == nil {
+		p.metrics.IncrementProcessorSentMessages(string(p.procDriver))
+	}
+
+	execEnd := time.Since(execStart)
+	p.metrics.SetProcessorExecutionTime(p.procDriver, execEnd.Milliseconds())
+	return procMsg, err
 }
 
 func (p *ProcessorWrapper) EvolveSchema(s *schema.StreamSchemaObj) error {

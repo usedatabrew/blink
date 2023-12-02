@@ -15,7 +15,8 @@ type Plugin struct {
 
 	writeOptions influxdb3.WriteOptions
 
-	procCounters map[string][]prometheus.Counter
+	procCounters            map[string][]prometheus.Counter
+	procExecutionTimeGauges map[string]prometheus.Gauge
 
 	groupName  string
 	pipelineId int
@@ -41,7 +42,8 @@ func NewPlugin(config Config) (*Plugin, error) {
 			Name: "source_errors",
 			Help: "The total number of errors from source connector",
 		}),
-		procCounters: map[string][]prometheus.Counter{},
+		procCounters:            map[string][]prometheus.Counter{},
+		procExecutionTimeGauges: map[string]prometheus.Gauge{},
 	}
 	return plugin, nil
 }
@@ -64,11 +66,11 @@ func (p *Plugin) IncrementSourceErrCounter() {
 
 func (p *Plugin) RegisterProcessors(processors []string) {
 	for _, proc := range processors {
+		p.procExecutionTimeGauges[proc] = promauto.NewGauge(prometheus.GaugeOpts{
+			Name: fmt.Sprintf("%s_execution_time", proc),
+			Help: "Time taken to process message",
+		})
 		p.procCounters[proc] = []prometheus.Counter{
-			promauto.NewCounter(prometheus.CounterOpts{
-				Name: fmt.Sprintf("%s_execution_time", proc),
-				Help: "Time taken to process message",
-			}),
 			promauto.NewCounter(prometheus.CounterOpts{
 				Name: fmt.Sprintf("%s_dropped_messages", proc),
 				Help: "Messages that were dropped, filtered by the processor",
@@ -85,8 +87,8 @@ func (p *Plugin) RegisterProcessors(processors []string) {
 	}
 }
 
-func (p *Plugin) SetProcessorExecutionTime(proc string, time int) {
-	p.procCounters[proc][0].Inc()
+func (p *Plugin) SetProcessorExecutionTime(proc string, time int64) {
+	p.procExecutionTimeGauges[proc].Set(float64(time))
 }
 
 func (p *Plugin) IncrementProcessorDroppedMessages(proc string) {

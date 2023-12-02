@@ -84,10 +84,21 @@ func (p *Plugin) IncrementSourceErrCounter() {
 	p.sourceErrorsCounter.Inc(1)
 }
 
-func (p *Plugin) SetProcessorExecutionTime(proc string, time int) {}
-func (p *Plugin) IncrementProcessorDroppedMessages(proc string)   {}
-func (p *Plugin) IncrementProcessorReceivedMessages(proc string)  {}
-func (p *Plugin) IncrementProcessorSentMessages(proc string)      {}
+func (p *Plugin) SetProcessorExecutionTime(proc string, time int64) {
+	p.procExecutionTimeMetrics[proc].Update(time)
+}
+
+func (p *Plugin) IncrementProcessorDroppedMessages(proc string) {
+	p.procMetrics[proc][0].Inc(0)
+}
+
+func (p *Plugin) IncrementProcessorReceivedMessages(proc string) {
+	p.procMetrics[proc][0].Inc(1)
+}
+
+func (p *Plugin) IncrementProcessorSentMessages(proc string) {
+	p.procMetrics[proc][0].Inc(2)
+}
 
 func (p *Plugin) RegisterProcessors(processors []string) {
 	for _, proc := range processors {

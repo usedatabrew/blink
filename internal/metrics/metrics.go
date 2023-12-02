@@ -8,7 +8,7 @@ type Metrics interface {
 
 	RegisterProcessors(processors []string)
 
-	SetProcessorExecutionTime(proc string, time int)
+	SetProcessorExecutionTime(proc string, time int64)
 	IncrementProcessorDroppedMessages(proc string)
 	IncrementProcessorReceivedMessages(proc string)
 	IncrementProcessorSentMessages(proc string)
