@@ -1,5 +1,5 @@
 # <p align="center"> DataBrew - Blink </p>
-### <p align="center"> OpenSource data processing engine to build event-driven systems </p>
+### <p align="center"> OpenSource data streaming & processing engine to build event-driven systems </p>
 <p align="center">
   <img src="./images/preview.png" width="150px" alt="Project social preview"> 
 </p>
