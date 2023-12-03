@@ -28,12 +28,18 @@ type Stream struct {
 func InitFromConfig(config config.Configuration) (*Stream, error) {
 	streamContext := stream_context.CreateContext()
 	streamContext.Logger.Info("Bootstrapping blink Stream-ETL")
+
+	var processorList []string
+	for _, proc := range config.Processors {
+		processorList = append(processorList, string(proc.Driver))
+	}
 	if config.Service.InfluxEnabled {
 		metrics, err := loadInfluxMetrics(config.Service.Influx)
 		if err != nil {
 			streamContext.Logger.WithPrefix("Metrics").Error("failed to load influx metrics")
 			return nil, err
 		}
+		metrics.RegisterProcessors(processorList)
 		streamContext.SetMetrics(metrics)
 		streamContext.Logger.WithPrefix("Metrics").Info("Component has been loaded")
 	} else {
@@ -44,6 +50,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 			streamContext.Logger.WithPrefix("Metrics").Error("failed to load local prometheus metrics")
 			return nil, err
 		}
+		metrics.RegisterProcessors(processorList)
 		streamContext.SetMetrics(metrics)
 		streamContext.Logger.WithPrefix("Metrics").Info("Component has been loaded")
 	}
