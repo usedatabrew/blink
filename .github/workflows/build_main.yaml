@@ -1,0 +1,22 @@
+name: Create release
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.3'
+
+      - name: "Install deps"
+        run: go mod tidy
+        
+      - name: "Build binary"
+        run: go build -tags dynamic
