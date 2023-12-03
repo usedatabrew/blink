@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"fmt"
 	"github.com/InfluxCommunity/influxdb3-go/influxdb3"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -13,6 +14,9 @@ type Plugin struct {
 	sourceErrorsCounter prometheus.Counter
 
 	writeOptions influxdb3.WriteOptions
+
+	procCounters            map[string][]prometheus.Counter
+	procExecutionTimeGauges map[string]prometheus.Gauge
 
 	groupName  string
 	pipelineId int
@@ -38,6 +42,8 @@ func NewPlugin(config Config) (*Plugin, error) {
 			Name: "source_errors",
 			Help: "The total number of errors from source connector",
 		}),
+		procCounters:            map[string][]prometheus.Counter{},
+		procExecutionTimeGauges: map[string]prometheus.Gauge{},
 	}
 	return plugin, nil
 }
@@ -56,4 +62,43 @@ func (p *Plugin) IncrementSinkErrCounter() {
 
 func (p *Plugin) IncrementSourceErrCounter() {
 	p.sourceErrorsCounter.Inc()
+}
+
+func (p *Plugin) RegisterProcessors(processors []string) {
+	for _, proc := range processors {
+		p.procExecutionTimeGauges[proc] = promauto.NewGauge(prometheus.GaugeOpts{
+			Name: fmt.Sprintf("%s_execution_time", proc),
+			Help: "Time taken to process message",
+		})
+		p.procCounters[proc] = []prometheus.Counter{
+			promauto.NewCounter(prometheus.CounterOpts{
+				Name: fmt.Sprintf("%s_dropped_messages", proc),
+				Help: "Messages that were dropped, filtered by the processor",
+			}),
+			promauto.NewCounter(prometheus.CounterOpts{
+				Name: fmt.Sprintf("%s_sent_messages", proc),
+				Help: "The total number of messages send to the next sink/processor plugin",
+			}),
+			promauto.NewCounter(prometheus.CounterOpts{
+				Name: fmt.Sprintf("%s_received_messages", proc),
+				Help: "The total number of messages send to the sink plugin",
+			}),
+		}
+	}
+}
+
+func (p *Plugin) SetProcessorExecutionTime(proc string, time int64) {
+	p.procExecutionTimeGauges[proc].Set(float64(time))
+}
+
+func (p *Plugin) IncrementProcessorDroppedMessages(proc string) {
+	p.procCounters[proc][0].Inc()
+}
+
+func (p *Plugin) IncrementProcessorReceivedMessages(proc string) {
+	p.procCounters[proc][1].Inc()
+}
+
+func (p *Plugin) IncrementProcessorSentMessages(proc string) {
+	p.procCounters[proc][2].Inc()
 }
