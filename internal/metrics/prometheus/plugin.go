@@ -92,13 +92,13 @@ func (p *Plugin) SetProcessorExecutionTime(proc string, time int64) {
 }
 
 func (p *Plugin) IncrementProcessorDroppedMessages(proc string) {
-	p.procCounters[proc][1].Inc()
+	p.procCounters[proc][0].Inc()
 }
 
 func (p *Plugin) IncrementProcessorReceivedMessages(proc string) {
-	p.procCounters[proc][2].Inc()
+	p.procCounters[proc][1].Inc()
 }
 
 func (p *Plugin) IncrementProcessorSentMessages(proc string) {
-	p.procCounters[proc][3].Inc()
+	p.procCounters[proc][2].Inc()
 }
