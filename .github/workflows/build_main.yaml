@@ -15,8 +15,11 @@ jobs:
         with:
           go-version: '1.21.3'
 
-      - name: "Install deps"
+      - name: Install go-Kafka dep
+        run: go get gopkg.in/confluentinc/confluent-kafka-go.v1/kafka
+
+      - name: Run mod tidy
         run: go mod tidy
         
-      - name: "Build binary"
+      - name: Build binary
         run: go build -tags dynamic
