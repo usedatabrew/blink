@@ -14,4 +14,7 @@ RUN go mod tidy
 RUN cd cmd/blink &&  go build -tags dynamic blink/cmd/blink
 
 ENV GOMAXPROCS=2
+
+ENTRYPOINT ["./cmd/blink/blink"]
+
 CMD ["./cmd/blink/blink"]
