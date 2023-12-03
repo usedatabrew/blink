@@ -28,7 +28,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.IMG_NAME }}
+          images: usedatabrew/blink
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
