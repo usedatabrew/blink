@@ -7,10 +7,24 @@
 Blink ETL gives you the ability to create truly flexible data pipelines to implement even-driven architecture, database replication and data lakes
 
 ## Getting started ![Latest version (latest semver)](https://img.shields.io/docker/v/usedatabrew/blink)
+Let's give blink a try. Check out different options to start Blink on your local machine
 
-Before we start you have to install Blink on your local machine
+### Run with Docker on Linux
+Currently, we offer only linux-based arm64 build for docker
 
+Create config with the name `blink.yaml` and run docker image
 ```shell
-brew install @databrew/blink
+docker run -v blink.yaml:/blink.yaml usedatabrew/blink start
 ```
 
+### Install Golang binary
+
+```shell
+go get -u github.com/usedatabrew/blink
+```
+
+```shell
+blink start -c blink-config.yaml
+```
+
+### Install with Homebrew (MacOS)
