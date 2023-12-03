@@ -1,13 +1,13 @@
 package stream
 
 import (
-	"blink/config"
-	"blink/internal/message"
-	"blink/internal/schema"
-	"blink/internal/service_registry"
-	"blink/internal/sources"
-	"blink/internal/stream_context"
 	"errors"
+	"github.com/usedatabrew/blink/config"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/service_registry"
+	"github.com/usedatabrew/blink/internal/sources"
+	"github.com/usedatabrew/blink/internal/stream_context"
 	"github.com/usedatabrew/tango"
 	"sync"
 	"time"

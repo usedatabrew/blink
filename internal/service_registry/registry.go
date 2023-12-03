@@ -1,8 +1,8 @@
 package service_registry
 
 import (
-	"blink/config"
-	"blink/internal/stream_context"
+	"github.com/usedatabrew/blink/config"
+	"github.com/usedatabrew/blink/internal/stream_context"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"

@@ -1,10 +1,10 @@
 package stream
 
 import (
-	"blink/config"
-	"blink/internal/metrics"
-	"blink/internal/metrics/influx"
-	"blink/internal/metrics/prometheus"
+	"github.com/usedatabrew/blink/config"
+	"github.com/usedatabrew/blink/internal/metrics"
+	"github.com/usedatabrew/blink/internal/metrics/influx"
+	"github.com/usedatabrew/blink/internal/metrics/prometheus"
 	"gopkg.in/yaml.v3"
 )
 

@@ -1,10 +1,10 @@
 package stdout
 
 import (
-	"blink/internal/message"
-	"blink/internal/schema"
-	"blink/internal/sinks"
-	"blink/internal/stream_context"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/sinks"
+	"github.com/usedatabrew/blink/internal/stream_context"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"

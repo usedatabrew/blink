@@ -1,7 +1,7 @@
 package sources
 
 import (
-	"blink/internal/message"
+	"github.com/usedatabrew/blink/internal/message"
 	"context"
 )
 

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"blink/public/stream"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/usedatabrew/blink/public/stream"
 	"io"
 	"net/http"
 )

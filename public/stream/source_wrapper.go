@@ -1,11 +1,11 @@
 package stream
 
 import (
-	"blink/config"
-	"blink/internal/sources"
-	"blink/internal/sources/mongo_stream"
-	"blink/internal/sources/postgres_cdc"
-	"blink/internal/stream_context"
+	"github.com/usedatabrew/blink/config"
+	"github.com/usedatabrew/blink/internal/sources"
+	"github.com/usedatabrew/blink/internal/sources/mongo_stream"
+	"github.com/usedatabrew/blink/internal/sources/postgres_cdc"
+	"github.com/usedatabrew/blink/internal/stream_context"
 
 	"gopkg.in/yaml.v3"
 )

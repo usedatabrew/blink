@@ -1,9 +1,9 @@
 package openai
 
 import (
-	"blink/internal/message"
-	"blink/internal/schema"
-	"blink/internal/stream_context"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/stream_context"
 	"context"
 	"github.com/apache/arrow/go/v14/arrow"
 )

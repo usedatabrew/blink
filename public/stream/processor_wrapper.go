@@ -1,13 +1,13 @@
 package stream
 
 import (
-	"blink/internal/message"
-	"blink/internal/metrics"
-	"blink/internal/processors"
-	"blink/internal/processors/openai"
-	"blink/internal/schema"
-	"blink/internal/sources"
-	"blink/internal/stream_context"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/metrics"
+	"github.com/usedatabrew/blink/internal/processors"
+	"github.com/usedatabrew/blink/internal/processors/openai"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/sources"
+	"github.com/usedatabrew/blink/internal/stream_context"
 	"errors"
 	"time"
 )

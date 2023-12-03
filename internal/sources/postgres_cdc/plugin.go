@@ -1,9 +1,9 @@
 package postgres_cdc
 
 import (
-	"blink/internal/message"
-	"blink/internal/schema"
-	"blink/internal/sources"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/sources"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"

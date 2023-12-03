@@ -1,8 +1,8 @@
 package stream_context
 
 import (
-	"blink/internal/logger"
-	"blink/internal/metrics"
+	"github.com/usedatabrew/blink/internal/logger"
+	"github.com/usedatabrew/blink/internal/metrics"
 	"context"
 	"github.com/charmbracelet/log"
 )

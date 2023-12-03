@@ -1,9 +1,9 @@
 package mongo_stream
 
 import (
-	"blink/internal/message"
-	"blink/internal/schema"
-	"blink/internal/sources"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/sources"
 	"context"
 	"fmt"
 

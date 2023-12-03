@@ -1,7 +1,7 @@
 package stream
 
 import (
-	"blink/config"
+	"github.com/usedatabrew/blink/config"
 	"os"
 	"regexp"
 	"strings"

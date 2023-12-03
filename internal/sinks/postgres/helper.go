@@ -1,8 +1,8 @@
 package postgres
 
 import (
-	"blink/internal/message"
-	"blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/schema"
 	"fmt"
 	"github.com/apache/arrow/go/v14/arrow"
 	"strings"

@@ -1,6 +1,6 @@
 package main
 
-import "blink/internal/cli"
+import "github.com/usedatabrew/blink/internal/cli"
 
 func main() {
 	cli.Start()

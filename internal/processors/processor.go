@@ -1,8 +1,8 @@
 package processors
 
 import (
-	"blink/internal/message"
-	"blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/schema"
 	"context"
 )
 

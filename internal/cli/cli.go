@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"blink/public/server"
-	"blink/public/stream"
+	"github.com/usedatabrew/blink/public/server"
+	"github.com/usedatabrew/blink/public/stream"
 	"errors"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"

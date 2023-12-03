@@ -1,10 +1,10 @@
 package config
 
 import (
-	"blink/internal/processors"
-	"blink/internal/schema"
-	"blink/internal/sinks"
-	"blink/internal/sources"
+	"github.com/usedatabrew/blink/internal/processors"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/sinks"
+	"github.com/usedatabrew/blink/internal/sources"
 )
 
 type Configuration struct {

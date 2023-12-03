@@ -1,4 +1,4 @@
-module blink
+module github.com/usedatabrew/blink
 
 go 1.21.1
 

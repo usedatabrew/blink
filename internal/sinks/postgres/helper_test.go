@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/schema"
 	"fmt"
 	"testing"
 )
