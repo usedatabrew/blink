@@ -13,7 +13,6 @@ require (
 	github.com/apache/arrow/go/v14 v14.0.1
 	github.com/charmbracelet/log v0.3.1
 	github.com/cloudquery/plugin-sdk/v4 v4.16.1
-	github.com/confluentinc/confluent-kafka-go v1.9.0
 	github.com/go-playground/validator/v10 v10.14.0
 	github.com/google/uuid v1.3.1
 	github.com/gorilla/websocket v1.5.0
@@ -21,6 +20,7 @@ require (
 	github.com/prometheus/client_golang v1.11.1
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475
 	github.com/spf13/cobra v1.6.1
+	github.com/twmb/franz-go v1.15.2
 	github.com/usedatabrew/pglogicalstream v0.0.20
 	github.com/usedatabrew/tango v0.0.3
 	go.etcd.io/etcd/client/v3 v3.5.10
@@ -69,6 +69,7 @@ require (
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/twmb/franz-go/pkg/kmsg v1.7.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
