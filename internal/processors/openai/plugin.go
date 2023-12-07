@@ -1,11 +1,11 @@
 package openai
 
 import (
+	"context"
+	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
-	"context"
-	"github.com/apache/arrow/go/v14/arrow"
 )
 
 type Plugin struct {

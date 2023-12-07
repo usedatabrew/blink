@@ -6,7 +6,7 @@ COPY . .
 
 RUN go mod tidy
 
-RUN cd cmd/blink && go build blink/cmd/blink
+RUN cd cmd/blink && go build
 
 ENV GOMAXPROCS=2
 
