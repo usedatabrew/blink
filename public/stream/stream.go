@@ -146,7 +146,7 @@ func (s *Stream) Start() error {
 	sinkStage := tango.Stage{
 		Channel: make(chan interface{}),
 		Function: func(i interface{}) (interface{}, error) {
-			err := s.sinks[0].Write(i.(message.Message))
+			err := s.sinks[0].Write(i.(sources.MessageEvent).Message)
 			if err != nil {
 				s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)
 			} else {
