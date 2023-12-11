@@ -21,7 +21,7 @@
 go.work
 
 .idea/
-
+.fleet/
 build/
 __tools/
 example.data

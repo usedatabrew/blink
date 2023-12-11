@@ -1,11 +1,11 @@
 package cli
 
 import (
-	"github.com/usedatabrew/blink/public/server"
-	"github.com/usedatabrew/blink/public/stream"
 	"errors"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
+	"github.com/usedatabrew/blink/public/server"
+	"github.com/usedatabrew/blink/public/stream"
 	"os"
 )
 

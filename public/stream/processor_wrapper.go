@@ -1,14 +1,13 @@
 package stream
 
 import (
+	"errors"
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/metrics"
 	"github.com/usedatabrew/blink/internal/processors"
 	"github.com/usedatabrew/blink/internal/processors/openai"
 	"github.com/usedatabrew/blink/internal/schema"
-	"github.com/usedatabrew/blink/internal/sources"
 	"github.com/usedatabrew/blink/internal/stream_context"
-	"errors"
 	"time"
 )
 
@@ -35,10 +34,10 @@ func NewProcessorWrapper(pluginType processors.ProcessorDriver, config interface
 	return loader
 }
 
-func (p *ProcessorWrapper) Process(msg sources.MessageEvent) (message.Message, error) {
+func (p *ProcessorWrapper) Process(msg message.Message) (message.Message, error) {
 	p.metrics.IncrementProcessorReceivedMessages(p.procDriver)
 	execStart := time.Now()
-	procMsg, err := p.processorDriver.Process(p.ctx.GetContext(), msg.Message)
+	procMsg, err := p.processorDriver.Process(p.ctx.GetContext(), msg)
 	if err == nil {
 		p.metrics.IncrementProcessorSentMessages(string(p.procDriver))
 	}

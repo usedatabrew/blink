@@ -12,6 +12,7 @@ type Message struct {
 	ID   uint32 `json:"id"`
 	Data arrow.Record
 	meta map[string]string
+	Err  error
 }
 
 func New(data arrow.Record) Message {
@@ -52,6 +53,15 @@ func (m *Message) GetEvent() string {
 	v, _ := m.meta["event"]
 
 	return v
+}
+
+func (m *Message) GetValue(colName string) interface{} {
+	for idx, col := range m.Data.Columns() {
+		if m.Data.Schema().Field(idx).Name == colName {
+			return GetValue(col, 0)
+		}
+	}
+	return nil
 }
 
 func (m *Message) SetNewField(name string, value interface{}, fieldType arrow.DataType) {

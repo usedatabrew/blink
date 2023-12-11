@@ -19,6 +19,7 @@ require (
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/prometheus/client_golang v1.11.1
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475
+	github.com/sashabaranov/go-openai v1.17.9
 	github.com/spf13/cobra v1.6.1
 	github.com/twmb/franz-go v1.15.2
 	github.com/usedatabrew/pglogicalstream v0.0.20

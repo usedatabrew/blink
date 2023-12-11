@@ -16,7 +16,7 @@ var (
 func GetInstance() *log.Logger {
 	once.Do(func() {
 		instance = log.NewWithOptions(os.Stdout, log.Options{
-			ReportCaller:    true,
+			ReportCaller:    false,
 			ReportTimestamp: true,
 			TimeFormat:      time.DateTime,
 			Prefix:          "blink",

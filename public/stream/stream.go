@@ -3,9 +3,9 @@ package stream
 import (
 	"errors"
 	"github.com/usedatabrew/blink/config"
+	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/service_registry"
-	"github.com/usedatabrew/blink/internal/sources"
 	"github.com/usedatabrew/blink/internal/stream_context"
 	"github.com/usedatabrew/tango"
 	"sync"
@@ -136,7 +136,7 @@ func (s *Stream) Start() error {
 		stage := tango.Stage{
 			Channel: make(chan interface{}),
 			Function: func(i interface{}) (interface{}, error) {
-				return proc.Process(i.(sources.MessageEvent))
+				return proc.Process(i.(message.Message))
 			},
 		}
 		dataStreamStages = append(dataStreamStages, stage)
@@ -145,7 +145,7 @@ func (s *Stream) Start() error {
 	sinkStage := tango.Stage{
 		Channel: make(chan interface{}),
 		Function: func(i interface{}) (interface{}, error) {
-			err := s.sinks[0].Write(i.(sources.MessageEvent).Message)
+			err := s.sinks[0].Write(i.(message.Message))
 			if err != nil {
 				s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)
 			} else {
@@ -168,7 +168,7 @@ func (s *Stream) Start() error {
 		for {
 			select {
 			case sourceEvent := <-s.source.Events():
-				streamProxyChan <- sourceEvent
+				streamProxyChan <- sourceEvent.Message
 			}
 		}
 	}()
