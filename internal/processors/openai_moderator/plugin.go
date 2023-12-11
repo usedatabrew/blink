@@ -24,9 +24,9 @@ func (p *Plugin) Process(context context.Context, msg message.Message) (message.
 		return msg, nil
 	}
 
-	sourceFieldValue := msg.GetValue(p.config.SourceField)
-
-	msg.SetNewField(p.config.TargetField, resp.Choices[0].Message.Content, arrow.BinaryTypes.String)
+	//sourceFieldValue := msg.GetValue(p.config.SourceField)
+	//
+	//msg.SetNewField(p.config.TargetField, resp.Choices[0].Message.Content, arrow.BinaryTypes.String)
 
 	return msg, nil
 }
