@@ -437,8 +437,8 @@ github.com/twmb/franz-go/pkg/kmsg v1.7.0/go.mod h1:se9Mjdt0Nwzc9lnjJ0HyDtLyBnaBD
 github.com/ugorji/go/codec v1.2.11/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
 github.com/usedatabrew/pglogicalstream v0.0.20 h1:QfdSO9X8p9sqDoh/LUbzrGtoW5E5QSKL7YSt8rNQtso=
 github.com/usedatabrew/pglogicalstream v0.0.20/go.mod h1:VmPhp8W+MSHR2sIPdwQxGBzMVR2zTzUxEbiMrjH+5eU=
-github.com/usedatabrew/tango v0.0.4 h1:ZcZIO/XlsoUVBceTcfsee2eF6HCImpSZtacdilq9P44=
-github.com/usedatabrew/tango v0.0.4/go.mod h1:6/hSAFH1NvS/wdsDlsLyHq1nbZLOIClzbOc7jxqSZ54=
+github.com/usedatabrew/tango v0.0.5 h1:YXSe4gnYsjGCoODFbtWjhqhmq2JIFJ9Zo4X4ED7wnZE=
+github.com/usedatabrew/tango v0.0.5/go.mod h1:6/hSAFH1NvS/wdsDlsLyHq1nbZLOIClzbOc7jxqSZ54=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.2/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
 github.com/vmihailenco/msgpack/v5 v5.3.5/go.mod h1:7xyJ9e+0+9SaZT0Wt1RGleJXzli6Q/V5KbhBonMG9jc=

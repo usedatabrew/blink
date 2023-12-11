@@ -23,7 +23,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/twmb/franz-go v1.15.2
 	github.com/usedatabrew/pglogicalstream v0.0.20
-	github.com/usedatabrew/tango v0.0.4
+	github.com/usedatabrew/tango v0.0.5
 	go.etcd.io/etcd/client/v3 v3.5.10
 	go.mongodb.org/mongo-driver v1.13.0
 	gopkg.in/yaml.v3 v3.0.1

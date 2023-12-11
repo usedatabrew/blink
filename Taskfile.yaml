@@ -1,19 +1,23 @@
 version: '3'
 
 tasks:
+  run_macos_build:
+    deps: [ build_macos ]
+    cmds:
+      - ./build/blink-macos start --config blink.yaml
   prebuild:
     - rm -rf ./build/
     - mkdir build
   build_windows:
     platforms: [windows/amd64]
     cmds:
-      - cd cmd/blink &&  go build -tags dynamic blink/cmd/blink
+      - cd cmd/blink &&  go build
       - mv cmd/blink/blink ./build/blink-macos
     silent: true
   build_macos:
     deps: [prebuild]
     cmds:
-      - cd cmd/blink && go build -tags dynamic blink/cmd/blink
+      - cd cmd/blink && go build
       - mv cmd/blink/blink ./build/blink-macos
     silent: true
   build_linux:
