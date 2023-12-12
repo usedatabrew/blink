@@ -1,15 +1,16 @@
 package processors
 
 import (
+	"context"
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
-	"context"
 )
 
 type ProcessorDriver string
 
 const (
 	OpenAIProcessor    ProcessorDriver = "openai"
+	SQLProcessor       ProcessorDriver = "sql"
 	LambdaProcessor    ProcessorDriver = "lambda"
 	HttpGetProcessor   ProcessorDriver = "http_get"
 	SQLEnrichProcessor ProcessorDriver = "sql_enrich"

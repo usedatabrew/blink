@@ -2,6 +2,8 @@ package schema
 
 import (
 	"github.com/apache/arrow/go/v14/arrow"
+	"github.com/barkimedes/go-deepcopy"
+	"slices"
 )
 
 type StreamSchema struct {
@@ -36,9 +38,7 @@ func (s *StreamSchemaObj) GetLatestSchema() []StreamSchema {
 }
 
 func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.DataType, driverType string) {
-	streamSchema := s.streamSchemaVersions[s.lastVersion]
-	var streamSchemaCopy = make([]StreamSchema, len(streamSchema))
-	copy(streamSchemaCopy, streamSchema)
+	var streamSchemaCopy = s.getLastSchemaDeepCopy()
 	for idx, stream := range streamSchemaCopy {
 		if stream.StreamName == streamName {
 			arrowColumn := Column{
@@ -49,8 +49,7 @@ func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.Data
 				Nullable:            true,
 			}
 
-			stream.Columns = append(stream.Columns, arrowColumn)
-			streamSchemaCopy[idx] = stream
+			streamSchemaCopy[idx].Columns = append(stream.Columns, arrowColumn)
 		}
 	}
 
@@ -58,15 +57,49 @@ func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.Data
 	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
 }
 
-// TODO:: add columns removal
-func (s *StreamSchemaObj) RemoveField(name string) {
-	//for idx, col := range s.Columns {
-	//	if col.Name == name {
-	//		s.Columns = remove(s.Columns, idx)
-	//	}
-	//}
+func (s *StreamSchemaObj) RemoveField(streamName, columnName string) {
+	var streamSchemaCopy = s.getLastSchemaDeepCopy()
+	for streamIndex, stream := range streamSchemaCopy {
+		if stream.StreamName == streamName {
+			for colIdx, column := range stream.Columns {
+				if column.Name == columnName {
+					streamSchemaCopy[streamIndex].Columns = remove(stream.Columns, colIdx)
+				}
+			}
+		}
+	}
+
+	s.lastVersion += 1
+	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
 }
 
-func remove(slice []Column, s int) []Column {
+func (s *StreamSchemaObj) RemoveFields(streamName string, columnNames []string) {
+	var streamSchemaCopy = s.getLastSchemaDeepCopy()
+	for streamIndex, stream := range streamSchemaCopy {
+		if stream.StreamName == streamName {
+			for colIdx, column := range stream.Columns {
+				if idx := slices.Index(columnNames, column.Name); idx != -1 {
+					streamSchemaCopy[streamIndex].Columns = remove(stream.Columns, colIdx)
+					columnNames = remove(columnNames, idx)
+				}
+			}
+		}
+	}
+
+	s.lastVersion += 1
+	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
+}
+
+func (s *StreamSchemaObj) getLastSchemaDeepCopy() []StreamSchema {
+	streamSchema := s.streamSchemaVersions[s.lastVersion]
+	//var streamSchemaCopy = make([]StreamSchema, len(streamSchema))
+	streamSchemaCopy, err := deepcopy.Anything(streamSchema)
+	if err != nil {
+		panic(err)
+	}
+	return streamSchemaCopy.([]StreamSchema)
+}
+
+func remove[T any](slice []T, s int) []T {
 	return append(slice[:s], slice[s+1:]...)
 }

@@ -12,7 +12,6 @@ import (
 
 type Plugin struct {
 	config       Config
-	resultSchema []schema.StreamSchema
 	ctx          *stream_context.Context
 	client       *openai.Client
 	model        string

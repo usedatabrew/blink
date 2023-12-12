@@ -11,6 +11,8 @@ replace go.etcd.io/bbolt v1.3.4 => github.com/coreos/bbolt v1.3.4
 require (
 	github.com/InfluxCommunity/influxdb3-go v0.4.0
 	github.com/apache/arrow/go/v14 v14.0.1
+	github.com/barkimedes/go-deepcopy v0.0.0-20220514131651-17c30cfc62df
+	github.com/blastrain/vitess-sqlparser v0.0.0-20201030050434-a139afbb1aba
 	github.com/charmbracelet/log v0.3.1
 	github.com/cloudquery/plugin-sdk/v4 v4.16.1
 	github.com/go-playground/validator/v10 v10.14.0
@@ -53,6 +55,7 @@ require (
 	github.com/jackc/pglogrepl v0.0.0-20230826184802-9ed16cb201f6 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/juju/errors v0.0.0-20170703010042-c7d06af17c68 // indirect
 	github.com/klauspost/compress v1.17.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect

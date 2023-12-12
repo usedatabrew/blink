@@ -6,6 +6,7 @@ import (
 	"github.com/usedatabrew/blink/internal/metrics"
 	"github.com/usedatabrew/blink/internal/processors"
 	"github.com/usedatabrew/blink/internal/processors/openai"
+	sqlproc "github.com/usedatabrew/blink/internal/processors/sql"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
 	"time"
@@ -63,6 +64,12 @@ func (p *ProcessorWrapper) LoadDriver(driver processors.ProcessorDriver, cfg int
 			panic("can read driver config")
 		}
 		return openai.NewOpenAIPlugin(p.ctx, driverConfig)
+	case processors.SQLProcessor:
+		driverConfig, err := ReadDriverConfig[sqlproc.Config](cfg, sqlproc.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return sqlproc.NewSqlTransformlugin(p.ctx, driverConfig)
 	default:
 		return nil, errors.New("unregistered driver provided")
 	}
