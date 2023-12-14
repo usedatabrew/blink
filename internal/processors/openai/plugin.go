@@ -11,18 +11,18 @@ import (
 )
 
 type Plugin struct {
-	config       Config
-	ctx          *stream_context.Context
-	client       *openai.Client
-	model        string
-	prompt       string
+	config Config
+	ctx    *stream_context.Context
+	client *openai.Client
+	model  string
+	prompt string
 }
 
 func NewOpenAIPlugin(appctx *stream_context.Context, config Config) (*Plugin, error) {
 	return &Plugin{config: config, ctx: appctx, client: openai.NewClient(config.ApiKey), model: config.Model, prompt: config.Prompt}, nil
 }
 
-func (p *Plugin) Process(context context.Context, msg message.Message) (message.Message, error) {
+func (p *Plugin) Process(context context.Context, msg *message.Message) (*message.Message, error) {
 	if msg.GetStream() != p.config.StreamName {
 		return msg, nil
 	}

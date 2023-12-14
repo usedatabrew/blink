@@ -1,14 +1,14 @@
 package postgres
 
 import (
-	"github.com/usedatabrew/blink/internal/message"
-	"github.com/usedatabrew/blink/internal/schema"
-	"github.com/usedatabrew/blink/internal/sinks"
-	"github.com/usedatabrew/blink/internal/stream_context"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"
 	"github.com/jackc/pgx/v5"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/sinks"
+	"github.com/usedatabrew/blink/internal/stream_context"
 	"sync"
 	"time"
 )
@@ -22,7 +22,7 @@ type SinkPlugin struct {
 	rowStatements         map[string]map[string]string
 	pkColumnNamesByStream map[string]string
 	mutex                 sync.Mutex
-	messagesBuffer        []message.Message
+	messagesBuffer        []*message.Message
 	snapshotMaxBufferSize int
 	prevEvent             string
 	prevSnapshotStream    string
@@ -35,7 +35,7 @@ func NewPostgresSinkPlugin(config Config, schema []schema.StreamSchema, appctx *
 		appctx:                appctx,
 		streamSchema:          schema,
 		logger:                log.WithPrefix("PostgreSQL Sink"),
-		messagesBuffer:        []message.Message{},
+		messagesBuffer:        []*message.Message{},
 		snapshotMaxBufferSize: 5000,
 	}
 }
@@ -64,7 +64,7 @@ func (s *SinkPlugin) GetType() sinks.SinkDriver {
 	return sinks.PostgresSinkType
 }
 
-func (s *SinkPlugin) Write(m message.Message) error {
+func (s *SinkPlugin) Write(m *message.Message) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	// for snapshot event we have to perform inserts in bulk using COPY command
@@ -90,7 +90,7 @@ func (s *SinkPlugin) Write(m message.Message) error {
 				return err
 			}
 
-			s.messagesBuffer = []message.Message{}
+			s.messagesBuffer = []*message.Message{}
 			return nil
 		} else if s.snapshotTicker == nil {
 			// Start a timer if not already running
@@ -101,7 +101,7 @@ func (s *SinkPlugin) Write(m message.Message) error {
 				if err != nil {
 					panic("Failed to write snapshot batch")
 				}
-				s.messagesBuffer = []message.Message{}
+				s.messagesBuffer = []*message.Message{}
 				s.snapshotTicker.Stop()
 				s.snapshotTicker = nil
 			})

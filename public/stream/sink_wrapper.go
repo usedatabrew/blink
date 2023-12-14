@@ -31,7 +31,7 @@ func (p *SinkWrapper) Init() error {
 	return p.sinkDriver.Connect(p.ctx.GetContext())
 }
 
-func (p *SinkWrapper) Write(msg message.Message) error {
+func (p *SinkWrapper) Write(msg *message.Message) error {
 	err := p.sinkDriver.Write(msg)
 	if err != nil {
 		p.ctx.Metrics.IncrementSinkErrCounter()

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	_ "github.com/apache/arrow/go/v14/arrow"
 	"github.com/blastrain/vitess-sqlparser/sqlparser"
+	"github.com/charmbracelet/log"
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
@@ -17,6 +18,7 @@ type Plugin struct {
 	config                   Config
 	resultSchema             []schema.StreamSchema
 	ctx                      *stream_context.Context
+	logger                   *log.Logger
 	columnsToDropFromSchema  []string
 	columnNameToIndexBinding map[string]int
 	affectedStream           string
@@ -27,13 +29,31 @@ type Plugin struct {
 }
 
 func NewSqlTransformlugin(appctx *stream_context.Context, config Config) (*Plugin, error) {
-	return &Plugin{config: config, ctx: appctx, columnNameToIndexBinding: make(map[string]int), columnsToDropFromSchema: []string{}}, nil
+	return &Plugin{
+		config:                   config,
+		ctx:                      appctx,
+		logger:                   appctx.Logger.WithPrefix("processor [sql]"),
+		columnNameToIndexBinding: make(map[string]int),
+		columnsToDropFromSchema:  []string{},
+	}, nil
 }
 
-func (p *Plugin) Process(context context.Context, msg message.Message) (message.Message, error) {
-	//	if msg.GetStream() != p.config.StreamName {
-	//		return msg, nil
-	//	}
+func (p *Plugin) Process(context context.Context, msg *message.Message) (*message.Message, error) {
+	if msg.GetStream() != p.affectedStream {
+		return msg, nil
+	}
+
+	if len(p.columnsToDropFromSchema) > 0 {
+		msg.RemoveFields(p.columnsToDropFromSchema)
+	}
+
+	if p.whereExist {
+		columnValue := msg.GetValue(p.whereLeft)
+		p.logger.Info("Left column value", columnValue, p.whereLeft)
+	}
+
+	return msg, nil
+
 	//
 	//	sourceFieldValue := msg.GetValue(p.config.SourceField)
 	//
@@ -132,6 +152,7 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 		for _, col := range streamToProcess.Columns {
 			if col.Name == whereColumn {
 				whereColumnExist = true
+				p.whereLeft = col.Name
 			}
 		}
 

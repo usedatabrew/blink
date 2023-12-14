@@ -35,7 +35,7 @@ func NewProcessorWrapper(pluginType processors.ProcessorDriver, config interface
 	return loader
 }
 
-func (p *ProcessorWrapper) Process(msg message.Message) (message.Message, error) {
+func (p *ProcessorWrapper) Process(msg *message.Message) (*message.Message, error) {
 	p.metrics.IncrementProcessorReceivedMessages(p.procDriver)
 	execStart := time.Now()
 	procMsg, err := p.processorDriver.Process(p.ctx.GetContext(), msg)
