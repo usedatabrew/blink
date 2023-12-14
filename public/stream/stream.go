@@ -136,8 +136,8 @@ func (s *Stream) Start() error {
 		stage := tango.Stage{
 			Channel: make(chan interface{}),
 			Function: func(i interface{}) (interface{}, error) {
-				inMessage := i.(message.Message)
-				return proc.Process(&inMessage)
+				inMessage := i.(*message.Message)
+				return proc.Process(inMessage)
 			},
 		}
 		dataStreamStages = append(dataStreamStages, stage)
@@ -146,8 +146,8 @@ func (s *Stream) Start() error {
 	sinkStage := tango.Stage{
 		Channel: make(chan interface{}),
 		Function: func(i interface{}) (interface{}, error) {
-			inMessage := i.(message.Message)
-			err := s.sinks[0].Write(&inMessage)
+			inMessage := i.(*message.Message)
+			err := s.sinks[0].Write(inMessage)
 			if err != nil {
 				s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)
 			} else {
@@ -170,7 +170,7 @@ func (s *Stream) Start() error {
 		for {
 			select {
 			case sourceEvent := <-s.source.Events():
-				streamProxyChan <- sourceEvent.Message
+				streamProxyChan <- &sourceEvent.Message
 			}
 		}
 	}()
