@@ -12,7 +12,7 @@ const (
 	OpenAIProcessor    ProcessorDriver = "openai"
 	SQLProcessor       ProcessorDriver = "sql"
 	LambdaProcessor    ProcessorDriver = "lambda"
-	HttpGetProcessor   ProcessorDriver = "http_get"
+	HttpProcessor      ProcessorDriver = "http"
 	SQLEnrichProcessor ProcessorDriver = "sql_enrich"
 )
 

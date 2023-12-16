@@ -3,7 +3,7 @@ package http
 type Config struct {
 	Source      string `json:"source" yaml:"source"`
 	TargetField string `json:"target_field" yaml:"target_field"`
-	StreamName  string `json:"stream" yaml:"stream"`
+	StreamName  string `json:"stream_name" yaml:"stream_name"`
 	Endpoint    string `json:"endpoint" yaml:"endpoint"`
 	Method      string `json:"method" yaml:"method"`
 	Auth        Auth   `json:"auth" yaml:"auth"`
