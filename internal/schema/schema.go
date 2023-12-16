@@ -57,6 +57,12 @@ func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.Data
 	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
 }
 
+func (s *StreamSchemaObj) FakeEvolve() {
+	var streamSchemaCopy = s.getLastSchemaDeepCopy()
+	s.lastVersion += 1
+	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
+}
+
 func (s *StreamSchemaObj) RemoveField(streamName, columnName string) {
 	var streamSchemaCopy = s.getLastSchemaDeepCopy()
 	for streamIndex, stream := range streamSchemaCopy {
