@@ -74,13 +74,14 @@ func (s *StreamSchemaObj) RemoveField(streamName, columnName string) {
 }
 
 func (s *StreamSchemaObj) RemoveFields(streamName string, columnNames []string) {
+	columnNamesCopied, _ := deepcopy.Anything(columnNames)
 	var streamSchemaCopy = s.getLastSchemaDeepCopy()
 	for streamIndex, stream := range streamSchemaCopy {
 		if stream.StreamName == streamName {
 			for colIdx, column := range stream.Columns {
-				if idx := slices.Index(columnNames, column.Name); idx != -1 {
+				if idx := slices.Index(columnNamesCopied.([]string), column.Name); idx != -1 {
 					streamSchemaCopy[streamIndex].Columns = remove(stream.Columns, colIdx)
-					columnNames = remove(columnNames, idx)
+					columnNamesCopied = remove(columnNamesCopied.([]string), idx)
 				}
 			}
 		}

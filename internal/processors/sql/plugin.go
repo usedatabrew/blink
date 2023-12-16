@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/apache/arrow/go/v14/arrow"
+	"github.com/barkimedes/go-deepcopy"
 	"github.com/blastrain/vitess-sqlparser/sqlparser"
 	"github.com/charmbracelet/log"
 	"github.com/usedatabrew/blink/internal/message"
@@ -125,10 +126,12 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 		// now we have to check is all the columns are available in the schema
 		for _, col := range streamToProcess.Columns {
 			idx := slices.Index(columns, col.Name)
-			if idx != -1 {
-				columns = append(columns[:idx], columns[idx+1:]...)
+			if idx == -1 {
+				// simple string deep copying doesn't require error handing :(
+				colNameCopied, _ := deepcopy.Anything(col.Name)
+				p.columnsToDropFromSchema = append(p.columnsToDropFromSchema, colNameCopied.(string))
 			} else {
-				p.columnsToDropFromSchema = append(p.columnsToDropFromSchema, col.Name)
+				columns = append(columns[:idx], columns[idx+1:]...)
 			}
 		}
 
@@ -164,6 +167,7 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 		p.whereRight = rightVal
 	}
 
+	fmt.Println("Drop columns from message", p.columnsToDropFromSchema)
 	streamSchema.RemoveFields(streamToProcess.StreamName, p.columnsToDropFromSchema)
 	return nil
 }
