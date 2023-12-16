@@ -149,7 +149,6 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 		p.whereRight = rightVal
 	}
 
-	fmt.Println("Drop columns from message", p.columnsToDropFromSchema)
 	streamSchema.RemoveFields(streamToProcess.StreamName, p.columnsToDropFromSchema)
 	return nil
 }

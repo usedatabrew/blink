@@ -5,6 +5,7 @@ import (
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/metrics"
 	"github.com/usedatabrew/blink/internal/processors"
+	"github.com/usedatabrew/blink/internal/processors/http"
 	"github.com/usedatabrew/blink/internal/processors/openai"
 	sqlproc "github.com/usedatabrew/blink/internal/processors/sql"
 	"github.com/usedatabrew/blink/internal/schema"
@@ -70,6 +71,12 @@ func (p *ProcessorWrapper) LoadDriver(driver processors.ProcessorDriver, cfg int
 			panic("can read driver config")
 		}
 		return sqlproc.NewSqlTransformlugin(p.ctx, driverConfig)
+	case processors.HttpProcessor:
+		driverConfig, err := ReadDriverConfig[http.Config](cfg, http.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return http.NewHttpPlugin(p.ctx, driverConfig)
 	default:
 		return nil, errors.New("unregistered driver provided")
 	}
