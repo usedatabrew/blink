@@ -30,7 +30,7 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 	return nil
 }
 
-func (s *SinkPlugin) Write(message message.Message) error {
+func (s *SinkPlugin) Write(message *message.Message) error {
 	d, _ := message.Data.MarshalJSON()
 	s.logger.Info(string(d))
 	return nil

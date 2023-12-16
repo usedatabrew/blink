@@ -1,13 +1,13 @@
 package websockets
 
 import (
+	"context"
+	"github.com/charmbracelet/log"
+	"github.com/gorilla/websocket"
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/blink/internal/stream_context"
-	"context"
-	"github.com/charmbracelet/log"
-	"github.com/gorilla/websocket"
 )
 
 type SinkPlugin struct {
@@ -47,7 +47,7 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 	return err
 }
 
-func (s *SinkPlugin) Write(message message.Message) error {
+func (s *SinkPlugin) Write(message *message.Message) error {
 	encodedMessage, _ := message.Data.MarshalJSON()
 	return s.wsClient.WriteMessage(websocket.BinaryMessage, encodedMessage)
 }

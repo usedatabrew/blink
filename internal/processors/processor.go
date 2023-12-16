@@ -1,15 +1,16 @@
 package processors
 
 import (
+	"context"
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
-	"context"
 )
 
 type ProcessorDriver string
 
 const (
 	OpenAIProcessor    ProcessorDriver = "openai"
+	SQLProcessor       ProcessorDriver = "sql"
 	LambdaProcessor    ProcessorDriver = "lambda"
 	HttpGetProcessor   ProcessorDriver = "http_get"
 	SQLEnrichProcessor ProcessorDriver = "sql_enrich"
@@ -20,7 +21,7 @@ type DataProcessor interface {
 	// before returning and passing to the downstream.
 	// !Important! Try to not copy the message inside a pipeline to avoid redundant
 	// memory allocations and make overall performance worth :(
-	Process(context context.Context, message message.Message) (message.Message, error)
+	Process(context context.Context, message *message.Message) (*message.Message, error)
 	// EvolveSchema is being called before starting the pipeline
 	// to form the schema that will be used as a result of the processing
 	// If your processor doesn't add/delete any fields for the message

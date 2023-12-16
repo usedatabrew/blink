@@ -21,7 +21,7 @@ type SinkPlugin struct {
 	writerConfig Config
 	schema       []schema.StreamSchema
 
-	messageBatch      []message.Message
+	messageBatch      []*message.Message
 	maxBatchSize      int
 	batchTickInterval time.Duration
 	mu                sync.Mutex
@@ -34,7 +34,7 @@ func NewKafkaSinkPlugin(config Config, schema []schema.StreamSchema) sinks.DataS
 	plugin.writerConfig = config
 	plugin.schema = schema
 	plugin.maxBatchSize = 10000
-	plugin.messageBatch = []message.Message{}
+	plugin.messageBatch = []*message.Message{}
 	plugin.batchTickInterval = time.Millisecond * 400
 	plugin.done = make(chan struct{})
 	plugin.ctx = context.Background()
@@ -66,7 +66,7 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 	return nil
 }
 
-func (s *SinkPlugin) Write(mess message.Message) error {
+func (s *SinkPlugin) Write(mess *message.Message) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -118,7 +118,7 @@ func (s *SinkPlugin) flushBuffer() error {
 		}
 
 		// Clear the buffer
-		s.messageBatch = []message.Message{}
+		s.messageBatch = []*message.Message{}
 	}
 
 	return nil
