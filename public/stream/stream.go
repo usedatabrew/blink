@@ -119,7 +119,6 @@ func (s *Stream) Start() error {
 	if err := s.validateAndInit(); err != nil {
 		return err
 	}
-	go s.source.Start()
 	var messagesProcessed = 0
 
 	go func() {
@@ -132,7 +131,11 @@ func (s *Stream) Start() error {
 	dataStream := tango.NewTango()
 
 	var dataStreamStages []tango.Stage
-	for _, proc := range s.processors {
+	for idx, _ := range s.processors {
+		// this is required as idx is a ref,
+		// so we will end up with the case when only the last processor will be executed
+		// as many times as we have processors
+		procIndex := idx
 		stage := tango.Stage{
 			Channel: make(chan interface{}),
 			Function: func(i interface{}) (interface{}, error) {
@@ -141,7 +144,7 @@ func (s *Stream) Start() error {
 					if i.(*message.Message) == nil {
 						return nil, nil
 					}
-					return proc.Process(i.(*message.Message))
+					return s.processors[procIndex].Process(i.(*message.Message))
 
 				}
 				return nil, nil
@@ -186,6 +189,7 @@ func (s *Stream) Start() error {
 		}
 	}()
 
+	go s.source.Start()
 	s.registry.SetState(service_registry.Started)
 
 	return dataStream.Start()
