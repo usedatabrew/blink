@@ -50,37 +50,19 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 
 	if p.whereExist {
 		columnValue := msg.GetValue(p.whereLeft)
-		p.logger.Info("Left column value", columnValue, p.whereLeft)
+		// TODO:: Add more types to do filtering
+		// This is so damn awful;; have to come up with something more convenient
+		switch p.whereOp {
+		case "=":
+			if columnValue != p.whereRight {
+				return nil, nil
+			}
+		case "!=":
+			if columnValue == p.whereRight {
+				return nil, nil
+			}
+		}
 	}
-
-	return msg, nil
-
-	//
-	//	sourceFieldValue := msg.GetValue(p.config.SourceField)
-	//
-	//	prompt := fmt.Sprintf("Take the data: %s and respond after doing following: %s . Provide the shortest response possible \n Do not explain your actions. If the question can be somehow answered with year/no - do exacetly that", sourceFieldValue, p.prompt)
-	//
-	//	resp, err := p.client.CreateChatCompletion(
-	//		p.ctx.GetContext(),
-	//		openai.ChatCompletionRequest{
-	//			Model: p.model,
-	//			Messages: []openai.ChatCompletionMessage{
-	//				{
-	//					Role:    openai.ChatMessageRoleUser,
-	//					Content: prompt,
-	//				},
-	//			},
-	//		},
-	//	)
-	//
-	//	if err != nil {
-	//		fmt.Printf("ChatCompletion error: %v\n", err)
-	//		if err != nil {
-	//			return msg, nil
-	//		}
-	//	}
-	//
-	//	msg.SetNewField(p.config.TargetField, resp.Choices[0].Message.Content, arrow.BinaryTypes.String)
 
 	return msg, nil
 }
