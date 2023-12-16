@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/usedatabrew/blink/internal/message"
@@ -34,8 +35,11 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 		requestPayload, _ = msg.Data.MarshalJSON()
 	} else {
 		sourceFieldValue := msg.GetValue(p.config.Source)
-		// TODO:: check if it's possible to cast everything to string
-		requestPayload = []byte(sourceFieldValue.(string))
+		if marshaled, err := json.Marshal(&sourceFieldValue); err != nil {
+			return nil, err
+		} else {
+			requestPayload = marshaled
+		}
 	}
 
 	req, err := http.NewRequest(p.config.Method, p.config.Endpoint, bytes.NewReader(requestPayload))
