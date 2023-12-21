@@ -37,8 +37,8 @@ brews:
     description: 'Open Source stream processing framework'
     folder: Formula
     commit_author:
-      name: franzramadhan
-      email: franzramadhan@gmail.com
-    tap:
-      owner: franzramadhan
-      name: homebrew-go-example
+      name: le-vlad
+      email: len.vladislavs@gmail.com
+    repository:
+      owner: usedatabrew
+      name: blink
