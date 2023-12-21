@@ -29,7 +29,7 @@ builds:
 archives:
   - name_template: "homebrew-databrewblink_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
-project_name: databrew-blink
+project_name: blink
 
 # Check https://goreleaser.com/customization/homebrew/
 brews:
