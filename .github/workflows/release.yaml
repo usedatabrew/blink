@@ -47,6 +47,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
-          args: -f .goreleaser.yml release --rm-dist
+          args: -f .goreleaser.yaml release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
