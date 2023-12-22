@@ -27,7 +27,7 @@ type Service struct {
 	PipelineId         int                   `yaml:"pipeline_id" validate:"required"`
 	InfluxEnabled      bool                  `yaml:"enable_influx"`
 	EnableETCDRegistry bool                  `yaml:"enable_etcd_registry"`
-	ETCD               ETCD                  `yaml:"etcd"`
+	ETCD               *ETCD                 `yaml:"etcd"`
 	Influx             interface{}           `yaml:"influx"`
 	StreamSchema       []schema.StreamSchema `yaml:"stream_schema" validate:"required"`
 }
