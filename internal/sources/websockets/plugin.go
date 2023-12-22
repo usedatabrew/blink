@@ -2,17 +2,26 @@ package websockets
 
 import (
 	"context"
+	"github.com/apache/arrow/go/v14/arrow"
+	"github.com/apache/arrow/go/v14/arrow/array"
+	"github.com/apache/arrow/go/v14/arrow/memory"
 	"github.com/charmbracelet/log"
+	"github.com/cloudquery/plugin-sdk/v4/scalar"
+	"github.com/goccy/go-json"
 	"github.com/gorilla/websocket"
+	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sources"
 )
 
 type SourcePlugin struct {
-	wsClient      *websocket.Conn
-	streamSchema  []schema.StreamSchema
-	config        Config
-	logger        *log.Logger
+	wsClient     *websocket.Conn
+	streamSchema []schema.StreamSchema
+	outputSchema map[string]*arrow.Schema
+	config       Config
+	logger       *log.Logger
+	// webSocket plugin doesn't support multiple streams
+	stream        string
 	messageStream chan sources.MessageEvent
 }
 
@@ -20,6 +29,8 @@ func NewWebSocketSourcePlugin(config Config, schema []schema.StreamSchema) sourc
 	return &SourcePlugin{
 		streamSchema:  schema,
 		config:        config,
+		outputSchema:  sources.BuildOutputSchema(schema),
+		stream:        schema[0].StreamName,
 		messageStream: make(chan sources.MessageEvent),
 		logger:        log.WithPrefix("[source]: websocket"),
 	}
@@ -37,13 +48,37 @@ func (s *SourcePlugin) Connect(ctx context.Context) error {
 }
 
 func (s *SourcePlugin) Start() {
+	builder := array.NewRecordBuilder(memory.DefaultAllocator, s.outputSchema[s.stream])
+
 	go func(c *websocket.Conn) {
 		for {
-			_, message, err := c.ReadMessage()
+			_, wsMessage, err := c.ReadMessage()
 			if err != nil {
-				panic(err)
+				s.logger.Fatal(err)
 			}
-			log.Printf("received: %s", message)
+			var rawMessage map[string]interface{}
+			err = json.Unmarshal(wsMessage, &rawMessage)
+			if err != nil {
+				s.logger.Fatal(err)
+			}
+			for i, v := range s.outputSchema[s.stream].Fields() {
+				value := rawMessage[v.Name]
+				ss := scalar.NewScalar(s.outputSchema[s.stream].Field(i).Type)
+				if err := ss.Set(value); err != nil {
+					panic(err)
+				}
+
+				scalar.AppendToBuilder(builder.Field(i), ss)
+			}
+
+			m := message.New(builder.NewRecord())
+			m.SetEvent("insert")
+			m.SetStream(s.stream)
+
+			s.messageStream <- sources.MessageEvent{
+				Message: m,
+				Err:     nil,
+			}
 		}
 	}(s.wsClient)
 }
