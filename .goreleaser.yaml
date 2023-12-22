@@ -1,8 +1,44 @@
+env:
+  - GO111MODULE=on
+
+# Check https://goreleaser.com/customization/hooks/
+before:
+  hooks:
+  - go mod download
+
+# Check https://goreleaser.com/customization/build/
 builds:
-  - main: ./cmd/blink/
-    env:
+  - env:
       - CGO_ENABLED=0
-    asmflags:
-      - -tags dynamic
-    targets:
-      - linux_amd64
+    main: ./cmd/blink
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 7
+      - goarm: mips64
+        gomips: hardfloat
+
+# Check https://goreleaser.com/customization/archive/
+archives:
+  - name_template: "homebrew-databrewblink_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+project_name: blink
+
+# Check https://goreleaser.com/customization/homebrew/
+brews:
+  - homepage: 'https://github.com/usedatabrew/blink'
+    description: 'Open Source stream processing framework'
+    folder: Formula
+    commit_author:
+      name: le-vlad
+      email: len.vladislavs@gmail.com
+    repository:
+      owner: usedatabrew
+      name: blink
