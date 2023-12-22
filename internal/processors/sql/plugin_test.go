@@ -34,7 +34,7 @@ func TestPlugin_EvolveSchema(t *testing.T) {
 		},
 	})
 
-	plugin, err := NewSqlTransformlugin(stream_context.CreateContext(), Config{
+	plugin, err := NewSqlTransformPlugin(stream_context.CreateContext(), Config{
 		Query: "SELECT destination from stream.flights",
 	})
 	if err != nil {
@@ -51,7 +51,7 @@ func TestPlugin_EvolveSchema(t *testing.T) {
 		t.Fatal("Schema should contain only one column")
 	}
 
-	plugin, err = NewSqlTransformlugin(stream_context.CreateContext(), Config{
+	plugin, err = NewSqlTransformPlugin(stream_context.CreateContext(), Config{
 		Query: "SELECT destination from stream.flightas",
 	})
 
@@ -104,7 +104,7 @@ func TestPlugin_Process(t *testing.T) {
 	mess.SetStream("test")
 	mess.SetEvent("insert")
 
-	plugin, err := NewSqlTransformlugin(stream_context.CreateContext(), Config{
+	plugin, err := NewSqlTransformPlugin(stream_context.CreateContext(), Config{
 		Query: "SELECT id, user from stream.test WHERE id = 123",
 	})
 	if err != nil {

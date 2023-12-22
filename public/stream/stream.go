@@ -163,6 +163,10 @@ func (s *Stream) Start() error {
 			switch i.(type) {
 			case *message.Message:
 				inMessage := i.(*message.Message)
+				if inMessage == nil {
+					return nil, nil
+				}
+
 				err := s.sinks[0].Write(inMessage)
 				if err != nil {
 					s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)

@@ -2,6 +2,7 @@ package sqlproc
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	_ "github.com/apache/arrow/go/v14/arrow"
@@ -11,7 +12,9 @@ import (
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
+	"math"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -26,10 +29,10 @@ type Plugin struct {
 	whereExist               bool
 	whereLeft                string
 	whereOp                  string
-	whereRight               string
+	whereRight               interface{}
 }
 
-func NewSqlTransformlugin(appctx *stream_context.Context, config Config) (*Plugin, error) {
+func NewSqlTransformPlugin(appctx *stream_context.Context, config Config) (*Plugin, error) {
 	return &Plugin{
 		config:                   config,
 		ctx:                      appctx,
@@ -50,17 +53,8 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 
 	if p.whereExist {
 		columnValue := msg.GetValue(p.whereLeft)
-		// TODO:: Add more types to do filtering
-		// This is so damn awful;; have to come up with something more convenient
-		switch p.whereOp {
-		case "=":
-			if columnValue != p.whereRight {
-				return nil, nil
-			}
-		case "!=":
-			if columnValue == p.whereRight {
-				return nil, nil
-			}
+		if !compareValues(columnValue, p.whereRight, p.whereOp) {
+			return nil, nil
 		}
 	}
 
@@ -91,7 +85,6 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 		}
 	}
 
-	fmt.Println("Stream to process", streamToProcess)
 	if streamToProcess == nil {
 		return errors.New("select from undefined stream")
 	}
@@ -146,8 +139,18 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 			return errors.New(fmt.Sprintf("Column %s doesnt exist in current stream", whereColumn))
 		}
 
-		rightVal := string(stmt.(*sqlparser.Select).Where.Expr.(*sqlparser.ComparisonExpr).Right.(*sqlparser.SQLVal).Val)
-		p.whereRight = rightVal
+		rightValType := stmt.(*sqlparser.Select).Where.Expr.(*sqlparser.ComparisonExpr).Right.(*sqlparser.SQLVal).Type
+		rightVal := stmt.(*sqlparser.Select).Where.Expr.(*sqlparser.ComparisonExpr).Right.(*sqlparser.SQLVal).Val
+		switch rightValType {
+		case sqlparser.StrVal:
+			p.whereRight = string(rightVal)
+		case sqlparser.FloatVal:
+			p.whereRight = Float64FromBytes(rightVal)
+		case sqlparser.IntVal:
+			p.whereRight = Int64FromBytes(rightVal)
+		default:
+			panic("unhandled default case")
+		}
 	}
 
 	if len(p.columnsToDropFromSchema) > 0 {
@@ -155,4 +158,18 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 	}
 
 	return nil
+}
+
+func Float64FromBytes(bytes []byte) float64 {
+	bits := binary.LittleEndian.Uint64(bytes)
+	float := math.Float64frombits(bits)
+	return float
+}
+
+func Int64FromBytes(bytes []byte) int64 {
+	i, err := strconv.ParseInt(string(bytes), 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }

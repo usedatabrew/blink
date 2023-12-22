@@ -70,7 +70,7 @@ func (p *ProcessorWrapper) LoadDriver(driver processors.ProcessorDriver, cfg int
 		if err != nil {
 			panic("can read driver config")
 		}
-		return sqlproc.NewSqlTransformlugin(p.ctx, driverConfig)
+		return sqlproc.NewSqlTransformPlugin(p.ctx, driverConfig)
 	case processors.HttpProcessor:
 		driverConfig, err := ReadDriverConfig[http.Config](cfg, http.Config{})
 		if err != nil {
