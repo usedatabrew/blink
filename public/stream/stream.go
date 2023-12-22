@@ -56,8 +56,10 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 
 	s := &Stream{}
 	s.ctx = streamContext
-	s.registry = service_registry.NewServiceRegistry(s.ctx, config.Service.ETCD, config.Service.PipelineId)
-	s.registry.Start()
+	if config.Service.ETCD != nil {
+		s.registry = service_registry.NewServiceRegistry(s.ctx, *config.Service.ETCD, config.Service.PipelineId)
+		s.registry.Start()
+	}
 
 	sourceWrapper := NewSourceWrapper(config.Source.Driver, config)
 	s.source = &sourceWrapper
@@ -88,7 +90,9 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	s.evolveSchemaForSinks(s.schema)
 	s.sinks[0].SetExpectedSchema(s.schema)
 
-	s.registry.SetState(service_registry.Loaded)
+	if config.Service.ETCD != nil {
+		s.registry.SetState(service_registry.Loaded)
+	}
 
 	return s, nil
 }
@@ -190,7 +194,9 @@ func (s *Stream) Start() error {
 	}()
 
 	go s.source.Start()
-	s.registry.SetState(service_registry.Started)
+	if s.registry != nil {
+		s.registry.SetState(service_registry.Started)
+	}
 
 	return dataStream.Start()
 }

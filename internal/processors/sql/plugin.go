@@ -91,6 +91,7 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 		}
 	}
 
+	fmt.Println("Stream to process", streamToProcess)
 	if streamToProcess == nil {
 		return errors.New("select from undefined stream")
 	}
@@ -149,6 +150,9 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 		p.whereRight = rightVal
 	}
 
-	streamSchema.RemoveFields(streamToProcess.StreamName, p.columnsToDropFromSchema)
+	if len(p.columnsToDropFromSchema) > 0 {
+		streamSchema.RemoveFields(streamToProcess.StreamName, p.columnsToDropFromSchema)
+	}
+
 	return nil
 }

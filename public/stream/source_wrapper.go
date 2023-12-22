@@ -5,6 +5,7 @@ import (
 	"github.com/usedatabrew/blink/internal/sources"
 	"github.com/usedatabrew/blink/internal/sources/mongo_stream"
 	"github.com/usedatabrew/blink/internal/sources/postgres_cdc"
+	"github.com/usedatabrew/blink/internal/sources/websockets"
 	"github.com/usedatabrew/blink/internal/stream_context"
 
 	"gopkg.in/yaml.v3"
@@ -77,6 +78,12 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 			panic("can read driver config")
 		}
 		return postgres_cdc.NewPostgresSourcePlugin(driverConfig, config.Service.StreamSchema)
+	case sources.WebSockets:
+		driverConfig, err := ReadDriverConfig[websockets.Config](config.Source.Config, websockets.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return websockets.NewWebSocketSourcePlugin(driverConfig, config.Service.StreamSchema)
 	case sources.MongoStream:
 		driverConfig, err := ReadDriverConfig[mongo_stream.Config](config.Source.Config, mongo_stream.Config{})
 
