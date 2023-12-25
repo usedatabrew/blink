@@ -16,6 +16,7 @@ builds:
       - linux
     goarch:
       - amd64
+      - arm
     ignore:
       - goos: darwin
         goarch: 386
