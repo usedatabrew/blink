@@ -18,11 +18,12 @@ builds:
       - amd64
       - arm
     ignore:
-      - goos: darwin
-        goarch: 386
       - goos: linux
         goarch: arm
         goarm: 7
+      - goos: linux
+        goarch: arm
+        goarm: 6
       - goarm: mips64
         gomips: hardfloat
 
