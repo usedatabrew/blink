@@ -1,8 +1,8 @@
 package postgres
 
 import (
-	"github.com/usedatabrew/blink/internal/schema"
 	"fmt"
+	"github.com/usedatabrew/blink/internal/schema"
 	"testing"
 )
 
@@ -46,4 +46,9 @@ func Test_generateBatchDeleteStatement(t *testing.T) {
 	if result != "DELETE FROM flights WHERE id = $1;\n" {
 		t.Fatal("Generated Update Query is not correct")
 	}
+}
+
+func Test_getColumnNames(t *testing.T) {
+	generatedColumnNames := getColumnNames(testStreamSchema[0].Columns)
+	fmt.Println(generatedColumnNames)
 }

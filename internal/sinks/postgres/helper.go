@@ -1,10 +1,10 @@
 package postgres
 
 import (
-	"github.com/usedatabrew/blink/internal/message"
-	"github.com/usedatabrew/blink/internal/schema"
 	"fmt"
 	"github.com/apache/arrow/go/v14/arrow"
+	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/schema"
 	"strings"
 )
 
@@ -64,7 +64,7 @@ func generateCreateTableStatement(table string, columns []schema.Column) string 
 func generateBatchInsertStatement(table schema.StreamSchema) string {
 	columnNames := getColumnNames(table.Columns)
 	valuesPlaceholder := getValuesPlaceholder(len(table.Columns))
-
+	fmt.Println(columnNames, fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;", table.StreamName, columnNames, valuesPlaceholder), valuesPlaceholder)
 	return fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;", table.StreamName, columnNames, valuesPlaceholder)
 }
 
@@ -91,6 +91,7 @@ func getColumnNames(columns []schema.Column) string {
 			columnNames = append(columnNames, column.Name)
 		}
 	}
+
 	columnNames = append(columnNames, pkColumn)
 	return strings.Join(columnNames, ", ")
 }

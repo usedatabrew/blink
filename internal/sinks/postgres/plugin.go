@@ -228,6 +228,7 @@ func (s *SinkPlugin) createInitStatements() {
 			}
 		}
 	}
+
 	s.pkColumnNamesByStream = pkColumnNames
 	s.rowStatements = rowStatements
 
