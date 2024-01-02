@@ -8,10 +8,14 @@ RUN go mod tidy
 
 RUN cd cmd/blink && go build
 
+FROM alpine as certs
+RUN apk update && apk add ca-certificates
+
 FROM busybox
 
 WORKDIR /app
 
+COPY --from=certs /etc/ssl/certs /etc/ssl/certs
 COPY --from=build /app/cmd/blink/blink /app/
 
 ENV GOMAXPROCS=2
