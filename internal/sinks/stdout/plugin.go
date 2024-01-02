@@ -2,7 +2,6 @@ package stdout
 
 import (
 	"context"
-	"fmt"
 	"github.com/charmbracelet/log"
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
@@ -40,8 +39,8 @@ func (s *SinkPlugin) GetType() sinks.SinkDriver {
 	return sinks.StdOutSinkType
 }
 
+// SetExpectedSchema for Stdout component does nothing, since this component is used mostly for debugging
 func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
-	fmt.Println("Expected sink schema", schema)
 }
 
 func (s *SinkPlugin) Stop() {

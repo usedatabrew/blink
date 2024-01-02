@@ -22,7 +22,6 @@ require (
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/prometheus/client_golang v1.11.1
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475
-	github.com/reiver/go-cast v0.0.0-20220716221226-5360a56d42f4
 	github.com/sashabaranov/go-openai v1.17.9
 	github.com/spf13/cobra v1.6.1
 	github.com/twmb/franz-go v1.15.2
@@ -72,7 +71,6 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.26.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
-	github.com/reiver/go-fck v0.0.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/twmb/franz-go/pkg/kmsg v1.7.0 // indirect

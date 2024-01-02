@@ -9,3 +9,8 @@
 .idea/dataSources.local.xml
 fly.toml
 build/
+.fleet/
+examples/
+Formula/
+dist/
+.github/

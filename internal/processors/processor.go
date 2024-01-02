@@ -14,6 +14,7 @@ const (
 	LambdaProcessor    ProcessorDriver = "lambda"
 	HttpProcessor      ProcessorDriver = "http"
 	SQLEnrichProcessor ProcessorDriver = "sql_enrich"
+	LogProcessor       ProcessorDriver = "log"
 )
 
 type DataProcessor interface {
