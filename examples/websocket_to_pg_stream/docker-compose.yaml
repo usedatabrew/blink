@@ -1,0 +1,29 @@
+name: "blink_ws"
+
+services:
+  blink_instance:
+    container_name: "blink"
+    image: usedatabrew/blink:1.5.2
+    ports:
+      - 3333:3333
+    volumes:
+      - ./blink.yaml:/blink.yaml
+    command: [ "start", "--config", "/blink.yaml" ]
+    networks:
+      - postgres
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_storage:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: lorem123
+      POSTGRES_DB: db
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    driver: bridge

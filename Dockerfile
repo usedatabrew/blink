@@ -1,4 +1,4 @@
-FROM golang:1.21-bookworm
+FROM golang:1.21-alpine as build
 
 WORKDIR /app
 
@@ -8,8 +8,14 @@ RUN go mod tidy
 
 RUN cd cmd/blink && go build
 
+FROM busybox
+
+WORKDIR /app
+
+COPY --from=build /app/cmd/blink/blink /app/
+
 ENV GOMAXPROCS=2
 
-ENTRYPOINT ["./cmd/blink/blink"]
+ENTRYPOINT ["/app/blink"]
 
-CMD ["./cmd/blink/blink"]
+CMD ["/app/blink"]

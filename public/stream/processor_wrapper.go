@@ -6,6 +6,7 @@ import (
 	"github.com/usedatabrew/blink/internal/metrics"
 	"github.com/usedatabrew/blink/internal/processors"
 	"github.com/usedatabrew/blink/internal/processors/http"
+	logProc "github.com/usedatabrew/blink/internal/processors/log"
 	"github.com/usedatabrew/blink/internal/processors/openai"
 	sqlproc "github.com/usedatabrew/blink/internal/processors/sql"
 	"github.com/usedatabrew/blink/internal/schema"
@@ -77,6 +78,12 @@ func (p *ProcessorWrapper) LoadDriver(driver processors.ProcessorDriver, cfg int
 			panic("can read driver config")
 		}
 		return http.NewHttpPlugin(p.ctx, driverConfig)
+	case processors.LogProcessor:
+		driverConfig, err := ReadDriverConfig[logProc.Config](cfg, logProc.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return logProc.NewLogPlugin(p.ctx, driverConfig)
 	default:
 		return nil, errors.New("unregistered driver provided")
 	}
