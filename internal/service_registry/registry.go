@@ -1,16 +1,16 @@
 package service_registry
 
 import (
-	"github.com/usedatabrew/blink/config"
-	"github.com/usedatabrew/blink/internal/stream_context"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"
+	"github.com/usedatabrew/blink/config"
+	"github.com/usedatabrew/blink/internal/stream_context"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"time"
 )
 
-var serviceKeyTemplate = "/service/%s"
+var serviceKeyTemplate = "/service/%d"
 
 type Registry struct {
 	logger     *log.Logger
@@ -55,7 +55,7 @@ func (r *Registry) Start() {
 				return
 			}
 
-			_, err = r.etcdClient.Put(context.Background(), fmt.Sprintf(serviceKeyTemplate, r.pipelineId), string(r.state), clientv3.WithLease(leaseResp.ID))
+			_, err = r.etcdClient.Put(context.Background(), fmt.Sprintf("/service/%d", r.pipelineId), string(r.state), clientv3.WithLease(leaseResp.ID))
 			r.logger.Info("State update", "state", r.state)
 			if err != nil {
 				r.logger.Errorf("Failed to set the key into registry %s", err.Error())
