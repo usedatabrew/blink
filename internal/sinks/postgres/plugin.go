@@ -124,19 +124,21 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 	tableStatement := s.rowStatements[m.GetStream()][m.GetEvent()]
 	var colValues []interface{}
 	var pkColValue interface{}
+	pkColExist := false
 	// we apply different flow for deletion requests
 	// since we don't have to bind all the params, we are interested only in PK
 	s.logger.Info("Applying operation", "op", m.GetEvent(), "stream", m.GetStream())
 	if m.GetEvent() == "delete" {
 		for idx, _ := range m.Data.Columns() {
 			if m.Data.Schema().Field(idx).Name == s.pkColumnNamesByStream[m.GetStream()] {
-				fmt.Println("Pk value found")
+				pkColExist = true
 				pkColValue = message.GetValue(m.Data.Column(idx), 0)
 				break
 			}
 		}
-
-		colValues = append(colValues, pkColValue)
+		if pkColExist {
+			colValues = append(colValues, pkColValue)
+		}
 		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
 		if err != nil {
 			return err
@@ -145,11 +147,14 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 		for idx, c := range m.Data.Columns() {
 			if m.Data.Schema().Field(idx).Name == s.pkColumnNamesByStream[m.GetStream()] {
 				pkColValue = message.GetValue(m.Data.Column(idx), 0)
+				pkColExist = true
 			} else {
 				colValues = append(colValues, c.GetOneForMarshal(0))
 			}
 		}
-		colValues = append(colValues, pkColValue)
+		if pkColExist {
+			colValues = append(colValues, pkColValue)
+		}
 		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
 		if err != nil {
 			return err

@@ -28,7 +28,7 @@ var testStreamSchema = []schema.StreamSchema{
 
 func Test_generateBatchInsertStatement(t *testing.T) {
 	result := generateBatchInsertStatement(testStreamSchema[0])
-	if result != "INSERT INTO flights (flights_name, id) VALUES ($1, $2 );" {
+	if result != "INSERT INTO flights (id, flights_name) VALUES ($1, $2 );" {
 		t.Fatal("Generated Insert Query is not correct")
 	}
 }
