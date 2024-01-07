@@ -55,7 +55,7 @@ name: "blink_ws"
 services:
   blink_instance:
     container_name: "blink"
-    image: usedatabrew/blink:1.6.1
+    image: usedatabrew/blink:1.6.3
     ports:
       - 3333:3333
     volumes:
