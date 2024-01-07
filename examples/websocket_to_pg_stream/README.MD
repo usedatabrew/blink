@@ -15,7 +15,7 @@ service:
       columns:
         - name: coin
           databrewType: String
-          pk: true
+          pk: false
           nullable: false
         - name: price
           databrewType: Int64
