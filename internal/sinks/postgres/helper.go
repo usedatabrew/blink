@@ -83,16 +83,10 @@ func generateBatchDeleteStatement(table schema.StreamSchema) string {
 
 func getColumnNames(columns []schema.Column) string {
 	var columnNames []string
-	var pkColumn string
 	for _, column := range columns {
-		if column.PK {
-			pkColumn = column.Name
-		} else {
-			columnNames = append(columnNames, column.Name)
-		}
+		columnNames = append(columnNames, column.Name)
 	}
 
-	columnNames = append(columnNames, pkColumn)
 	return strings.Join(columnNames, ", ")
 }
 
