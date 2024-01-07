@@ -34,7 +34,7 @@ var cmdStart = &cobra.Command{
 		}
 
 		if enableHttpServer {
-			go server.CreateAndStartHttpServer(streamService)
+			go server.CreateAndStartHttpServer(streamService.GetContext(), true)
 		}
 
 		if err = streamService.Start(); err != nil {
@@ -47,7 +47,7 @@ var rootCmd = &cobra.Command{}
 
 func init() {
 	cmdStart.Flags().StringVarP(&configFileLocation, "config", "c", "blink.yaml", "Specify the location of the configuration file")
-	cmdStart.Flags().BoolVarP(&enableHttpServer, "http-server", "s", false, "Define if you need blink to start http server with prometheus metrics exporter")
+	cmdStart.Flags().BoolVarP(&enableHttpServer, "http-server", "s", true, "Define if you need blink to start http server with prometheus metrics exporter")
 }
 
 func Start() {

@@ -1,0 +1,18 @@
+<div class="columns-1">
+    <h1>Pipeline logs</h1>
+    <div class="websocket-logs" style="height: 60vh; background: red; overflow: scroll; width: 100%">
+
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    window.logs = document.querySelector('.websocket-logs');
+    window.conn = new WebSocket('ws://localhost:3333/api/logs');
+    window.conn.onmessage = message => {
+        const messNode = document.createElement('div');
+        messNode.textContent = message.data;
+        messNode.classList.add('log-line');
+        window.logs.appendChild(messNode)
+    }
+</script>

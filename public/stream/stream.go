@@ -205,6 +205,15 @@ func (s *Stream) Start() error {
 	return dataStream.Start()
 }
 
+func (s *Stream) GetContext() *stream_context.Context {
+	return s.ctx
+}
+
+// GetInfo is used to return all stream information. Including a list of processors and connectors included
+func (s *Stream) GetInfo() any {
+	return s.processors
+}
+
 func (s *Stream) validateAndInit() error {
 	if s.source == nil {
 		s.ctx.Logger.Error("Source is required to start pipeline")
