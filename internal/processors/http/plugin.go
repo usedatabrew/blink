@@ -6,9 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/apache/arrow/go/v14/arrow"
-	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/helper"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
+	"github.com/usedatabrew/message"
 	"io"
 	"net/http"
 )
@@ -32,9 +33,9 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 	var requestPayload []byte
 	// means we have to pack all the message and send it over http
 	if p.config.Source == "*" {
-		requestPayload, _ = msg.Data.MarshalJSON()
+		requestPayload = []byte(msg.AsJSONString())
 	} else {
-		sourceFieldValue := msg.GetValue(p.config.Source)
+		sourceFieldValue := msg.Data.AccessProperty(p.config.Source)
 		if marshaled, err := json.Marshal(&sourceFieldValue); err != nil {
 			return nil, err
 		} else {
@@ -75,7 +76,7 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 		return nil, err
 	}
 
-	msg.SetNewField(p.config.TargetField, string(bodyResult), arrow.BinaryTypes.String)
+	msg.Data.SetProperty(p.config.TargetField, string(bodyResult))
 
 	return msg, nil
 }
@@ -83,7 +84,7 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 // EvolveSchema will add a string column to the schema in order to store OpenAI response
 func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 	if p.config.TargetField != "" {
-		streamSchema.AddField(p.config.StreamName, p.config.TargetField, arrow.BinaryTypes.String, message.ArrowToPg10(arrow.BinaryTypes.String))
+		streamSchema.AddField(p.config.StreamName, p.config.TargetField, arrow.BinaryTypes.String, helper.ArrowToPg10(arrow.BinaryTypes.String))
 	} else {
 		streamSchema.FakeEvolve()
 	}

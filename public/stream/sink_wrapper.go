@@ -2,7 +2,6 @@ package stream
 
 import (
 	"github.com/usedatabrew/blink/config"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/blink/internal/sinks/kafka"
@@ -10,6 +9,7 @@ import (
 	"github.com/usedatabrew/blink/internal/sinks/stdout"
 	websocket "github.com/usedatabrew/blink/internal/sinks/websockets"
 	"github.com/usedatabrew/blink/internal/stream_context"
+	"github.com/usedatabrew/message"
 )
 
 // SinkWrapper wraps plan sink writer plugin in order to

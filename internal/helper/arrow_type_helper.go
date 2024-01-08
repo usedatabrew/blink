@@ -1,4 +1,4 @@
-package message
+package helper
 
 import (
 	"github.com/apache/arrow/go/v14/arrow"
@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func inferArrowType(value interface{}) arrow.DataType {
+func InferArrowType(value interface{}) arrow.DataType {
 	switch value.(type) {
 	case int, int8, int16, int32, int64:
 		return arrow.PrimitiveTypes.Int64

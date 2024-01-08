@@ -3,8 +3,9 @@ package postgres
 import (
 	"fmt"
 	"github.com/apache/arrow/go/v14/arrow"
-	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/helper"
 	"github.com/usedatabrew/blink/internal/schema"
+	"slices"
 	"strings"
 )
 
@@ -45,7 +46,7 @@ func generateCreateTableStatement(table string, columns []schema.Column) string 
 	statement := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (\n", table)
 
 	for idx, column := range columns {
-		statement += fmt.Sprintf("  %s %s", column.Name, message.ArrowToPg10(MapPlainTypeToArrow(column.DatabrewType)))
+		statement += fmt.Sprintf("  %s %s", column.Name, helper.ArrowToPg10(MapPlainTypeToArrow(column.DatabrewType)))
 		if column.PK {
 			statement += fmt.Sprint(" PRIMARY KEY")
 		}
@@ -87,6 +88,7 @@ func getColumnNames(columns []schema.Column) string {
 		columnNames = append(columnNames, column.Name)
 	}
 
+	slices.Sort(columnNames)
 	return strings.Join(columnNames, ", ")
 }
 

@@ -3,10 +3,10 @@ package stdout
 import (
 	"context"
 	"github.com/charmbracelet/log"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/blink/internal/stream_context"
+	"github.com/usedatabrew/message"
 )
 
 type SinkPlugin struct {
@@ -30,8 +30,8 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 }
 
 func (s *SinkPlugin) Write(message *message.Message) error {
-	d, _ := message.Data.MarshalJSON()
-	s.logger.Info(string(d))
+	d := message.AsJSONString()
+	s.logger.Info(d)
 	return nil
 }
 

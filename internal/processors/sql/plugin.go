@@ -9,9 +9,9 @@ import (
 	"github.com/barkimedes/go-deepcopy"
 	"github.com/blastrain/vitess-sqlparser/sqlparser"
 	"github.com/charmbracelet/log"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
+	"github.com/usedatabrew/message"
 	"math"
 	"slices"
 	"strconv"
@@ -48,11 +48,13 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 	}
 
 	if len(p.columnsToDropFromSchema) > 0 {
-		msg.RemoveFields(p.columnsToDropFromSchema)
+		for _, prop := range p.columnsToDropFromSchema {
+			msg.Data.DropProperty(prop)
+		}
 	}
 
 	if p.whereExist {
-		columnValue := msg.GetValue(p.whereLeft)
+		columnValue := msg.Data.AccessProperty(p.whereLeft)
 		if !compareValues(columnValue, p.whereRight, p.whereOp) {
 			return nil, nil
 		}

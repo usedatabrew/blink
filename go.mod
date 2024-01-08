@@ -25,6 +25,7 @@ require (
 	github.com/sashabaranov/go-openai v1.17.9
 	github.com/spf13/cobra v1.6.1
 	github.com/twmb/franz-go v1.15.2
+	github.com/usedatabrew/message v0.0.2
 	github.com/usedatabrew/pglogicalstream v0.0.20
 	github.com/usedatabrew/tango v0.0.5
 	go.etcd.io/etcd/client/v3 v3.5.10
@@ -40,6 +41,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.9.1 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
+	github.com/fatih/structs v1.1.0 // indirect
 	github.com/frankban/quicktest v1.14.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
@@ -51,6 +53,7 @@ require (
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/influxdata/line-protocol/v2 v2.2.1 // indirect
+	github.com/ivancorrales/knoa v0.0.2 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pglogrepl v0.0.0-20230826184802-9ed16cb201f6 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -64,6 +67,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
@@ -73,6 +77,7 @@ require (
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/thedevsaddam/gojsonq/v2 v2.5.2 // indirect
 	github.com/twmb/franz-go/pkg/kmsg v1.7.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect

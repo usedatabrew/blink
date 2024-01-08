@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"github.com/apache/arrow/go/v14/arrow"
+	"github.com/usedatabrew/blink/internal/helper"
 	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
@@ -33,6 +34,6 @@ func (p *Plugin) Process(context context.Context, msg message.Message) (message.
 
 // EvolveSchema will add a string column to the schema in order to store OpenAI response
 func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
-	streamSchema.AddField(p.config.StreamName, p.config.TargetField, arrow.BinaryTypes.String, message.ArrowToPg10(arrow.BinaryTypes.String))
+	streamSchema.AddField(p.config.StreamName, p.config.TargetField, arrow.BinaryTypes.String, helper.ArrowToPg10(arrow.BinaryTypes.String))
 	return nil
 }

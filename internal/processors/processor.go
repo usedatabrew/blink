@@ -2,8 +2,8 @@ package processors
 
 import (
 	"context"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/message"
 )
 
 type ProcessorDriver string

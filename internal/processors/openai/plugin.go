@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/sashabaranov/go-openai"
-	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/helper"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
+	"github.com/usedatabrew/message"
 )
 
 type Plugin struct {
@@ -27,7 +28,7 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 		return msg, nil
 	}
 
-	sourceFieldValue := msg.GetValue(p.config.SourceField)
+	sourceFieldValue := msg.Data.AccessProperty(p.config.SourceField)
 
 	prompt := fmt.Sprintf("Take the data: %s and respond after doing following: %s . Provide the shortest response possible \n Do not explain your actions. If the question can be somehow answered with year/no - do exacetly that", sourceFieldValue, p.prompt)
 
@@ -51,13 +52,13 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 		}
 	}
 
-	msg.SetNewField(p.config.TargetField, resp.Choices[0].Message.Content, arrow.BinaryTypes.String)
+	msg.Data.SetProperty(p.config.TargetField, resp.Choices[0].Message.Content)
 
 	return msg, nil
 }
 
 // EvolveSchema will add a string column to the schema in order to store OpenAI response
 func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
-	streamSchema.AddField(p.config.StreamName, p.config.TargetField, arrow.BinaryTypes.String, message.ArrowToPg10(arrow.BinaryTypes.String))
+	streamSchema.AddField(p.config.StreamName, p.config.TargetField, arrow.BinaryTypes.String, helper.ArrowToPg10(arrow.BinaryTypes.String))
 	return nil
 }

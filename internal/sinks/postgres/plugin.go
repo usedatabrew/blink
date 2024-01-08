@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/charmbracelet/log"
 	"github.com/jackc/pgx/v5"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/blink/internal/stream_context"
+	"github.com/usedatabrew/message"
 	"sync"
 	"time"
 )
@@ -19,12 +19,12 @@ type SinkPlugin struct {
 	streamSchema          []schema.StreamSchema
 	conn                  *pgx.Conn
 	logger                *log.Logger
-	rowStatements         map[string]map[string]string
+	rowStatements         map[string]map[message.Event]string
 	pkColumnNamesByStream map[string]string
 	mutex                 sync.Mutex
 	messagesBuffer        []*message.Message
 	snapshotMaxBufferSize int
-	prevEvent             string
+	prevEvent             message.Event
 	prevSnapshotStream    string
 	snapshotTicker        *time.Timer
 }
@@ -124,19 +124,12 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 	tableStatement := s.rowStatements[m.GetStream()][m.GetEvent()]
 	var colValues []interface{}
 	var pkColValue interface{}
-	pkColExist := false
 	// we apply different flow for deletion requests
 	// since we don't have to bind all the params, we are interested only in PK
 	s.logger.Info("Applying operation", "op", m.GetEvent(), "stream", m.GetStream())
 	if m.GetEvent() == "delete" {
-		for idx, _ := range m.Data.Columns() {
-			if m.Data.Schema().Field(idx).Name == s.pkColumnNamesByStream[m.GetStream()] {
-				pkColExist = true
-				pkColValue = message.GetValue(m.Data.Column(idx), 0)
-				break
-			}
-		}
-		if pkColExist {
+		pkColumnValue := m.Data.AccessProperty(s.pkColumnNamesByStream[m.GetStream()])
+		if pkColumnValue != nil {
 			colValues = append(colValues, pkColValue)
 		}
 		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
@@ -144,16 +137,17 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 			return err
 		}
 	} else {
-		for idx, c := range m.Data.Columns() {
-			if m.Data.Schema().Field(idx).Name == s.pkColumnNamesByStream[m.GetStream()] {
-				pkColValue = message.GetValue(m.Data.Column(idx), 0)
-				pkColExist = true
-			} else {
-				colValues = append(colValues, c.GetOneForMarshal(0))
+		pkColName := s.pkColumnNamesByStream[s.prevSnapshotStream]
+		for _, ss := range s.streamSchema {
+			if ss.StreamName == m.Stream {
+				for _, col := range ss.Columns {
+					colValues = append(colValues, m.Data.AccessProperty(col.Name))
+				}
 			}
 		}
-		if pkColExist {
-			colValues = append(colValues, pkColValue)
+
+		if pkColName != "" {
+			colValues = append(colValues, m.Data.AccessProperty(pkColName))
 		}
 		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
 		if err != nil {
@@ -177,25 +171,31 @@ func (s *SinkPlugin) writeSnapshotBatch() error {
 
 	for bufMIdx, bufMessage := range s.messagesBuffer {
 		if bufMIdx == 0 {
-			var pkColName string
-			for i, field := range bufMessage.Data.Schema().Fields() {
-				if bufMessage.Data.Schema().Field(i).Name == s.pkColumnNamesByStream[s.prevSnapshotStream] {
-					pkColName = field.Name
-				} else {
-					colNames = append(colNames, field.Name)
+			pkColName := s.pkColumnNamesByStream[s.prevSnapshotStream]
+			for _, ss := range s.streamSchema {
+				if ss.StreamName == bufMessage.Stream {
+					for _, col := range ss.Columns {
+						colNames = append(colNames, col.Name)
+					}
 				}
 			}
+
+			bufMessage.Data.AccessProperty(s.pkColumnNamesByStream[s.prevSnapshotStream])
 			colNames = append(colNames, pkColName)
 		}
 		var colValues []interface{}
 		var pkColValue interface{}
-		for idx, c := range bufMessage.Data.Columns() {
-			if bufMessage.Data.Schema().Field(idx).Name == s.pkColumnNamesByStream[s.prevSnapshotStream] {
-				pkColValue = message.GetValue(bufMessage.Data.Column(idx), 0)
-			} else {
-				colValues = append(colValues, c.GetOneForMarshal(0))
+		pkColName := s.pkColumnNamesByStream[s.prevSnapshotStream]
+		for _, ss := range s.streamSchema {
+			if ss.StreamName == bufMessage.Stream {
+				for _, col := range ss.Columns {
+					colNames = append(colNames, col.Name)
+				}
 			}
 		}
+
+		bufMessage.Data.AccessProperty(s.pkColumnNamesByStream[s.prevSnapshotStream])
+		colNames = append(colNames, pkColName)
 
 		colValues = append(colValues, pkColValue)
 		messagesToInsert = append(messagesToInsert, colValues)
@@ -212,7 +212,7 @@ func (s *SinkPlugin) Stop() {
 
 func (s *SinkPlugin) createInitStatements() {
 	var dbCreateTableStatements []string
-	var rowStatements = make(map[string]map[string]string)
+	var rowStatements = make(map[string]map[message.Event]string)
 	var pkColumnNames = make(map[string]string)
 
 	for _, stream := range s.streamSchema {
@@ -221,10 +221,10 @@ func (s *SinkPlugin) createInitStatements() {
 		insertStatement := generateBatchInsertStatement(stream)
 		updateStatement := generateBatchUpdateStatement(stream)
 		deleteStatement := generateBatchDeleteStatement(stream)
-		rowStatements[stream.StreamName] = map[string]string{
-			"delete": deleteStatement,
-			"update": updateStatement,
-			"insert": insertStatement,
+		rowStatements[stream.StreamName] = map[message.Event]string{
+			message.Delete:   deleteStatement,
+			message.Update:   updateStatement,
+			message.Snapshot: insertStatement,
 		}
 
 		for _, col := range stream.Columns {
