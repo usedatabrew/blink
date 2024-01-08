@@ -8,6 +8,8 @@
 *.so
 *.dylib
 
+backup_blink.yaml
+
 examples/websocket_to_pg_stream/postgres_storage
 
 # Test binary, built with `go test -c`

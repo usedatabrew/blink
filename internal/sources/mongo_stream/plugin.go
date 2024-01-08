@@ -72,9 +72,9 @@ func (p *SourcePlugin) Events() chan sources.MessageEvent {
 
 func (p *SourcePlugin) takeSnapshot() {
 	for _, v := range p.inputSchema {
-		fmt.Println("start taking snapshot for", v.StreamName)
-
-		cursor, err := p.database.Collection(v.StreamName).Find(p.ctx, bson.D{})
+		filter := bson.D{}
+		opts := options.Find().SetSort(bson.M{"_id": "1"})
+		cursor, err := p.database.Collection(v.StreamName).Find(p.ctx, filter, opts)
 
 		if err != nil {
 			panic(err)
@@ -89,7 +89,7 @@ func (p *SourcePlugin) takeSnapshot() {
 				panic(err)
 			}
 
-			p.process(v.StreamName, data)
+			p.process(v.StreamName, data, true)
 		}
 	}
 
@@ -117,12 +117,12 @@ func (p *SourcePlugin) watch() {
 				panic(err)
 			}
 
-			p.process(v.StreamName, data)
+			p.process(v.StreamName, data, false)
 		}
 	}
 }
 
-func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
+func (p *SourcePlugin) process(stream string, data map[string]interface{}, snapshot bool) {
 	builder := array.NewRecordBuilder(memory.DefaultAllocator, p.outputSchema[stream])
 
 	var eventOperation string
@@ -140,6 +140,10 @@ func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
 	} else {
 		eventOperation = "insert"
 		eventData = data
+	}
+
+	if snapshot {
+		eventOperation = string(message.Snapshot)
 	}
 
 	encodedJson, _ := json.Marshal(&eventData)

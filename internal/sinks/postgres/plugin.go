@@ -70,7 +70,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 	// for snapshot event we have to perform inserts in bulk using COPY command
 	// to achieve higher insert efficiency
 
-	if m.GetEvent() == "snapshot" && s.prevEvent == "snapshot" && s.prevSnapshotStream != m.GetStream() {
+	if m.GetEvent() == message.Snapshot && s.prevEvent == message.Snapshot && s.prevSnapshotStream != m.GetStream() {
 		// we have to drain snapshot message for prev stream
 		// before we can process snapshot for another stream
 		s.logger.Info("Changed stream for snapshot. Draining message buffer to continue")
@@ -81,7 +81,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 	}
 
 	s.prevSnapshotStream = m.GetStream()
-	if m.GetEvent() == "snapshot" {
+	if m.GetEvent() == message.Snapshot {
 		s.messagesBuffer = append(s.messagesBuffer, m)
 
 		if len(s.messagesBuffer) >= s.snapshotMaxBufferSize {
@@ -99,6 +99,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 				defer s.mutex.Unlock()
 				err := s.writeSnapshotBatch()
 				if err != nil {
+					s.logger.Fatal(err)
 					panic("Failed to write snapshot batch")
 				}
 				s.messagesBuffer = []*message.Message{}
@@ -112,7 +113,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 	}
 	// means we finished snapshot streaming. Here we must ensure that we flushed all the
 	// messages from snapshot before we start pushing rest of the messages
-	if s.prevEvent == "snapshot" && s.prevEvent != m.GetEvent() {
+	if s.prevEvent == message.Snapshot && s.prevEvent != m.GetEvent() {
 		s.logger.Info("Snapshot streaming finished. Draining message buffer to continue")
 		err := s.writeSnapshotBatch()
 		if err != nil {
@@ -120,24 +121,23 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 		}
 	}
 	s.prevEvent = m.GetEvent()
-	fmt.Println(s.rowStatements)
+
 	tableStatement := s.rowStatements[m.GetStream()][m.GetEvent()]
 	var colValues []interface{}
 	var pkColValue interface{}
 	// we apply different flow for deletion requests
 	// since we don't have to bind all the params, we are interested only in PK
 	s.logger.Info("Applying operation", "op", m.GetEvent(), "stream", m.GetStream())
-	if m.GetEvent() == "delete" {
-		pkColumnValue := m.Data.AccessProperty(s.pkColumnNamesByStream[m.GetStream()])
-		if pkColumnValue != nil {
+	if m.GetEvent() == message.Delete {
+		pkColValue = m.Data.AccessProperty(s.pkColumnNamesByStream[m.GetStream()])
+		if pkColValue != nil {
 			colValues = append(colValues, pkColValue)
 		}
 		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
 		if err != nil {
 			return err
 		}
-	} else {
-		pkColName := s.pkColumnNamesByStream[s.prevSnapshotStream]
+	} else if m.GetEvent() == message.Insert {
 		for _, ss := range s.streamSchema {
 			if ss.StreamName == m.Stream {
 				for _, col := range ss.Columns {
@@ -146,10 +146,30 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 			}
 		}
 
-		if pkColName != "" {
-			colValues = append(colValues, m.Data.AccessProperty(pkColName))
+		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
+		if err != nil {
+			return err
 		}
-		fmt.Println(tableStatement, colValues)
+	} else {
+		// else is for update statements
+		pkColName := s.pkColumnNamesByStream[s.prevSnapshotStream]
+		if pkColName == "" {
+			s.logger.Debug("Update statement is not supported for PG without PK")
+			return nil
+		}
+
+		for _, ss := range s.streamSchema {
+			if ss.StreamName == m.Stream {
+				for _, col := range ss.Columns {
+					if col.Name != pkColName {
+						colValues = append(colValues, m.Data.AccessProperty(col.Name))
+					}
+				}
+
+				colValues = append(colValues, m.Data.AccessProperty(pkColName))
+			}
+		}
+
 		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
 		if err != nil {
 			return err
@@ -170,35 +190,27 @@ func (s *SinkPlugin) writeSnapshotBatch() error {
 		return nil
 	}
 
-	for bufMIdx, bufMessage := range s.messagesBuffer {
-		if bufMIdx == 0 {
-			pkColName := s.pkColumnNamesByStream[s.prevSnapshotStream]
-			for _, ss := range s.streamSchema {
-				if ss.StreamName == bufMessage.Stream {
-					for _, col := range ss.Columns {
-						colNames = append(colNames, col.Name)
-					}
-				}
+	// extract column names
+	for _, ss := range s.streamSchema {
+		if ss.StreamName == s.messagesBuffer[0].Stream {
+			for _, col := range ss.Columns {
+				colNames = append(colNames, col.Name)
 			}
-
-			bufMessage.Data.AccessProperty(s.pkColumnNamesByStream[s.prevSnapshotStream])
-			colNames = append(colNames, pkColName)
 		}
+	}
+
+	for _, bufMessage := range s.messagesBuffer {
+		// then we extract all the column values that we will use
+		// in CopyFromRows statement
 		var colValues []interface{}
-		var pkColValue interface{}
-		pkColName := s.pkColumnNamesByStream[s.prevSnapshotStream]
 		for _, ss := range s.streamSchema {
 			if ss.StreamName == bufMessage.Stream {
 				for _, col := range ss.Columns {
-					colNames = append(colNames, col.Name)
+					colValues = append(colValues, bufMessage.Data.AccessProperty(col.Name))
 				}
 			}
 		}
 
-		bufMessage.Data.AccessProperty(s.pkColumnNamesByStream[s.prevSnapshotStream])
-		colNames = append(colNames, pkColName)
-
-		colValues = append(colValues, pkColValue)
 		messagesToInsert = append(messagesToInsert, colValues)
 	}
 
@@ -226,6 +238,7 @@ func (s *SinkPlugin) createInitStatements() {
 			message.Delete:   deleteStatement,
 			message.Update:   updateStatement,
 			message.Snapshot: insertStatement,
+			message.Insert:   insertStatement,
 		}
 
 		for _, col := range stream.Columns {

@@ -3,6 +3,7 @@ package schema
 import (
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/usedatabrew/blink/internal/helper"
+	"sort"
 )
 
 // StreamSchema represents YAML configuration of the
@@ -19,6 +20,10 @@ type Column struct {
 	PK                  bool     `yaml:"pk"`
 	Nullable            bool     `yaml:"nullable"`
 	Columns             []Column `yaml:"columns,omitempty"`
+}
+
+func (s *StreamSchema) SortColumnsAsc() {
+	sort.Sort(ByName(s.Columns))
 }
 
 func (s *StreamSchema) AsArrow() *arrow.Schema {
