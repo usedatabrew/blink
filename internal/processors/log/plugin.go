@@ -20,8 +20,7 @@ func NewLogPlugin(appctx *stream_context.Context, config Config) (*Plugin, error
 
 func (p *Plugin) Process(context context.Context, msg *message.Message) (*message.Message, error) {
 	if p.config.StreamName == "*" || msg.GetStream() == p.config.StreamName {
-		jsonMarshaledMessage := msg.AsJSONString()
-		p.log.Info("message received", "message", jsonMarshaledMessage)
+		p.log.Info("message received", "message", msg.AsJSONString())
 	}
 
 	return msg, nil

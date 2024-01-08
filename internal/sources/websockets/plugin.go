@@ -9,9 +9,9 @@ import (
 	"github.com/cloudquery/plugin-sdk/v4/scalar"
 	"github.com/goccy/go-json"
 	"github.com/gorilla/websocket"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sources"
+	"github.com/usedatabrew/message"
 )
 
 type SourcePlugin struct {
@@ -71,9 +71,8 @@ func (s *SourcePlugin) Start() {
 				scalar.AppendToBuilder(builder.Field(i), ss)
 			}
 
-			m := message.New(builder.NewRecord())
-			m.SetEvent("insert")
-			m.SetStream(s.stream)
+			mBytes, _ := builder.NewRecord().MarshalJSON()
+			m := message.NewMessage(message.Insert, s.stream, mBytes)
 
 			s.messageStream <- sources.MessageEvent{
 				Message: m,

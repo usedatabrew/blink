@@ -24,6 +24,7 @@ type Plugin struct {
 	ctx                      *stream_context.Context
 	logger                   *log.Logger
 	columnsToDropFromSchema  []string
+	columnsToSelect          []string
 	columnNameToIndexBinding map[string]int
 	affectedStream           string
 	whereExist               bool
@@ -54,8 +55,8 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 	}
 
 	if p.whereExist {
-		columnValue := msg.Data.AccessProperty(p.whereLeft)
-		if !compareValues(columnValue, p.whereRight, p.whereOp) {
+		columnValue := msg.Data.Where(p.whereLeft, p.whereOp, p.whereRight)
+		if columnValue == nil {
 			return nil, nil
 		}
 	}

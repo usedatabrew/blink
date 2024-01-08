@@ -1,12 +1,12 @@
 package postgres_cdc
 
 import (
-	"github.com/usedatabrew/blink/internal/message"
-	"github.com/usedatabrew/blink/internal/schema"
-	"github.com/usedatabrew/blink/internal/sources"
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/sources"
+	"github.com/usedatabrew/message"
 	"github.com/usedatabrew/pglogicalstream"
 )
 
@@ -63,18 +63,16 @@ func (p *SourcePlugin) Start() {
 		// logical replication messages will be streamed after the snapshot is processed
 		case snapshotMessage := <-p.stream.SnapshotMessageC():
 			m := snapshotMessage.Changes[0].Row
-			builtMessage := message.New(m)
-			builtMessage.SetEvent("snapshot")
-			builtMessage.SetStream(snapshotMessage.Changes[0].Table)
+			mbytes, _ := m.MarshalJSON()
+			builtMessage := message.NewMessage(message.Snapshot, snapshotMessage.Changes[0].Table, mbytes)
 			p.messagesStream <- sources.MessageEvent{
 				Message: builtMessage,
 				Err:     nil,
 			}
 		case lrMessage := <-p.stream.LrMessageC():
 			m := lrMessage.Changes[0].Row
-			builtMessage := message.New(m)
-			builtMessage.SetEvent(lrMessage.Changes[0].Kind)
-			builtMessage.SetStream(lrMessage.Changes[0].Table)
+			mbytes, _ := m.MarshalJSON()
+			builtMessage := message.NewMessage(message.Event(lrMessage.Changes[0].Kind), lrMessage.Changes[0].Table, mbytes)
 			p.messagesStream <- sources.MessageEvent{
 				Message: builtMessage,
 				Err:     nil,

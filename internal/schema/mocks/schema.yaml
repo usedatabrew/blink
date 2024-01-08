@@ -1,0 +1,33 @@
+stream: coin_price
+columns:
+  - name: coin
+    databrewType: String
+    pk: false
+    nullable: false
+  - name: price
+    databrewType: Int64
+    pk: false
+    nullable: false
+  - name: data_points
+    databrewType: "List<Int64>"
+  - name: market
+    databrewType: JSON
+    columns:
+      - name: market_name
+        databrewType: String
+      - name: market_size
+        databrewType: Float64
+  - name: markets
+    databrewType: List<JSON>
+    columns:
+      - name: market_name
+        databrewType: String
+      - name: market_size
+        databrewType: Float64
+      - name: owner
+        databrewType: JSON
+        columns:
+          - name: name
+            databrewType: String
+          - name: ids
+            databrewType: List<Int64>

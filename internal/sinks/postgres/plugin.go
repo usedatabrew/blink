@@ -120,7 +120,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 		}
 	}
 	s.prevEvent = m.GetEvent()
-
+	fmt.Println(s.rowStatements)
 	tableStatement := s.rowStatements[m.GetStream()][m.GetEvent()]
 	var colValues []interface{}
 	var pkColValue interface{}
@@ -149,6 +149,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 		if pkColName != "" {
 			colValues = append(colValues, m.Data.AccessProperty(pkColName))
 		}
+		fmt.Println(tableStatement, colValues)
 		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
 		if err != nil {
 			return err

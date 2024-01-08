@@ -192,7 +192,7 @@ func (s *Stream) Start() error {
 		for {
 			select {
 			case sourceEvent := <-s.source.Events():
-				streamProxyChan <- &sourceEvent.Message
+				streamProxyChan <- sourceEvent.Message
 			}
 		}
 	}()

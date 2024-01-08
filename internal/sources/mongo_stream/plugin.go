@@ -1,11 +1,11 @@
 package mongo_stream
 
 import (
-	"github.com/usedatabrew/blink/internal/message"
-	"github.com/usedatabrew/blink/internal/schema"
-	"github.com/usedatabrew/blink/internal/sources"
 	"context"
 	"fmt"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/sources"
+	"github.com/usedatabrew/message"
 
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/apache/arrow/go/v14/arrow/array"
@@ -155,9 +155,8 @@ func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
 		scalar.AppendToBuilder(builder.Field(i), s)
 	}
 
-	m := message.New(builder.NewRecord())
-	m.SetEvent(eventOperation)
-	m.SetStream(stream)
+	mbytes, _ := builder.NewRecord().MarshalJSON()
+	m := message.NewMessage(message.Event(eventOperation), stream, mbytes)
 
 	p.messageStream <- sources.MessageEvent{
 		Message: m,
