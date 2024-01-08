@@ -41,7 +41,7 @@ func (p *SourcePlugin) Connect(ctx context.Context) error {
 		SnapshotMemorySafetyFactor: 0.3,
 		BatchSize:                  13500,
 		SeparateChanges:            true,
-	}, log.WithPrefix("PostgreSQL-CDC"))
+	}, log.WithPrefix("[source]: PostgreSQL-CDC"))
 	if err != nil {
 		return err
 	}
