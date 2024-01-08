@@ -24,10 +24,3 @@ columns:
         databrewType: String
       - name: market_size
         databrewType: Float64
-      - name: owner
-        databrewType: JSON
-        columns:
-          - name: name
-            databrewType: String
-          - name: ids
-            databrewType: List<Int64>

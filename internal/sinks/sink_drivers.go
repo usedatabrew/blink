@@ -7,4 +7,5 @@ const (
 	WebSocketSinkType SinkDriver = "websocket"
 	KafkaSinkType     SinkDriver = "kafka"
 	PostgresSinkType  SinkDriver = "postgres"
+	MongoDBSinkType   SinkDriver = "mongodb"
 )

@@ -12,14 +12,16 @@ import (
 	"testing"
 )
 
-var messagePacket = `{ 
-	"coin": "BTC", "price": 123.11,
-	"data_points": [11,22,333], 
-	"market": {
-		"market_name": "binance", "market_size": 123
-	},
-	"markets": [
-			{ "market_name": "binance", "market_size": 123, "owner": { "name": "Vladyslav", "ids": [123,123,211] } }
+var messagePacket = `{
+		"coin":"BTC",
+		"price":930,
+		"data_points": [123,123],
+		"market": {
+			"market_name":"binance","market_size":1231243242.111
+		},
+		"markets": [
+			{"market_name":"binance","market_size":1231243242.111},
+			{"market_name":"coinbase","market_size":123.111}
 		]
 	}`
 
