@@ -57,25 +57,25 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 		if err != nil {
 			panic("can read driver config")
 		}
-		return stdout.NewStdOutSinkPlugin(driverConfig, cfg.Service.StreamSchema, p.ctx)
+		return stdout.NewStdOutSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.KafkaSinkType:
 		driverConfig, err := ReadDriverConfig[kafka.Config](cfg.Sink.Config, kafka.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
-		return kafka.NewKafkaSinkPlugin(driverConfig, cfg.Service.StreamSchema)
+		return kafka.NewKafkaSinkPlugin(driverConfig, cfg.Source.StreamSchema)
 	case sinks.WebSocketSinkType:
 		driverConfig, err := ReadDriverConfig[websocket.Config](cfg.Sink.Config, websocket.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
-		return websocket.NewWebSocketSinkPlugin(driverConfig, cfg.Service.StreamSchema, p.ctx)
+		return websocket.NewWebSocketSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.PostgresSinkType:
 		driverConfig, err := ReadDriverConfig[postgres.Config](cfg.Sink.Config, postgres.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
-		return postgres.NewPostgresSinkPlugin(driverConfig, cfg.Service.StreamSchema, p.ctx)
+		return postgres.NewPostgresSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	default:
 		p.ctx.Logger.WithPrefix("Sink loader").Fatal("Failed to load driver", "driver", driver)
 	}

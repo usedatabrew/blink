@@ -77,13 +77,13 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 		if err != nil {
 			panic("can read driver config")
 		}
-		return postgres_cdc.NewPostgresSourcePlugin(driverConfig, config.Service.StreamSchema)
+		return postgres_cdc.NewPostgresSourcePlugin(driverConfig, config.Source.StreamSchema)
 	case sources.WebSockets:
 		driverConfig, err := ReadDriverConfig[websockets.Config](config.Source.Config, websockets.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
-		return websockets.NewWebSocketSourcePlugin(driverConfig, config.Service.StreamSchema)
+		return websockets.NewWebSocketSourcePlugin(driverConfig, config.Source.StreamSchema)
 	case sources.MongoStream:
 		driverConfig, err := ReadDriverConfig[mongo_stream.Config](config.Source.Config, mongo_stream.Config{})
 
@@ -91,7 +91,7 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 			panic("cannot ready driver config")
 		}
 
-		return mongo_stream.NewMongoStreamSourcePlugin(driverConfig, config.Service.StreamSchema)
+		return mongo_stream.NewMongoStreamSourcePlugin(driverConfig, config.Source.StreamSchema)
 	}
 
 	return nil

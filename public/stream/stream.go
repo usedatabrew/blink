@@ -68,7 +68,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 		"driver", config.Source.Driver,
 	).Info("Loaded")
 
-	s.schema = schema.NewStreamSchemaObj(config.Service.StreamSchema)
+	s.schema = schema.NewStreamSchemaObj(config.Source.StreamSchema)
 	for _, processorCfg := range config.Processors {
 		procWrapper := NewProcessorWrapper(processorCfg.Driver, processorCfg.Config, s.ctx)
 		s.processors = append(s.processors, procWrapper)

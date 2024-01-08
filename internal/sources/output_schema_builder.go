@@ -2,8 +2,8 @@ package sources
 
 import (
 	"github.com/apache/arrow/go/v14/arrow"
+	"github.com/usedatabrew/blink/internal/helper"
 	"github.com/usedatabrew/blink/internal/schema"
-	"github.com/usedatabrew/blink/internal/sinks/postgres"
 )
 
 func BuildOutputSchema(inputSchema []schema.StreamSchema) map[string]*arrow.Schema {
@@ -13,7 +13,7 @@ func BuildOutputSchema(inputSchema []schema.StreamSchema) map[string]*arrow.Sche
 		for _, col := range collection.Columns {
 			outputSchemaFields = append(outputSchemaFields, arrow.Field{
 				Name:     col.Name,
-				Type:     postgres.MapPlainTypeToArrow(col.DatabrewType),
+				Type:     helper.MapPlainTypeToArrow(col.DatabrewType),
 				Nullable: col.Nullable,
 				Metadata: arrow.Metadata{},
 			})
