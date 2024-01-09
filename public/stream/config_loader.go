@@ -20,6 +20,10 @@ func ReadInitConfigFromYaml(configBytes []byte) (config.Configuration, error) {
 	conf := config.Configuration{}
 	err := yaml.Unmarshal(replacedBytes, &conf)
 
+	for _, ss := range conf.Source.StreamSchema {
+		ss.SortColumnsAsc()
+	}
+
 	config.ValidateConfigSchema(conf)
 	return conf, err
 }

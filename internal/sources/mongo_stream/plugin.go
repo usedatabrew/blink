@@ -1,16 +1,15 @@
 package mongo_stream
 
 import (
-	"github.com/usedatabrew/blink/internal/message"
-	"github.com/usedatabrew/blink/internal/schema"
-	"github.com/usedatabrew/blink/internal/sources"
 	"context"
 	"fmt"
-
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/apache/arrow/go/v14/arrow/array"
 	"github.com/apache/arrow/go/v14/arrow/memory"
-	"github.com/cloudquery/plugin-sdk/v4/scalar" // todo: check it
+	"github.com/goccy/go-json"
+	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/sources"
+	"github.com/usedatabrew/message"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -73,9 +72,9 @@ func (p *SourcePlugin) Events() chan sources.MessageEvent {
 
 func (p *SourcePlugin) takeSnapshot() {
 	for _, v := range p.inputSchema {
-		fmt.Println("start taking snapshot for", v.StreamName)
-
-		cursor, err := p.database.Collection(v.StreamName).Find(p.ctx, bson.D{})
+		filter := bson.D{}
+		opts := options.Find().SetSort(bson.M{"_id": "1"})
+		cursor, err := p.database.Collection(v.StreamName).Find(p.ctx, filter, opts)
 
 		if err != nil {
 			panic(err)
@@ -90,7 +89,7 @@ func (p *SourcePlugin) takeSnapshot() {
 				panic(err)
 			}
 
-			p.process(v.StreamName, data)
+			p.process(v.StreamName, data, true)
 		}
 	}
 
@@ -118,12 +117,12 @@ func (p *SourcePlugin) watch() {
 				panic(err)
 			}
 
-			p.process(v.StreamName, data)
+			p.process(v.StreamName, data, false)
 		}
 	}
 }
 
-func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
+func (p *SourcePlugin) process(stream string, data map[string]interface{}, snapshot bool) {
 	builder := array.NewRecordBuilder(memory.DefaultAllocator, p.outputSchema[stream])
 
 	var eventOperation string
@@ -143,21 +142,19 @@ func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
 		eventData = data
 	}
 
-	for i, v := range p.outputSchema[stream].Fields() {
-		value := eventData[v.Name]
-
-		s := scalar.NewScalar(p.outputSchema[stream].Field(i).Type)
-
-		if err := s.Set(value); err != nil {
-			panic(err)
-		}
-
-		scalar.AppendToBuilder(builder.Field(i), s)
+	if snapshot {
+		eventOperation = string(message.Snapshot)
 	}
 
-	m := message.New(builder.NewRecord())
-	m.SetEvent(eventOperation)
-	m.SetStream(stream)
+	encodedJson, _ := json.Marshal(&eventData)
+	err := json.Unmarshal(encodedJson, &builder)
+	// TODO:: rewrite
+	if err != nil {
+		panic(err)
+	}
+
+	mbytes, _ := builder.NewRecord().MarshalJSON()
+	m := message.NewMessage(message.Event(eventOperation), stream, mbytes)
 
 	p.messageStream <- sources.MessageEvent{
 		Message: m,
@@ -168,16 +165,7 @@ func (p *SourcePlugin) process(stream string, data map[string]interface{}) {
 func (p *SourcePlugin) buildOutputSchema() {
 	outputSchemas := make(map[string]*arrow.Schema)
 	for _, collection := range p.inputSchema {
-		var outputSchemaFields []arrow.Field
-		for _, col := range collection.Columns {
-			outputSchemaFields = append(outputSchemaFields, arrow.Field{
-				Name:     col.Name,
-				Type:     MapPlainTypeToArrow(col.DatabrewType),
-				Nullable: col.Nullable,
-				Metadata: arrow.Metadata{},
-			})
-		}
-		outputSchema := arrow.NewSchema(outputSchemaFields, nil)
+		outputSchema := collection.AsArrow()
 		outputSchemas[collection.StreamName] = outputSchema
 	}
 

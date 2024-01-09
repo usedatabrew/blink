@@ -3,6 +3,7 @@ package postgres
 import (
 	"fmt"
 	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/message"
 	"testing"
 )
 
@@ -26,9 +27,11 @@ var testStreamSchema = []schema.StreamSchema{
 	},
 }
 
+var testMessage = message.NewMessage(message.Snapshot, "flights", []byte(`{"message": "code_11", "id": 1234}`))
+
 func Test_generateBatchInsertStatement(t *testing.T) {
 	result := generateBatchInsertStatement(testStreamSchema[0])
-	if result != "INSERT INTO flights (id, flights_name) VALUES ($1, $2 );" {
+	if result != "INSERT INTO flights (flights_name, id) VALUES ($1, $2 );" {
 		t.Fatal("Generated Insert Query is not correct")
 	}
 }
@@ -51,4 +54,8 @@ func Test_generateBatchDeleteStatement(t *testing.T) {
 func Test_getColumnNames(t *testing.T) {
 	generatedColumnNames := getColumnNames(testStreamSchema[0].Columns)
 	fmt.Println(generatedColumnNames)
+}
+
+func TestSinkPlugin_Write(t *testing.T) {
+
 }

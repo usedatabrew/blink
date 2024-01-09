@@ -6,6 +6,7 @@ import (
 	"github.com/apache/arrow/go/v14/arrow/memory"
 	"github.com/cloudquery/plugin-sdk/v4/scalar"
 	"github.com/google/uuid"
+	"github.com/usedatabrew/blink/internal/helper"
 	"slices"
 	"sync"
 )
@@ -61,7 +62,7 @@ func (m *Message) GetEvent() string {
 func (m *Message) GetValue(colName string) interface{} {
 	for idx, col := range m.Data.Columns() {
 		if m.Data.Schema().Field(idx).Name == colName {
-			return GetValue(col, 0)
+			return helper.GetValue(col, 0)
 		}
 	}
 	return nil
@@ -71,7 +72,7 @@ func (m *Message) SetNewField(name string, value interface{}, fieldType arrow.Da
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	newSchemaFields := m.Data.Schema().Fields()
-	newFieldType := inferArrowType(value)
+	newFieldType := helper.InferArrowType(value)
 	updatedSchema := arrow.NewSchema(append(newSchemaFields, arrow.Field{Name: name, Type: newFieldType}), nil)
 	updatedBuilder := array.NewRecordBuilder(memory.DefaultAllocator, updatedSchema)
 	for i, field := range updatedSchema.Fields() {
@@ -83,7 +84,7 @@ func (m *Message) SetNewField(name string, value interface{}, fieldType arrow.Da
 			}
 		} else {
 			s = scalar.NewScalar(field.Type)
-			if err := s.Set(GetValue(m.Data.Column(i), 0)); err != nil {
+			if err := s.Set(helper.GetValue(m.Data.Column(i), 0)); err != nil {
 				panic(err)
 			}
 		}

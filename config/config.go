@@ -23,13 +23,12 @@ type Columns struct {
 }
 
 type Service struct {
-	ReloadOnRestart    bool                  `yaml:"reload_on_restart"`
-	PipelineId         int                   `yaml:"pipeline_id" validate:"required"`
-	InfluxEnabled      bool                  `yaml:"enable_influx"`
-	EnableETCDRegistry bool                  `yaml:"enable_etcd_registry"`
-	ETCD               *ETCD                 `yaml:"etcd"`
-	Influx             interface{}           `yaml:"influx"`
-	StreamSchema       []schema.StreamSchema `yaml:"stream_schema" validate:"required"`
+	ReloadOnRestart    bool        `yaml:"reload_on_restart"`
+	PipelineId         int         `yaml:"pipeline_id" validate:"required"`
+	InfluxEnabled      bool        `yaml:"enable_influx"`
+	EnableETCDRegistry bool        `yaml:"enable_etcd_registry"`
+	ETCD               *ETCD       `yaml:"etcd"`
+	Influx             interface{} `yaml:"influx"`
 }
 
 type ETCD struct {
@@ -37,8 +36,9 @@ type ETCD struct {
 }
 
 type Source struct {
-	Driver sources.SourceDriver `yaml:"driver"`
-	Config interface{}          `yaml:"config"`
+	Driver       sources.SourceDriver  `yaml:"driver"`
+	Config       interface{}           `yaml:"config"`
+	StreamSchema []schema.StreamSchema `yaml:"stream_schema" validate:"required"`
 }
 
 type Processor struct {

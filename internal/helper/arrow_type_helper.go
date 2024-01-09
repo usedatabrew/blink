@@ -1,4 +1,4 @@
-package message
+package helper
 
 import (
 	"github.com/apache/arrow/go/v14/arrow"
@@ -9,7 +9,47 @@ import (
 	"strconv"
 )
 
-func inferArrowType(value interface{}) arrow.DataType {
+func IsPrimitiveType(fieldType string) bool {
+	switch fieldType {
+	case "Boolean", "Int32", "Int64", "Uint64", "Float64", "Float32", "UUID", "bytea", "Inet", "MAC", "Date32", "String":
+		return true
+	default:
+		return false
+	}
+}
+
+func MapPlainTypeToArrow(fieldType string) arrow.DataType {
+	switch fieldType {
+	case "Boolean":
+		return arrow.FixedWidthTypes.Boolean
+	case "Int16":
+		return arrow.PrimitiveTypes.Int16
+	case "Int32":
+		return arrow.PrimitiveTypes.Int32
+	case "Int64":
+		return arrow.PrimitiveTypes.Int64
+	case "Uint64":
+		return arrow.PrimitiveTypes.Uint64
+	case "Float64":
+		return arrow.PrimitiveTypes.Float64
+	case "Float32":
+		return arrow.PrimitiveTypes.Float32
+	case "UUID":
+		return arrow.BinaryTypes.String
+	case "bytea":
+		return arrow.BinaryTypes.Binary
+	case "Inet":
+		return arrow.BinaryTypes.String
+	case "MAC":
+		return arrow.BinaryTypes.String
+	case "Date32":
+		return arrow.FixedWidthTypes.Date32
+	default:
+		return arrow.BinaryTypes.String
+	}
+}
+
+func InferArrowType(value interface{}) arrow.DataType {
 	switch value.(type) {
 	case int, int8, int16, int32, int64:
 		return arrow.PrimitiveTypes.Int64

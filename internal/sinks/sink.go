@@ -2,8 +2,8 @@ package sinks
 
 import (
 	"context"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/message"
 )
 
 type DataSink interface {

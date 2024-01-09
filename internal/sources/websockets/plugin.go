@@ -6,12 +6,11 @@ import (
 	"github.com/apache/arrow/go/v14/arrow/array"
 	"github.com/apache/arrow/go/v14/arrow/memory"
 	"github.com/charmbracelet/log"
-	"github.com/cloudquery/plugin-sdk/v4/scalar"
 	"github.com/goccy/go-json"
 	"github.com/gorilla/websocket"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sources"
+	"github.com/usedatabrew/message"
 )
 
 type SourcePlugin struct {
@@ -56,24 +55,9 @@ func (s *SourcePlugin) Start() {
 			if err != nil {
 				s.logger.Fatal(err)
 			}
-			var rawMessage map[string]interface{}
-			err = json.Unmarshal(wsMessage, &rawMessage)
-			if err != nil {
-				s.logger.Fatal(err)
-			}
-			for i, v := range s.outputSchema[s.stream].Fields() {
-				value := rawMessage[v.Name]
-				ss := scalar.NewScalar(s.outputSchema[s.stream].Field(i).Type)
-				if err := ss.Set(value); err != nil {
-					panic(err)
-				}
-
-				scalar.AppendToBuilder(builder.Field(i), ss)
-			}
-
-			m := message.New(builder.NewRecord())
-			m.SetEvent("insert")
-			m.SetStream(s.stream)
+			err = json.Unmarshal(wsMessage, &builder)
+			mBytes, _ := builder.NewRecord().MarshalJSON()
+			m := message.NewMessage(message.Insert, s.stream, mBytes)
 
 			s.messageStream <- sources.MessageEvent{
 				Message: m,

@@ -7,9 +7,9 @@ import (
 	"github.com/apache/arrow/go/v14/arrow/array"
 	"github.com/apache/arrow/go/v14/arrow/memory"
 	"github.com/cloudquery/plugin-sdk/v4/scalar"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
+	"github.com/usedatabrew/message"
 	"testing"
 )
 
@@ -100,9 +100,8 @@ func TestPlugin_Process(t *testing.T) {
 	}
 	scalar.AppendToBuilder(updatedBuilder.Field(1), userScalar)
 
-	mess := message.New(updatedBuilder.NewRecord())
-	mess.SetStream("test")
-	mess.SetEvent("insert")
+	mbytes, _ := updatedBuilder.NewRecord().MarshalJSON()
+	mess := message.NewMessage(message.Insert, "test", mbytes)
 
 	plugin, err := NewSqlTransformPlugin(stream_context.CreateContext(), Config{
 		Query: "SELECT id, user from stream.test WHERE id = 123",
@@ -118,7 +117,7 @@ func TestPlugin_Process(t *testing.T) {
 		t.Fail()
 	}
 
-	processedMessage, err := plugin.Process(context.Background(), &mess)
+	processedMessage, err := plugin.Process(context.Background(), mess)
 	if err != nil {
 		t.Fatal(err)
 	}

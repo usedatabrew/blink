@@ -7,9 +7,9 @@ import (
 	"github.com/twmb/franz-go/pkg/sasl/aws"
 	"github.com/twmb/franz-go/pkg/sasl/plain"
 	"github.com/twmb/franz-go/pkg/sasl/scram"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
+	"github.com/usedatabrew/message"
 	"strings"
 	"sync"
 	"time"
@@ -103,7 +103,7 @@ func (s *SinkPlugin) flushBuffer() error {
 		// Replace this with your actual processing logic
 		var records []*kgo.Record
 		for _, mess := range s.messageBatch {
-			marshaledMessage, _ := mess.Data.MarshalJSON()
+			marshaledMessage := []byte(mess.AsJSONString())
 			topic := s.writerConfig.TopicName
 			if s.writerConfig.BindTopicToStream {
 				topic = mess.GetStream()

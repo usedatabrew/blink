@@ -1,12 +1,12 @@
 package sources
 
 import (
-	"github.com/usedatabrew/blink/internal/message"
 	"context"
+	"github.com/usedatabrew/message"
 )
 
 type MessageEvent struct {
-	Message message.Message
+	Message *message.Message
 	Err     error
 }
 

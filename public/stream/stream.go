@@ -3,10 +3,10 @@ package stream
 import (
 	"errors"
 	"github.com/usedatabrew/blink/config"
-	"github.com/usedatabrew/blink/internal/message"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/service_registry"
 	"github.com/usedatabrew/blink/internal/stream_context"
+	"github.com/usedatabrew/message"
 	"github.com/usedatabrew/tango"
 	"sync"
 	"time"
@@ -68,7 +68,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 		"driver", config.Source.Driver,
 	).Info("Loaded")
 
-	s.schema = schema.NewStreamSchemaObj(config.Service.StreamSchema)
+	s.schema = schema.NewStreamSchemaObj(config.Source.StreamSchema)
 	for _, processorCfg := range config.Processors {
 		procWrapper := NewProcessorWrapper(processorCfg.Driver, processorCfg.Config, s.ctx)
 		s.processors = append(s.processors, procWrapper)
@@ -192,7 +192,7 @@ func (s *Stream) Start() error {
 		for {
 			select {
 			case sourceEvent := <-s.source.Events():
-				streamProxyChan <- &sourceEvent.Message
+				streamProxyChan <- sourceEvent.Message
 			}
 		}
 	}()

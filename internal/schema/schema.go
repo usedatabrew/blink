@@ -2,111 +2,117 @@ package schema
 
 import (
 	"github.com/apache/arrow/go/v14/arrow"
-	"github.com/barkimedes/go-deepcopy"
-	"slices"
+	"github.com/usedatabrew/blink/internal/helper"
+	"sort"
 )
 
+// StreamSchema represents YAML configuration of the
+// source plugin schema. It's used to build Apache Arrow schema from this definition
 type StreamSchema struct {
 	StreamName string   `yaml:"stream"`
 	Columns    []Column `yaml:"columns"`
 }
 
 type Column struct {
-	Name                string `yaml:"name"`
-	DatabrewType        string `yaml:"databrewType"`
-	NativeConnectorType string `yaml:"nativeConnectorType"`
-	PK                  bool   `yaml:"pk"`
-	Nullable            bool   `yaml:"nullable"`
+	Name                string   `yaml:"name"`
+	DatabrewType        string   `yaml:"databrewType"`
+	NativeConnectorType string   `yaml:"nativeConnectorType"`
+	PK                  bool     `yaml:"pk"`
+	Nullable            bool     `yaml:"nullable"`
+	Columns             []Column `yaml:"columns,omitempty"`
 }
 
-type StreamSchemaObj struct {
-	streamSchemaVersions map[int][]StreamSchema
-	lastVersion          int
+func (s *StreamSchema) SortColumnsAsc() {
+	sort.Sort(ByName(s.Columns))
 }
 
-func NewStreamSchemaObj(s []StreamSchema) *StreamSchemaObj {
-	obj := &StreamSchemaObj{
-		streamSchemaVersions: map[int][]StreamSchema{},
-		lastVersion:          0,
-	}
-	obj.streamSchemaVersions[obj.lastVersion] = s
-	return obj
-}
-
-func (s *StreamSchemaObj) GetLatestSchema() []StreamSchema {
-	return s.streamSchemaVersions[s.lastVersion]
-}
-
-func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.DataType, driverType string) {
-	var streamSchemaCopy = s.getLastSchemaDeepCopy()
-	for idx, stream := range streamSchemaCopy {
-		if stream.StreamName == streamName {
-			arrowColumn := Column{
-				Name:                name,
-				DatabrewType:        fieldType.String(),
-				NativeConnectorType: driverType,
-				PK:                  false,
-				Nullable:            true,
+func (s *StreamSchema) AsArrow() *arrow.Schema {
+	var arrowSchema *arrow.Schema
+	var outputSchemaFields []arrow.Field
+	for _, column := range s.Columns {
+		var field arrow.Field
+		if helper.IsPrimitiveType(column.DatabrewType) {
+			field = arrow.Field{
+				Name:     column.Name,
+				Type:     helper.MapPlainTypeToArrow(column.DatabrewType),
+				Nullable: column.Nullable,
+				Metadata: arrow.Metadata{},
 			}
-
-			streamSchemaCopy[idx].Columns = append(stream.Columns, arrowColumn)
-		}
-	}
-
-	s.lastVersion += 1
-	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
-}
-
-func (s *StreamSchemaObj) FakeEvolve() {
-	var streamSchemaCopy = s.getLastSchemaDeepCopy()
-	s.lastVersion += 1
-	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
-}
-
-func (s *StreamSchemaObj) RemoveField(streamName, columnName string) {
-	var streamSchemaCopy = s.getLastSchemaDeepCopy()
-	for streamIndex, stream := range streamSchemaCopy {
-		if stream.StreamName == streamName {
-			for colIdx, column := range stream.Columns {
-				if column.Name == columnName {
-					streamSchemaCopy[streamIndex].Columns = remove(stream.Columns, colIdx)
-				}
+		} else {
+			// trying to handle complex field type.
+			// like array of numbers of nested object
+			// List<JSON>, JSON, List<Int64>, List<Float54>, List<String>
+			if column.DatabrewType == "List<JSON>" || column.DatabrewType == "JSON" {
+				field = buildFieldsFromJson(column)
+			} else {
+				field = buildFieldsFromList(column)
 			}
 		}
+
+		outputSchemaFields = append(outputSchemaFields, field)
 	}
 
-	s.lastVersion += 1
-	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
-}
-
-func (s *StreamSchemaObj) RemoveFields(streamName string, columnNames []string) {
-	columnNamesCopied, _ := deepcopy.Anything(columnNames)
-	var streamSchemaCopy = s.getLastSchemaDeepCopy()
-	for streamIndex, stream := range streamSchemaCopy {
-		if stream.StreamName == streamName {
-			for colIdx, column := range stream.Columns {
-				if idx := slices.Index(columnNamesCopied.([]string), column.Name); idx != -1 {
-					streamSchemaCopy[streamIndex].Columns = remove(stream.Columns, colIdx)
-					columnNamesCopied = remove(columnNamesCopied.([]string), idx)
-				}
-			}
-		}
-	}
-
-	s.lastVersion += 1
-	s.streamSchemaVersions[s.lastVersion] = streamSchemaCopy
-}
-
-func (s *StreamSchemaObj) getLastSchemaDeepCopy() []StreamSchema {
-	streamSchema := s.streamSchemaVersions[s.lastVersion]
-	//var streamSchemaCopy = make([]StreamSchema, len(streamSchema))
-	streamSchemaCopy, err := deepcopy.Anything(streamSchema)
-	if err != nil {
-		panic(err)
-	}
-	return streamSchemaCopy.([]StreamSchema)
+	arrowSchema = arrow.NewSchema(outputSchemaFields, nil)
+	return arrowSchema
 }
 
 func remove[T any](slice []T, s int) []T {
 	return append(slice[:s], slice[s+1:]...)
+}
+
+func buildFieldsFromList(column Column) arrow.Field {
+	field := arrow.Field{
+		Name:     column.Name,
+		Nullable: column.Nullable,
+		Metadata: arrow.Metadata{},
+	}
+
+	switch column.DatabrewType {
+	case "List<Int64>":
+		field.Type = arrow.ListViewOf(arrow.PrimitiveTypes.Int64)
+	case "List<Float64>":
+		field.Type = arrow.ListViewOf(arrow.PrimitiveTypes.Float64)
+	case "List<String>":
+		field.Type = arrow.ListViewOf(arrow.BinaryTypes.String)
+	default:
+		field.Type = arrow.ListViewOf(arrow.BinaryTypes.String)
+	}
+
+	return field
+}
+
+func buildFieldsFromJson(column Column) arrow.Field {
+	field := arrow.Field{
+		Name:     column.Name,
+		Nullable: column.Nullable,
+		Metadata: arrow.Metadata{},
+	}
+
+	var nestedFields []arrow.Field
+	for _, subCol := range column.Columns {
+		subColField := arrow.Field{
+			Name:     subCol.Name,
+			Nullable: subCol.Nullable,
+			Metadata: arrow.Metadata{},
+		}
+
+		if subCol.DatabrewType == "JSON" {
+			subColField = buildFieldsFromJson(subCol)
+		} else if subCol.DatabrewType == "List<Int64>" || subCol.DatabrewType == "List<Float64>" || subCol.DatabrewType == "List<String>" {
+			subColField = buildFieldsFromList(subCol)
+		} else {
+			subColField.Type = helper.MapPlainTypeToArrow(subCol.DatabrewType)
+		}
+
+		nestedFields = append(nestedFields, subColField)
+	}
+
+	if column.DatabrewType == "JSON" {
+		field.Type = arrow.StructOf(nestedFields...)
+	} else if column.DatabrewType == "List<JSON>" {
+		// else means json only column
+		field.Type = arrow.ListViewOf(arrow.StructOf(nestedFields...))
+	}
+
+	return field
 }

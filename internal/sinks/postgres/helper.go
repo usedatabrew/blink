@@ -2,50 +2,17 @@ package postgres
 
 import (
 	"fmt"
-	"github.com/apache/arrow/go/v14/arrow"
-	"github.com/usedatabrew/blink/internal/message"
+	"github.com/usedatabrew/blink/internal/helper"
 	"github.com/usedatabrew/blink/internal/schema"
+	"slices"
 	"strings"
 )
-
-func MapPlainTypeToArrow(fieldType string) arrow.DataType {
-	switch fieldType {
-	case "Boolean":
-		return arrow.FixedWidthTypes.Boolean
-	case "Int16":
-		return arrow.PrimitiveTypes.Int16
-	case "Int32":
-		return arrow.PrimitiveTypes.Int32
-	case "Int64":
-		return arrow.PrimitiveTypes.Int64
-	case "Uint64":
-		return arrow.PrimitiveTypes.Uint64
-	case "Float64":
-		return arrow.PrimitiveTypes.Float64
-	case "Float32":
-		return arrow.PrimitiveTypes.Float32
-	case "UUID":
-		return arrow.BinaryTypes.String
-	case "bytea":
-		return arrow.BinaryTypes.Binary
-	case "JSON":
-		return arrow.BinaryTypes.String
-	case "Inet":
-		return arrow.BinaryTypes.String
-	case "MAC":
-		return arrow.BinaryTypes.String
-	case "Date32":
-		return arrow.FixedWidthTypes.Date32
-	default:
-		return arrow.BinaryTypes.String
-	}
-}
 
 func generateCreateTableStatement(table string, columns []schema.Column) string {
 	statement := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (\n", table)
 
 	for idx, column := range columns {
-		statement += fmt.Sprintf("  %s %s", column.Name, message.ArrowToPg10(MapPlainTypeToArrow(column.DatabrewType)))
+		statement += fmt.Sprintf("  %s %s", column.Name, helper.ArrowToPg10(helper.MapPlainTypeToArrow(column.DatabrewType)))
 		if column.PK {
 			statement += fmt.Sprint(" PRIMARY KEY")
 		}
@@ -87,6 +54,7 @@ func getColumnNames(columns []schema.Column) string {
 		columnNames = append(columnNames, column.Name)
 	}
 
+	slices.Sort(columnNames)
 	return strings.Join(columnNames, ", ")
 }
 
