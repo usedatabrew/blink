@@ -21,6 +21,7 @@ type SourcePlugin struct {
 	client             *airtable.Client
 	schema             []schema.StreamSchema
 	schemaMapper       map[string]schema.StreamSchema
+	streamPks          map[string]string
 	streamFields       map[string][]string
 	streamOffsets      map[string]string
 	lastRecordStreamId map[string]string
@@ -36,6 +37,7 @@ func NewAirTableSourcePlugin(config Config, s []schema.StreamSchema) sources.Dat
 		streamFields:       map[string][]string{},
 		streamOffsets:      map[string]string{},
 		lastRecordStreamId: map[string]string{},
+		streamPks:          map[string]string{},
 		logger:             log.WithPrefix("[source]: AirTable"),
 	}
 
@@ -83,7 +85,14 @@ func (s *SourcePlugin) Start() {
 				s.logger.Info("Initial load. Querying without offset")
 			}
 
-			getRowsRequest.PageSize(100)
+			if s.streamPks[stream] != "" {
+				getRowsRequest.WithSort(struct {
+					FieldName string
+					Direction string
+				}{FieldName: s.streamPks[stream], Direction: "asc"})
+			}
+
+			getRowsRequest.PageSize(2)
 			result, err := getRowsRequest.Do()
 			if err != nil {
 				s.messageEvents <- sources.MessageEvent{
@@ -154,6 +163,9 @@ func (s *SourcePlugin) extractFields() {
 		var fields []string
 		for _, col := range stream.Columns {
 			fields = append(fields, col.Name)
+			if col.PK {
+				s.streamPks[stream.StreamName] = col.Name
+			}
 		}
 
 		s.schemaMapper[stream.StreamName] = stream
