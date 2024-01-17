@@ -7,6 +7,7 @@ import (
 	"github.com/usedatabrew/blink/internal/sinks/kafka"
 	"github.com/usedatabrew/blink/internal/sinks/mongodb"
 	"github.com/usedatabrew/blink/internal/sinks/postgres"
+	"github.com/usedatabrew/blink/internal/sinks/redis"
 	"github.com/usedatabrew/blink/internal/sinks/stdout"
 	websocket "github.com/usedatabrew/blink/internal/sinks/websockets"
 	"github.com/usedatabrew/blink/internal/stream_context"
@@ -71,6 +72,12 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 			panic("can read driver config")
 		}
 		return websocket.NewWebSocketSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
+	case sinks.RedisSinkType:
+		driverConfig, err := ReadDriverConfig[redis.Config](cfg.Sink.Config, redis.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return redis.NewRedisSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.MongoDBSinkType:
 		driverConfig, err := ReadDriverConfig[mongodb.Config](cfg.Sink.Config, mongodb.Config{})
 		if err != nil {

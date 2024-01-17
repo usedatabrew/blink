@@ -92,7 +92,7 @@ func (s *SourcePlugin) Start() {
 				}{FieldName: s.streamPks[stream], Direction: "asc"})
 			}
 
-			getRowsRequest.PageSize(2)
+			getRowsRequest.PageSize(100)
 			result, err := getRowsRequest.Do()
 			if err != nil {
 				s.messageEvents <- sources.MessageEvent{
