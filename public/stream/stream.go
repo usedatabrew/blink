@@ -192,7 +192,11 @@ func (s *Stream) Start() error {
 		for {
 			select {
 			case sourceEvent := <-s.source.Events():
-				streamProxyChan <- sourceEvent.Message
+				if sourceEvent.Err != nil {
+					s.ctx.Logger.Errorf("Error processing message %s", sourceEvent.Err.Error())
+				} else {
+					streamProxyChan <- sourceEvent.Message
+				}
 			}
 		}
 	}()
@@ -230,6 +234,5 @@ func (s *Stream) evolveSchemaForSinks(streamSchema *schema.StreamSchemaObj) {
 		if err != nil {
 			s.ctx.Logger.Fatalf("error evolving schema %s", err.Error())
 		}
-
 	}
 }

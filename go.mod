@@ -19,6 +19,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/websocket v1.5.0
 	github.com/jackc/pgx/v5 v5.4.3
+	github.com/mehanizm/airtable v0.3.1
 	github.com/prometheus/client_golang v1.11.1
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475
 	github.com/redis/go-redis/v9 v9.4.0

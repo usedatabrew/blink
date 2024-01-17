@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/charmbracelet/log"
+	"github.com/goccy/go-json"
 	"github.com/redis/go-redis/v9"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/blink/internal/stream_context"
 	"github.com/usedatabrew/message"
+	"strings"
 	"time"
 )
 
@@ -31,7 +33,7 @@ func NewRedisSinkPlugin(config Config, schema []schema.StreamSchema, appCtx *str
 	}
 }
 
-func (s SinkPlugin) Connect(context context.Context) error {
+func (s *SinkPlugin) Connect(context context.Context) error {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     s.config.RedisAddr,
 		Password: s.config.RedisPassword,
@@ -43,11 +45,13 @@ func (s SinkPlugin) Connect(context context.Context) error {
 		return status.Err()
 	}
 
+	s.logger.Debug("Connect check info", "result", status)
+
 	s.redisConn = rdb
 	return nil
 }
 
-func (s SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
+func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
 	for _, stream := range schema {
 		var pkCol string
 		for _, c := range stream.Columns {
@@ -55,15 +59,20 @@ func (s SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
 				pkCol = c.Name
 			}
 		}
-		s.pksByStream[stream.StreamName] = pkCol
+		if strings.Index(stream.StreamName, ".") != -1 {
+			splitName := strings.Split(stream.StreamName, ".")
+			s.pksByStream[splitName[1]] = pkCol
+		} else {
+			s.pksByStream[stream.StreamName] = pkCol
+		}
 	}
 }
 
-func (s SinkPlugin) GetType() sinks.SinkDriver {
+func (s *SinkPlugin) GetType() sinks.SinkDriver {
 	return sinks.RedisSinkType
 }
 
-func (s SinkPlugin) Write(m *message.Message) error {
+func (s *SinkPlugin) Write(m *message.Message) error {
 	streamName := m.GetStream()
 	namespace := ""
 	if s.config.CustomNamespace != "" {
@@ -74,7 +83,7 @@ func (s SinkPlugin) Write(m *message.Message) error {
 		namespace = streamName
 	}
 
-	messageKey := fmt.Sprintf("%v", m.Data.AccessProperty(s.pksByStream[streamName]))
+	messageKey := fmt.Sprintf("%s%v", s.config.KeyPrefix, m.Data.AccessProperty(s.pksByStream[streamName]))
 	if namespace != "" {
 		messageKey = namespace + ":" + messageKey
 	}
@@ -85,12 +94,17 @@ func (s SinkPlugin) Write(m *message.Message) error {
 		ttl = time.Second * time.Duration(s.config.SetWithTTL)
 	}
 
-	status := s.redisConn.Set(s.appCtx.GetContext(), messageKey, payload, ttl)
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
 
+	s.logger.Debug("Writing message to redis", "key", messageKey, "payload", string(data))
+	status := s.redisConn.Set(s.appCtx.GetContext(), messageKey, data, ttl)
 	return status.Err()
 }
 
-func (s SinkPlugin) Stop() {
+func (s *SinkPlugin) Stop() {
 	if err := s.redisConn.Close(); err != nil {
 		s.logger.Fatal("Failed to close redis client", "error", err)
 	}
