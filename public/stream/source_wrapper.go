@@ -92,6 +92,8 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 		}
 
 		return mongo_stream.NewMongoStreamSourcePlugin(driverConfig, config.Source.StreamSchema)
+	default:
+		p.ctx.Logger.WithPrefix("Source driver loader").Fatal("Failed to load driver", "driver", driver)
 	}
 
 	return nil
