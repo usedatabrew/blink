@@ -3,6 +3,7 @@ package stream
 import (
 	"github.com/usedatabrew/blink/config"
 	"github.com/usedatabrew/blink/internal/sources"
+	"github.com/usedatabrew/blink/internal/sources/airtable"
 	"github.com/usedatabrew/blink/internal/sources/mongo_stream"
 	"github.com/usedatabrew/blink/internal/sources/postgres_cdc"
 	"github.com/usedatabrew/blink/internal/sources/websockets"
@@ -92,6 +93,14 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 		}
 
 		return mongo_stream.NewMongoStreamSourcePlugin(driverConfig, config.Source.StreamSchema)
+	 case sources.AirTable:
+			driverConfig, err := ReadDriverConfig[airtable.Config](config.Source.Config, airtable.Config{})
+
+			if err != nil {
+				panic("cannot ready driver config")
+			}
+
+			return airtable.NewAirTableSourcePlugin(driverConfig, config.Source.StreamSchema)
 	}
 
 	return nil
