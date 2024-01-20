@@ -9,12 +9,13 @@ import (
 type ProcessorDriver string
 
 const (
-	OpenAIProcessor    ProcessorDriver = "openai"
-	SQLProcessor       ProcessorDriver = "sql"
-	LambdaProcessor    ProcessorDriver = "lambda"
-	HttpProcessor      ProcessorDriver = "http"
-	SQLEnrichProcessor ProcessorDriver = "sql_enrich"
-	LogProcessor       ProcessorDriver = "log"
+	OpenAIProcessor             ProcessorDriver = "openai"
+	AIContentModeratorProcessor ProcessorDriver = "ai_content_moderator"
+	SQLProcessor                ProcessorDriver = "sql"
+	LambdaProcessor             ProcessorDriver = "lambda"
+	HttpProcessor               ProcessorDriver = "http"
+	SQLEnrichProcessor          ProcessorDriver = "sql_enrich"
+	LogProcessor                ProcessorDriver = "log"
 )
 
 type DataProcessor interface {

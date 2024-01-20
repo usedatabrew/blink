@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/usedatabrew/blink/internal/metrics"
 	"github.com/usedatabrew/blink/internal/processors"
+	"github.com/usedatabrew/blink/internal/processors/ai_content_moderation"
 	"github.com/usedatabrew/blink/internal/processors/http"
 	logProc "github.com/usedatabrew/blink/internal/processors/log"
 	"github.com/usedatabrew/blink/internal/processors/openai"
@@ -42,7 +43,10 @@ func (p *ProcessorWrapper) Process(msg *message.Message) (*message.Message, erro
 	execStart := time.Now()
 	procMsg, err := p.processorDriver.Process(p.ctx.GetContext(), msg)
 	if err == nil {
-		p.metrics.IncrementProcessorSentMessages(string(p.procDriver))
+		p.metrics.IncrementProcessorSentMessages(p.procDriver)
+	}
+	if err == nil && procMsg == nil {
+		p.metrics.IncrementProcessorDroppedMessages(p.procDriver)
 	}
 
 	execEnd := time.Since(execStart)
@@ -78,6 +82,12 @@ func (p *ProcessorWrapper) LoadDriver(driver processors.ProcessorDriver, cfg int
 			panic("can read driver config")
 		}
 		return http.NewHttpPlugin(p.ctx, driverConfig)
+	case processors.AIContentModeratorProcessor:
+		driverConfig, err := ReadDriverConfig[ai_content_moderation.Config](cfg, ai_content_moderation.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return ai_content_moderation.NewAIContentModerationPlugin(p.ctx, driverConfig)
 	case processors.LogProcessor:
 		driverConfig, err := ReadDriverConfig[logProc.Config](cfg, logProc.Config{})
 		if err != nil {
