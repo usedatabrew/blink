@@ -122,7 +122,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 	}
 	s.prevEvent = m.GetEvent()
 
-	tableStatement := s.rowStatements[m.GetStream()][m.GetEvent()]
+	tableStatement := s.rowStatements[s.config.StreamPrefix+m.GetStream()][m.GetEvent()]
 	var colValues []interface{}
 	var pkColValue interface{}
 	// we apply different flow for deletion requests
@@ -140,8 +140,8 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 	} else if m.GetEvent() == message.Insert {
 		for _, ss := range s.streamSchema {
 			if ss.StreamName == m.Stream {
-				for _, col := range ss.Columns {
-					colValues = append(colValues, m.Data.AccessProperty(col.Name))
+				for _, col := range getColumnNamesSorted(ss.Columns) {
+					colValues = append(colValues, m.Data.AccessProperty(col))
 				}
 			}
 		}
@@ -160,9 +160,9 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 
 		for _, ss := range s.streamSchema {
 			if ss.StreamName == m.Stream {
-				for _, col := range ss.Columns {
-					if col.Name != pkColName {
-						colValues = append(colValues, m.Data.AccessProperty(col.Name))
+				for _, col := range getColumnNamesSorted(ss.Columns) {
+					if col != pkColName {
+						colValues = append(colValues, m.Data.AccessProperty(col))
 					}
 				}
 
@@ -214,7 +214,7 @@ func (s *SinkPlugin) writeSnapshotBatch() error {
 		messagesToInsert = append(messagesToInsert, colValues)
 	}
 
-	_, err := s.conn.CopyFrom(context.TODO(), pgx.Identifier{s.prevSnapshotStream}, colNames, pgx.CopyFromRows(messagesToInsert))
+	_, err := s.conn.CopyFrom(context.TODO(), pgx.Identifier{s.config.StreamPrefix + s.prevSnapshotStream}, colNames, pgx.CopyFromRows(messagesToInsert))
 
 	return err
 }
@@ -229,6 +229,7 @@ func (s *SinkPlugin) createInitStatements() {
 	var pkColumnNames = make(map[string]string)
 
 	for _, stream := range s.streamSchema {
+		stream.StreamName = s.config.StreamPrefix + stream.StreamName
 		dbCreateTableStatements = append(dbCreateTableStatements, generateCreateTableStatement(stream.StreamName, stream.Columns))
 
 		insertStatement := generateBatchInsertStatement(stream)
