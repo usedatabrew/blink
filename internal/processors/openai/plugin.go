@@ -67,7 +67,7 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 func (p *Plugin) processMessage(context context.Context, msg *message.Message) (*message.Message, error) {
 	sourceFieldValue := msg.Data.AccessProperty(p.config.SourceField)
 
-	prompt := fmt.Sprintf("Strinctly follow the instructions. Take the data: %s and respond after doing following: %s . Provide the shortest response possible \n Do not explain your actions.", sourceFieldValue, p.prompt)
+	prompt := fmt.Sprintf("Strictly follow the instructions. Take the data: %s and respond after doing following: %s . Provide the shortest response possible \n Do not explain your actions.", sourceFieldValue, p.prompt)
 
 	resp, err := p.client.CreateChatCompletion(
 		context,
