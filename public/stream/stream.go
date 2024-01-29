@@ -123,12 +123,16 @@ func (s *Stream) Start() error {
 	if err := s.validateAndInit(); err != nil {
 		return err
 	}
-	var messagesProcessed = 0
+	var messageSent = 0
+	var messagesReceived = 0
 
 	go func() {
 		for {
-			time.Sleep(time.Second * 25)
-			s.ctx.Logger.WithPrefix("Stream").Infof("Total messages processed: %d", messagesProcessed)
+			time.Sleep(time.Second * 10)
+			s.ctx.Logger.WithPrefix("Stream").Info(
+				"Messages stat", "messages_received", messagesReceived,
+				"messages_sent", messageSent, "messages_dropped_or_filtered", messagesReceived-messageSent,
+			)
 		}
 	}()
 
@@ -171,7 +175,7 @@ func (s *Stream) Start() error {
 				if err != nil {
 					s.ctx.Logger.WithPrefix("sink").Errorf("failed to write to sink %v", err)
 				} else {
-					messagesProcessed += 1
+					messageSent += 1
 				}
 				return nil, err
 			}
@@ -192,7 +196,12 @@ func (s *Stream) Start() error {
 		for {
 			select {
 			case sourceEvent := <-s.source.Events():
-				streamProxyChan <- sourceEvent.Message
+				if sourceEvent.Err != nil {
+					s.ctx.Logger.Errorf("Error processing message %s", sourceEvent.Err.Error())
+				} else {
+					streamProxyChan <- sourceEvent.Message
+					messagesReceived += 1
+				}
 			}
 		}
 	}()
@@ -230,6 +239,5 @@ func (s *Stream) evolveSchemaForSinks(streamSchema *schema.StreamSchemaObj) {
 		if err != nil {
 			s.ctx.Logger.Fatalf("error evolving schema %s", err.Error())
 		}
-
 	}
 }

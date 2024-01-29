@@ -121,7 +121,7 @@ func (s *SinkPlugin) Write(mess *message.Message) error {
 		deleteModel := &mongo.DeleteOneModel{
 			Filter: filter,
 		}
-		_, err := s.database.Collection(mess.GetStream()).
+		_, err := s.database.Collection(s.config.StreamPrefix+mess.GetStream()).
 			BulkWrite(s.appCtx.GetContext(), []mongo.WriteModel{deleteModel})
 		return err
 	}
@@ -134,12 +134,12 @@ func (s *SinkPlugin) Write(mess *message.Message) error {
 			Upsert: &upsert,
 			Update: bson.M{"$set": mess.Data.JsonQ().First()},
 		}
-		_, err := s.database.Collection(mess.GetStream()).
+		_, err := s.database.Collection(s.config.StreamPrefix+mess.GetStream()).
 			BulkWrite(s.appCtx.GetContext(), []mongo.WriteModel{upsertModel})
 		return err
 	}
 
-	_, err := s.database.Collection(mess.GetStream()).InsertOne(s.appCtx.GetContext(), mess.Data.JsonQ().First())
+	_, err := s.database.Collection(s.config.StreamPrefix+mess.GetStream()).InsertOne(s.appCtx.GetContext(), mess.Data.JsonQ().First())
 	return err
 }
 
@@ -176,6 +176,6 @@ func (s *SinkPlugin) writeSnapshotBatch() error {
 	for _, mess := range s.messageBatchBuffer {
 		batchToWrite = append(batchToWrite, mess.Data.JsonQ().First())
 	}
-	_, err := s.database.Collection(firstMessage.GetStream()).InsertMany(s.appCtx.GetContext(), batchToWrite)
+	_, err := s.database.Collection(s.config.StreamPrefix+firstMessage.GetStream()).InsertMany(s.appCtx.GetContext(), batchToWrite)
 	return err
 }

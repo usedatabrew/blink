@@ -4,36 +4,73 @@ import (
 	"context"
 	"fmt"
 	"github.com/apache/arrow/go/v14/arrow"
+	"github.com/charmbracelet/log"
 	"github.com/sashabaranov/go-openai"
 	"github.com/usedatabrew/blink/internal/helper"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
 	"github.com/usedatabrew/message"
+	"sync"
+	"time"
 )
 
 type Plugin struct {
-	config Config
-	ctx    *stream_context.Context
-	client *openai.Client
-	model  string
-	prompt string
+	config                        Config
+	ctx                           *stream_context.Context
+	client                        *openai.Client
+	model                         string
+	prompt                        string
+	rateLimiterTick               *time.Ticker
+	logger                        *log.Logger
+	mutx                          sync.Mutex
+	messagesProcessedWithinALimit int64
 }
 
 func NewOpenAIPlugin(appctx *stream_context.Context, config Config) (*Plugin, error) {
-	return &Plugin{config: config, ctx: appctx, client: openai.NewClient(config.ApiKey), model: config.Model, prompt: config.Prompt}, nil
+	plugin := &Plugin{
+		config: config, ctx: appctx,
+		client: openai.NewClient(config.ApiKey),
+		model:  config.Model, prompt: config.Prompt,
+		logger: log.WithPrefix("processor [openai]: "),
+	}
+
+	if config.LimitPerMinute > 0 {
+		plugin.rateLimiterTick = time.NewTicker(time.Minute)
+	}
+
+	return plugin, nil
 }
 
 func (p *Plugin) Process(context context.Context, msg *message.Message) (*message.Message, error) {
 	if msg.GetStream() != p.config.StreamName {
 		return msg, nil
 	}
+	if p.rateLimiterTick != nil && p.messagesProcessedWithinALimit >= p.config.LimitPerMinute {
+		p.logger.Info("Rate limit wait")
+		<-p.rateLimiterTick.C
+		p.mutx.Lock()
+		p.messagesProcessedWithinALimit = 0
+		p.mutx.Unlock()
+	}
 
+	processedMessage, err := p.processMessage(context, msg)
+	if err != nil {
+		return nil, err
+	}
+
+	p.mutx.Lock()
+	p.messagesProcessedWithinALimit += 1
+	p.mutx.Unlock()
+	return processedMessage, nil
+}
+
+func (p *Plugin) processMessage(context context.Context, msg *message.Message) (*message.Message, error) {
 	sourceFieldValue := msg.Data.AccessProperty(p.config.SourceField)
 
-	prompt := fmt.Sprintf("Take the data: %s and respond after doing following: %s . Provide the shortest response possible \n Do not explain your actions. If the question can be somehow answered with year/no - do exacetly that", sourceFieldValue, p.prompt)
+	prompt := fmt.Sprintf("Strictly follow the instructions. Take the data: %s and respond after doing following: %s . Provide the shortest response possible \n Do not explain your actions.", sourceFieldValue, p.prompt)
 
 	resp, err := p.client.CreateChatCompletion(
-		p.ctx.GetContext(),
+		context,
 		openai.ChatCompletionRequest{
 			Model: p.model,
 			Messages: []openai.ChatCompletionMessage{

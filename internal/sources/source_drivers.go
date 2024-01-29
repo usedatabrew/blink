@@ -6,4 +6,5 @@ const (
 	PostgresCDC SourceDriver = "postgres_cdc"
 	MongoStream SourceDriver = "mongo_stream"
 	WebSockets  SourceDriver = "websocket"
+	AirTable    SourceDriver = "airtable"
 )

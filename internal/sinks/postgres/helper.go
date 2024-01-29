@@ -49,13 +49,18 @@ func generateBatchDeleteStatement(table schema.StreamSchema) string {
 }
 
 func getColumnNames(columns []schema.Column) string {
+	return strings.Join(getColumnNamesSorted(columns), ", ")
+}
+
+func getColumnNamesSorted(columns []schema.Column) []string {
 	var columnNames []string
 	for _, column := range columns {
 		columnNames = append(columnNames, column.Name)
 	}
 
 	slices.Sort(columnNames)
-	return strings.Join(columnNames, ", ")
+
+	return columnNames
 }
 
 func getValuesPlaceholder(numColumns int) string {
