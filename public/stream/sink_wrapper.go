@@ -6,7 +6,9 @@ import (
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/blink/internal/sinks/kafka"
 	"github.com/usedatabrew/blink/internal/sinks/mongodb"
+	"github.com/usedatabrew/blink/internal/sinks/nats"
 	"github.com/usedatabrew/blink/internal/sinks/postgres"
+	"github.com/usedatabrew/blink/internal/sinks/rabbit_mq"
 	"github.com/usedatabrew/blink/internal/sinks/stdout"
 	websocket "github.com/usedatabrew/blink/internal/sinks/websockets"
 	"github.com/usedatabrew/blink/internal/stream_context"
@@ -83,6 +85,22 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 			panic("can read driver config")
 		}
 		return postgres.NewPostgresSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
+	case sinks.NatsSinkType:
+		driverConfig, err := ReadDriverConfig[nats.Config](cfg.Sink.Config, nats.Config{})
+
+		if err != nil {
+			panic("can't read driver config")
+		}
+
+		return nats.NewNatsSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
+	case sinks.RabbitMqSinkType:
+		driverConfig, err := ReadDriverConfig[rabbit_mq.Config](cfg.Sink.Config, rabbit_mq.Config{})
+
+		if err != nil {
+			panic("can't read driver config")
+		}
+
+		return rabbit_mq.NewRabbitMqSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	default:
 		p.ctx.Logger.WithPrefix("Sink loader").Fatal("Failed to load driver", "driver", driver)
 	}
