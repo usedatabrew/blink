@@ -2,6 +2,7 @@ package stdout
 
 import (
 	"context"
+
 	"github.com/charmbracelet/log"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
@@ -10,7 +11,6 @@ import (
 )
 
 type SinkPlugin struct {
-	appCtx       *stream_context.Context
 	streamSchema []schema.StreamSchema
 	config       Config
 	logger       *log.Logger
@@ -20,7 +20,6 @@ func NewStdOutSinkPlugin(config Config, schema []schema.StreamSchema, appCtx *st
 	return &SinkPlugin{
 		streamSchema: schema,
 		config:       config,
-		appCtx:       appCtx,
 		logger:       appCtx.Logger.WithPrefix("[sink]: stdout"),
 	}
 }
@@ -43,6 +42,4 @@ func (s *SinkPlugin) GetType() sinks.SinkDriver {
 func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
 }
 
-func (s *SinkPlugin) Stop() {
-	s.appCtx.GetContext().Done()
-}
+func (s *SinkPlugin) Stop() {}

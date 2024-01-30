@@ -14,7 +14,6 @@ import (
 
 type SinkPlugin struct {
 	natsClient   *nats.Conn
-	appCtx       *stream_context.Context
 	streamSchema []schema.StreamSchema
 	config       Config
 	logger       *log.Logger
@@ -24,7 +23,6 @@ func NewNatsSinkPlugin(config Config, schema []schema.StreamSchema, appCtx *stre
 	return &SinkPlugin{
 		streamSchema: schema,
 		config:       config,
-		appCtx:       appCtx,
 		logger:       appCtx.Logger.WithPrefix("[sink]: nats"),
 	}
 }
@@ -52,6 +50,4 @@ func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {}
 
 func (s *SinkPlugin) Stop() {
 	s.natsClient.Close()
-
-	s.appCtx.GetContext().Done()
 }

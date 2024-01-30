@@ -2,6 +2,9 @@ package mongodb
 
 import (
 	"context"
+	"sync"
+	"time"
+
 	"github.com/charmbracelet/log"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
@@ -10,8 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"sync"
-	"time"
 )
 
 type SinkPlugin struct {
@@ -163,7 +164,7 @@ func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
 }
 
 func (s *SinkPlugin) Stop() {
-	s.appCtx.GetContext().Done()
+	s.client.Disconnect(s.appCtx.GetContext())
 }
 
 func (s *SinkPlugin) writeSnapshotBatch() error {

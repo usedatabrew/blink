@@ -13,7 +13,6 @@ import (
 
 type SinkPlugin struct {
 	wsClient     *websocket.Conn
-	appCtx       *stream_context.Context
 	streamSchema []schema.StreamSchema
 	config       Config
 	logger       *log.Logger
@@ -23,7 +22,6 @@ func NewWebSocketSinkPlugin(config Config, schema []schema.StreamSchema, appCtx 
 	return &SinkPlugin{
 		streamSchema: schema,
 		config:       config,
-		appCtx:       appCtx,
 		logger:       appCtx.Logger.WithPrefix("[sink]: websocket"),
 	}
 }
@@ -61,6 +59,4 @@ func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
 
 }
 
-func (s *SinkPlugin) Stop() {
-	s.appCtx.GetContext().Done()
-}
+func (s *SinkPlugin) Stop() {}

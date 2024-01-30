@@ -15,7 +15,6 @@ import (
 type SinkPlugin struct {
 	rabbitmqClient *rabbitmq.Conn
 	publisher      *rabbitmq.Publisher
-	appCtx         *stream_context.Context
 	streamSchema   []schema.StreamSchema
 	config         Config
 	logger         *log.Logger
@@ -25,7 +24,6 @@ func NewRabbitMqSinkPlugin(config Config, schema []schema.StreamSchema, appCtx *
 	return &SinkPlugin{
 		streamSchema: schema,
 		config:       config,
-		appCtx:       appCtx,
 		logger:       appCtx.Logger.WithPrefix("[sink]: rabbit_mq"),
 	}
 }
@@ -71,6 +69,4 @@ func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {}
 func (s *SinkPlugin) Stop() {
 	s.publisher.Close()
 	s.rabbitmqClient.Close()
-
-	s.appCtx.GetContext().Done()
 }
