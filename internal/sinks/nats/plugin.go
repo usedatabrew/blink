@@ -1,4 +1,4 @@
-package stdout
+package nats
 
 import (
 	"context"
@@ -8,38 +8,46 @@ import (
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/blink/internal/stream_context"
 	"github.com/usedatabrew/message"
+
+	"github.com/nats-io/nats.go"
 )
 
 type SinkPlugin struct {
+	natsClient   *nats.Conn
 	streamSchema []schema.StreamSchema
 	config       Config
 	logger       *log.Logger
 }
 
-func NewStdOutSinkPlugin(config Config, schema []schema.StreamSchema, appCtx *stream_context.Context) sinks.DataSink {
+func NewNatsSinkPlugin(config Config, schema []schema.StreamSchema, appCtx *stream_context.Context) sinks.DataSink {
 	return &SinkPlugin{
 		streamSchema: schema,
 		config:       config,
-		logger:       appCtx.Logger.WithPrefix("[sink]: stdout"),
+		logger:       appCtx.Logger.WithPrefix("[sink]: nats"),
 	}
 }
 
 func (s *SinkPlugin) Connect(ctx context.Context) error {
-	return nil
+	client, err := nats.Connect(s.config.Url)
+
+	if err != nil {
+		return err
+	}
+
+	s.natsClient = client
+	return err
 }
 
 func (s *SinkPlugin) Write(message *message.Message) error {
-	d := message.AsJSONString()
-	s.logger.Info(d)
-	return nil
+	return s.natsClient.Publish(s.config.Subject, []byte(message.AsJSONString()))
 }
 
 func (s *SinkPlugin) GetType() sinks.SinkDriver {
-	return sinks.StdOutSinkType
+	return sinks.NatsSinkType
 }
 
-// SetExpectedSchema for Stdout component does nothing, since this component is used mostly for debugging
-func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
-}
+func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {}
 
-func (s *SinkPlugin) Stop() {}
+func (s *SinkPlugin) Stop() {
+	s.natsClient.Close()
+}

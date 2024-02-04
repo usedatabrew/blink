@@ -2,6 +2,7 @@ package websockets
 
 import (
 	"context"
+
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
 	"github.com/usedatabrew/blink/internal/schema"
@@ -12,7 +13,6 @@ import (
 
 type SinkPlugin struct {
 	wsClient     *websocket.Conn
-	appCtx       *stream_context.Context
 	streamSchema []schema.StreamSchema
 	config       Config
 	logger       *log.Logger
@@ -22,7 +22,6 @@ func NewWebSocketSinkPlugin(config Config, schema []schema.StreamSchema, appCtx 
 	return &SinkPlugin{
 		streamSchema: schema,
 		config:       config,
-		appCtx:       appCtx,
 		logger:       appCtx.Logger.WithPrefix("[sink]: websocket"),
 	}
 }
@@ -53,13 +52,11 @@ func (s *SinkPlugin) Write(message *message.Message) error {
 }
 
 func (s *SinkPlugin) GetType() sinks.SinkDriver {
-	return sinks.StdOutSinkType
+	return sinks.WebSocketSinkType
 }
 
 func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
 
 }
 
-func (s *SinkPlugin) Stop() {
-	s.appCtx.GetContext().Done()
-}
+func (s *SinkPlugin) Stop() {}

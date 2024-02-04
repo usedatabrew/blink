@@ -3,6 +3,10 @@ package kafka
 import (
 	"context"
 	"fmt"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sasl/aws"
 	"github.com/twmb/franz-go/pkg/sasl/plain"
@@ -10,9 +14,6 @@ import (
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/message"
-	"strings"
-	"sync"
-	"time"
 )
 
 type SinkPlugin struct {
@@ -125,7 +126,7 @@ func (s *SinkPlugin) flushBuffer() error {
 }
 
 func (s *SinkPlugin) GetType() sinks.SinkDriver {
-	return sinks.StdOutSinkType
+	return sinks.KafkaSinkType
 }
 
 func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {

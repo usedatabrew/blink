@@ -8,5 +8,7 @@ const (
 	KafkaSinkType     SinkDriver = "kafka"
 	PostgresSinkType  SinkDriver = "postgres"
 	MongoDBSinkType   SinkDriver = "mongodb"
+	NatsSinkType      SinkDriver = "nats"
+	RabbitMqSinkType  SinkDriver = "rabbitmq"
 	RedisSinkType     SinkDriver = "redis"
 )
