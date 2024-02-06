@@ -52,11 +52,17 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 }
 
 func (s *SinkPlugin) Write(message *message.Message) error {
+	var opts func(*rabbitmq.PublishOptions)
+
+	if s.config.ExchangeName != "" {
+		opts = rabbitmq.WithPublishOptionsExchange(s.config.ExchangeName)
+	}
+
 	return s.publisher.Publish(
 		[]byte(message.AsJSONString()),
 		[]string{s.config.RoutingKey},
 		rabbitmq.WithPublishOptionsContentType("application/json"),
-		rabbitmq.WithPublishOptionsExchange(s.config.ExchangeName),
+		opts,
 	)
 }
 
