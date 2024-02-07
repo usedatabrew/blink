@@ -34,11 +34,14 @@ func NewRedisSinkPlugin(config Config, schema []schema.StreamSchema, appCtx *str
 }
 
 func (s *SinkPlugin) Connect(context context.Context) error {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     s.config.RedisAddr,
-		Password: s.config.RedisPassword,
-		DB:       0,
-	})
+	options, err := redis.ParseURL(s.config.RedisAddr)
+	if err != nil {
+		return err
+	}
+
+	options.Password = s.config.RedisPassword
+
+	rdb := redis.NewClient(options)
 
 	status := rdb.Ping(context)
 	if status.Err() != nil {
