@@ -28,7 +28,13 @@ func NewNatsSinkPlugin(config Config, schema []schema.StreamSchema, appCtx *stre
 }
 
 func (s *SinkPlugin) Connect(ctx context.Context) error {
-	client, err := nats.Connect(s.config.Url)
+	var opt nats.Option
+
+	if s.config.Username != "" {
+		opt = nats.UserInfo(s.config.Username, s.config.Password)
+	}
+
+	client, err := nats.Connect(s.config.Url, opt)
 
 	if err != nil {
 		return err
