@@ -8,6 +8,7 @@ import (
 	"github.com/usedatabrew/blink/internal/sources"
 	"github.com/usedatabrew/message"
 	"github.com/usedatabrew/pglogicalstream"
+	"strings"
 )
 
 type SourcePlugin struct {
@@ -94,7 +95,12 @@ func (p *SourcePlugin) buildPluginsSchema() []pglogicalstream.DbTablesSchema {
 	var tablesSchema []pglogicalstream.DbTablesSchema
 	for _, stream := range p.streamSchema {
 		tSch := pglogicalstream.DbTablesSchema{}
-		tSch.Table = fmt.Sprintf("%s.%s", p.config.Schema, stream.StreamName)
+		if len(strings.Split(stream.StreamName, ".")) == 2 {
+			// schema name included in stream.
+			tSch.Table = stream.StreamName
+		} else {
+			tSch.Table = fmt.Sprintf("%s.%s", p.config.Schema, stream.StreamName)
+		}
 		for _, schemaCol := range stream.Columns {
 			tSch.Columns = append(tSch.Columns, pglogicalstream.DbSchemaColumn{
 				Name:                schemaCol.Name,
