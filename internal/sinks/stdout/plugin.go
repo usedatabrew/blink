@@ -2,8 +2,8 @@ package stdout
 
 import (
 	"context"
-
 	"github.com/charmbracelet/log"
+	"github.com/goccy/go-json"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/blink/internal/stream_context"
@@ -29,8 +29,8 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 }
 
 func (s *SinkPlugin) Write(message *message.Message) error {
-	d := message.AsJSONString()
-	s.logger.Info(d)
+	d, _ := json.MarshalIndent(message.Data.JsonQ().First(), "", "  ")
+	s.logger.Info(string(d))
 	return nil
 }
 

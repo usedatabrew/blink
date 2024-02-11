@@ -19,6 +19,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/websocket v1.5.0
 	github.com/jackc/pgx/v5 v5.4.3
+	github.com/jaswdr/faker v1.19.1
 	github.com/mehanizm/airtable v0.3.1
 	github.com/nats-io/nats.go v1.32.0
 	github.com/prometheus/client_golang v1.11.1

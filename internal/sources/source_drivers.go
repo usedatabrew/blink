@@ -7,4 +7,5 @@ const (
 	MongoStream SourceDriver = "mongo_stream"
 	WebSockets  SourceDriver = "websocket"
 	AirTable    SourceDriver = "airtable"
+	Playground  SourceDriver = "playground"
 )

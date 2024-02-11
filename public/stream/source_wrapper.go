@@ -5,6 +5,7 @@ import (
 	"github.com/usedatabrew/blink/internal/sources"
 	"github.com/usedatabrew/blink/internal/sources/airtable"
 	"github.com/usedatabrew/blink/internal/sources/mongo_stream"
+	"github.com/usedatabrew/blink/internal/sources/playground"
 	"github.com/usedatabrew/blink/internal/sources/postgres_cdc"
 	"github.com/usedatabrew/blink/internal/sources/websockets"
 	"github.com/usedatabrew/blink/internal/stream_context"
@@ -73,6 +74,12 @@ func (p *SourceWrapper) GetPluginConfigs(driver sources.SourceDriver, config *ya
 
 func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Configuration) sources.DataSource {
 	switch driver {
+	case sources.Playground:
+		driverConfig, err := ReadDriverConfig[playground.Config](config.Source.Config, playground.Config{})
+		if err != nil {
+			panic("can read driver config")
+		}
+		return playground.NewPlaygroundSourcePlugin(driverConfig, config.Source.StreamSchema)
 	case sources.PostgresCDC:
 		driverConfig, err := ReadDriverConfig[postgres_cdc.Config](config.Source.Config, postgres_cdc.Config{})
 		if err != nil {
@@ -93,14 +100,14 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 		}
 
 		return mongo_stream.NewMongoStreamSourcePlugin(driverConfig, config.Source.StreamSchema)
-	 case sources.AirTable:
-			driverConfig, err := ReadDriverConfig[airtable.Config](config.Source.Config, airtable.Config{})
+	case sources.AirTable:
+		driverConfig, err := ReadDriverConfig[airtable.Config](config.Source.Config, airtable.Config{})
 
-			if err != nil {
-				panic("cannot ready driver config")
-			}
+		if err != nil {
+			panic("cannot ready driver config")
+		}
 
-			return airtable.NewAirTableSourcePlugin(driverConfig, config.Source.StreamSchema)
+		return airtable.NewAirTableSourcePlugin(driverConfig, config.Source.StreamSchema)
 	default:
 		p.ctx.Logger.WithPrefix("Source driver loader").Fatal("Failed to load driver", "driver", driver)
 	}
