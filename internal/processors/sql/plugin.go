@@ -9,6 +9,7 @@ import (
 	"github.com/barkimedes/go-deepcopy"
 	"github.com/blastrain/vitess-sqlparser/sqlparser"
 	"github.com/charmbracelet/log"
+	"github.com/usedatabrew/blink/internal/helper"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
 	"github.com/usedatabrew/message"
@@ -83,7 +84,7 @@ func (p *Plugin) EvolveSchema(streamSchema *schema.StreamSchemaObj) error {
 
 	var streamToProcess *schema.StreamSchema
 	for _, stream := range streamSchema.GetLatestSchema() {
-		if stream.StreamName == streamName {
+		if helper.NormalizeStreamName(stream.StreamName) == streamName {
 			streamToProcess = &stream
 		}
 	}

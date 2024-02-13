@@ -3,6 +3,7 @@ package schema
 import (
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/barkimedes/go-deepcopy"
+	"github.com/usedatabrew/blink/internal/helper"
 	"slices"
 )
 
@@ -27,7 +28,7 @@ func (s *StreamSchemaObj) GetLatestSchema() []StreamSchema {
 func (s *StreamSchemaObj) AddField(streamName, name string, fieldType arrow.DataType, driverType string) {
 	var streamSchemaCopy = s.getLastSchemaDeepCopy()
 	for idx, stream := range streamSchemaCopy {
-		if stream.StreamName == streamName {
+		if helper.NormalizeStreamName(stream.StreamName) == streamName {
 			arrowColumn := Column{
 				Name:                name,
 				DatabrewType:        fieldType.String(),
@@ -53,7 +54,7 @@ func (s *StreamSchemaObj) FakeEvolve() {
 func (s *StreamSchemaObj) RemoveField(streamName, columnName string) {
 	var streamSchemaCopy = s.getLastSchemaDeepCopy()
 	for streamIndex, stream := range streamSchemaCopy {
-		if stream.StreamName == streamName {
+		if helper.NormalizeStreamName(stream.StreamName) == streamName {
 			for colIdx, column := range stream.Columns {
 				if column.Name == columnName {
 					streamSchemaCopy[streamIndex].Columns = remove(stream.Columns, colIdx)
