@@ -45,9 +45,19 @@ func (s *SourcePlugin) Start() {
 	if s.config.HistoricalBatch {
 		for i := 0; i <= 1000; i++ {
 			msgBytes := s.getFakeMessageForStream()
-			msg := message.NewMessage(message.Snapshot, s.config.DataType, msgBytes)
+
+			if err := json.Unmarshal(msgBytes, &builder); err != nil {
+				s.messageEvents <- sources.MessageEvent{
+					Message: nil,
+					Err:     err,
+				}
+				continue
+			}
+
+			data, _ := builder.NewRecord().MarshalJSON()
+			m := message.NewMessage(message.Snapshot, s.config.DataType, data)
 			s.messageEvents <- sources.MessageEvent{
-				Message: msg,
+				Message: m,
 				Err:     nil,
 			}
 		}
