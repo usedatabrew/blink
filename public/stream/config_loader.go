@@ -1,7 +1,6 @@
 package stream
 
 import (
-	"fmt"
 	"github.com/usedatabrew/blink/config"
 	"os"
 	"regexp"
@@ -24,7 +23,7 @@ func ReadInitConfigFromYaml(configBytes []byte) (config.Configuration, error) {
 	for _, ss := range conf.Source.StreamSchema {
 		ss.SortColumnsAsc()
 	}
-	fmt.Println(string(configBytes))
+
 	config.ValidateConfigSchema(conf)
 	return conf, err
 }

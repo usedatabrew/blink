@@ -9,7 +9,7 @@ import (
 )
 
 func generateCreateTableStatement(table string, columns []schema.Column) string {
-	statement := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (\n", table)
+	statement := fmt.Sprintf("CREATE TABLE IF NOT EXISTS \"%s\" (\n", table)
 
 	for idx, column := range columns {
 		statement += fmt.Sprintf("  %s %s", column.Name, helper.ArrowToPg10(helper.MapPlainTypeToArrow(column.DatabrewType)))
@@ -31,21 +31,21 @@ func generateCreateTableStatement(table string, columns []schema.Column) string 
 func generateBatchInsertStatement(table schema.StreamSchema) string {
 	columnNames := getColumnNames(table.Columns)
 	valuesPlaceholder := getValuesPlaceholder(len(table.Columns))
-	fmt.Println(columnNames, fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;", table.StreamName, columnNames, valuesPlaceholder), valuesPlaceholder)
-	return fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;", table.StreamName, columnNames, valuesPlaceholder)
+	fmt.Println(columnNames, fmt.Sprintf("INSERT INTO \"%s\" (%s) VALUES %s;", table.StreamName, columnNames, valuesPlaceholder), valuesPlaceholder)
+	return fmt.Sprintf("INSERT INTO \"%s\" (%s) VALUES %s;", table.StreamName, columnNames, valuesPlaceholder)
 }
 
 func generateBatchUpdateStatement(table schema.StreamSchema) string {
 	pkColumns := getPrimaryKeyColumnsForUpdate(table.Columns)
 	setClause := getSetClause(table.Columns)
 
-	return fmt.Sprintf("UPDATE %s SET %s WHERE %s;\n", table.StreamName, setClause, pkColumns)
+	return fmt.Sprintf("UPDATE \"%s\" SET %s WHERE %s;\n", table.StreamName, setClause, pkColumns)
 }
 
 func generateBatchDeleteStatement(table schema.StreamSchema) string {
 	pkColumns := getPrimaryKeyColumns(table.Columns)
 
-	return fmt.Sprintf("DELETE FROM %s WHERE %s;\n", table.StreamName, pkColumns)
+	return fmt.Sprintf("DELETE FROM \"%s\" WHERE %s;\n", table.StreamName, pkColumns)
 }
 
 func getColumnNames(columns []schema.Column) string {
