@@ -9,6 +9,8 @@ import (
 )
 
 func generateCreateTableStatement(table string, columns []schema.Column) string {
+	spltTable := strings.Split(table, ".")
+	table = spltTable[len(spltTable)-1]
 	statement := fmt.Sprintf("CREATE TABLE IF NOT EXISTS \"%s\" (\n", table)
 
 	for idx, column := range columns {
@@ -102,4 +104,13 @@ func getSetClause(columns []schema.Column) string {
 		}
 	}
 	return strings.Join(setClauses, ", ")
+}
+
+func generateStreamNameWithPrefix(stream, prefix string) string {
+	var streamSplit = strings.Split(stream, ".")
+	if len(streamSplit) == 2 {
+		return prefix + streamSplit[1]
+	}
+
+	return prefix + stream
 }

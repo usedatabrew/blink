@@ -122,7 +122,8 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 	}
 	s.prevEvent = m.GetEvent()
 
-	tableStatement := s.rowStatements[s.config.StreamPrefix+m.GetStream()][m.GetEvent()]
+	streamRow := generateStreamNameWithPrefix(m.GetStream(), s.config.StreamPrefix)
+	tableStatement := s.rowStatements[streamRow][m.GetEvent()]
 	var colValues []interface{}
 	var pkColValue interface{}
 	// we apply different flow for deletion requests
@@ -139,7 +140,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 		}
 	} else if m.GetEvent() == message.Insert {
 		for _, ss := range s.streamSchema {
-			if ss.StreamName == m.Stream {
+			if s.compareStreamNames(ss.StreamName, m.Stream) {
 				for _, col := range getColumnNamesSorted(ss.Columns) {
 					colValues = append(colValues, m.Data.AccessProperty(col))
 				}
@@ -159,7 +160,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 		}
 
 		for _, ss := range s.streamSchema {
-			if ss.StreamName == m.Stream {
+			if s.compareStreamNames(ss.StreamName, m.Stream) {
 				for _, col := range getColumnNamesSorted(ss.Columns) {
 					if col != pkColName {
 						colValues = append(colValues, m.Data.AccessProperty(col))
@@ -170,6 +171,7 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 			}
 		}
 
+		fmt.Println(tableStatement, colValues)
 		_, err := s.conn.Exec(s.appctx.GetContext(), tableStatement, colValues...)
 		if err != nil {
 			return err
@@ -177,6 +179,10 @@ func (s *SinkPlugin) Write(m *message.Message) error {
 	}
 
 	return nil
+}
+
+func (s *SinkPlugin) compareStreamNames(streamA, streamB string) bool {
+	return generateStreamNameWithPrefix(streamA, s.config.StreamPrefix) == generateStreamNameWithPrefix(streamB, s.config.StreamPrefix)
 }
 
 // writeSnapshotBatch is used only when we restore snapshot / to back-filling
@@ -192,7 +198,7 @@ func (s *SinkPlugin) writeSnapshotBatch() error {
 
 	// extract column names
 	for _, ss := range s.streamSchema {
-		if ss.StreamName == s.messagesBuffer[0].Stream {
+		if generateStreamNameWithPrefix(ss.StreamName, s.config.StreamPrefix) == generateStreamNameWithPrefix(s.messagesBuffer[0].Stream, s.config.StreamPrefix) {
 			for _, col := range ss.Columns {
 				colNames = append(colNames, col.Name)
 			}
@@ -204,7 +210,7 @@ func (s *SinkPlugin) writeSnapshotBatch() error {
 		// in CopyFromRows statement
 		var colValues []interface{}
 		for _, ss := range s.streamSchema {
-			if ss.StreamName == bufMessage.Stream {
+			if generateStreamNameWithPrefix(ss.StreamName, s.config.StreamPrefix) == generateStreamNameWithPrefix(bufMessage.Stream, s.config.StreamPrefix) {
 				for _, col := range ss.Columns {
 					colValues = append(colValues, bufMessage.Data.AccessProperty(col.Name))
 				}
@@ -214,7 +220,9 @@ func (s *SinkPlugin) writeSnapshotBatch() error {
 		messagesToInsert = append(messagesToInsert, colValues)
 	}
 
-	_, err := s.conn.CopyFrom(context.TODO(), pgx.Identifier{s.config.StreamPrefix + s.prevSnapshotStream}, colNames, pgx.CopyFromRows(messagesToInsert))
+	snapStreamName := generateStreamNameWithPrefix(s.prevSnapshotStream, s.config.StreamPrefix)
+	fmt.Println(messagesToInsert, colNames)
+	_, err := s.conn.CopyFrom(context.TODO(), pgx.Identifier{snapStreamName}, colNames, pgx.CopyFromRows(messagesToInsert))
 
 	return err
 }
@@ -229,7 +237,7 @@ func (s *SinkPlugin) createInitStatements() {
 	var pkColumnNames = make(map[string]string)
 
 	for _, stream := range s.streamSchema {
-		stream.StreamName = s.config.StreamPrefix + stream.StreamName
+		stream.StreamName = generateStreamNameWithPrefix(stream.StreamName, s.config.StreamPrefix)
 		dbCreateTableStatements = append(dbCreateTableStatements, generateCreateTableStatement(stream.StreamName, stream.Columns))
 
 		insertStatement := generateBatchInsertStatement(stream)

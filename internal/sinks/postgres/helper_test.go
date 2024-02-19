@@ -59,3 +59,8 @@ func Test_getColumnNames(t *testing.T) {
 func TestSinkPlugin_Write(t *testing.T) {
 
 }
+
+func Test_generateCreateTableStatement(t *testing.T) {
+	generatedStream := generateStreamNameWithPrefix("public.zenko_comments", "databrew_")
+	fmt.Println(generatedStream)
+}
