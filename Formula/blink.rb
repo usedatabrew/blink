@@ -5,11 +5,11 @@
 class Blink < Formula
   desc "Open Source stream processing framework"
   homepage "https://github.com/usedatabrew/blink"
-  version "1.11.0"
+  version "1.11.1"
 
   on_macos do
-    url "https://github.com/usedatabrew/blink/releases/download/v1.11.0/blink_1.11.0_darwin_amd64.tar.gz"
-    sha256 "0e17e380c567588894c9cf8daa63c3948a2d171ef9c56401a4a28a972ef3fa9a"
+    url "https://github.com/usedatabrew/blink/releases/download/v1.11.1/blink_1.11.1_darwin_amd64.tar.gz"
+    sha256 "663f2792c2b6c82e75edc5aed2cae3058273d6c80a6dd7b1cb0ad55a42332995"
 
     def install
       bin.install "blink"
@@ -28,8 +28,8 @@ class Blink < Formula
 
   on_linux do
     if Hardware::CPU.intel?
-      url "https://github.com/usedatabrew/blink/releases/download/v1.11.0/blink_1.11.0_linux_amd64.tar.gz"
-      sha256 "426b61ac1556a65e7848b972d297c289244bacbadcc7ebbf5488c9d29b42d7e4"
+      url "https://github.com/usedatabrew/blink/releases/download/v1.11.1/blink_1.11.1_linux_amd64.tar.gz"
+      sha256 "0be5cb986086cb6854135802de67ba6b3a1b934dd7b5d43e27dab710f246cbc5"
 
       def install
         bin.install "blink"
