@@ -28,6 +28,11 @@ func NewPostgresSourcePlugin(config Config, schema []schema.StreamSchema) source
 }
 
 func (p *SourcePlugin) Connect(ctx context.Context) error {
+	tlsVerifyMode := pglogicalstream.TlsNoVerify
+	if p.config.SSLRequired {
+		tlsVerifyMode = pglogicalstream.TlsRequireVerify
+	}
+
 	pgStream, err := pglogicalstream.NewPgStream(pglogicalstream.Config{
 		DbHost:                     p.config.Host,
 		DbPassword:                 p.config.Password,
@@ -37,7 +42,7 @@ func (p *SourcePlugin) Connect(ctx context.Context) error {
 		DbSchema:                   p.config.Schema,
 		DbTablesSchema:             p.buildPluginsSchema(),
 		ReplicationSlotName:        fmt.Sprintf("rs_%s", p.config.SlotName),
-		TlsVerify:                  "require",
+		TlsVerify:                  tlsVerifyMode,
 		StreamOldData:              p.config.StreamSnapshot,
 		SnapshotMemorySafetyFactor: 0.3,
 		BatchSize:                  13500,
