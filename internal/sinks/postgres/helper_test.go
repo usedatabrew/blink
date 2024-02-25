@@ -31,14 +31,14 @@ var testMessage = message.NewMessage(message.Snapshot, "flights", []byte(`{"mess
 
 func Test_generateBatchInsertStatement(t *testing.T) {
 	result := generateBatchInsertStatement(testStreamSchema[0])
-	if result != "INSERT INTO flights (flights_name, id) VALUES ($1, $2 );" {
+	if result != "INSERT INTO \"flights\" (flights_name, id) VALUES ($1, $2 );" {
 		t.Fatal("Generated Insert Query is not correct")
 	}
 }
 
 func Test_generateBatchUpdateStatement(t *testing.T) {
 	result := generateBatchUpdateStatement(testStreamSchema[0])
-	if result != "UPDATE flights SET flights_name = $1 WHERE id = $2;\n" {
+	if result != "UPDATE \"flights\" SET flights_name = $1 WHERE id = $2;\n" {
 		t.Fatal("Generated Update Query is not correct")
 	}
 }
@@ -46,7 +46,7 @@ func Test_generateBatchUpdateStatement(t *testing.T) {
 func Test_generateBatchDeleteStatement(t *testing.T) {
 	result := generateBatchDeleteStatement(testStreamSchema[0])
 	fmt.Println(result)
-	if result != "DELETE FROM flights WHERE id = $1;\n" {
+	if result != "DELETE FROM \"flights\" WHERE id = $1;\n" {
 		t.Fatal("Generated Update Query is not correct")
 	}
 }

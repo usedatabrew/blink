@@ -33,7 +33,6 @@ func generateCreateTableStatement(table string, columns []schema.Column) string 
 func generateBatchInsertStatement(table schema.StreamSchema) string {
 	columnNames := getColumnNames(table.Columns)
 	valuesPlaceholder := getValuesPlaceholder(len(table.Columns))
-	fmt.Println(columnNames, fmt.Sprintf("INSERT INTO \"%s\" (%s) VALUES %s;", table.StreamName, columnNames, valuesPlaceholder), valuesPlaceholder)
 	return fmt.Sprintf("INSERT INTO \"%s\" (%s) VALUES %s;", table.StreamName, columnNames, valuesPlaceholder)
 }
 
