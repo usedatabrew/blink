@@ -279,8 +279,8 @@ github.com/twmb/franz-go/pkg/kmsg v1.7.0 h1:a457IbvezYfA5UkiBvyV3zj0Is3y1i8EJgqj
 github.com/twmb/franz-go/pkg/kmsg v1.7.0/go.mod h1:se9Mjdt0Nwzc9lnjJ0HyDtLyBnaBDAd7pCje47OhSyw=
 github.com/usedatabrew/message v0.0.3 h1:NRynMSekP3U4kRUMxjbv5dCHW7Q2P33GVu0DkYBIH6w=
 github.com/usedatabrew/message v0.0.3/go.mod h1:dwSl52lgKKo51dk3DBjW7Whi6kQl06mXFfPumGxumeA=
-github.com/usedatabrew/pglogicalstream v0.0.22 h1:XyvWZQQ1SU7OjalYJP+9AJ+LtIEx98rtpzbLRLwN6BU=
-github.com/usedatabrew/pglogicalstream v0.0.22/go.mod h1:VmPhp8W+MSHR2sIPdwQxGBzMVR2zTzUxEbiMrjH+5eU=
+github.com/usedatabrew/pglogicalstream v0.0.23 h1:IiDWzDRgV86v9uoLCQ+kJaRD3fN4KtPXmwOxJVu0+gY=
+github.com/usedatabrew/pglogicalstream v0.0.23/go.mod h1:VmPhp8W+MSHR2sIPdwQxGBzMVR2zTzUxEbiMrjH+5eU=
 github.com/usedatabrew/tango v0.0.5 h1:YXSe4gnYsjGCoODFbtWjhqhmq2JIFJ9Zo4X4ED7wnZE=
 github.com/usedatabrew/tango v0.0.5/go.mod h1:6/hSAFH1NvS/wdsDlsLyHq1nbZLOIClzbOc7jxqSZ54=
 github.com/wagslane/go-rabbitmq v0.12.4 h1:dxpmTew/wrBlltcu9kBZNTVftT7tsguF4n4IAawK2d8=

@@ -24,9 +24,10 @@ type Columns struct {
 
 type Service struct {
 	ReloadOnRestart    bool        `yaml:"reload_on_restart"`
-	PipelineId         int         `yaml:"pipeline_id" validate:"required"`
+	PipelineId         int64       `yaml:"pipeline_id" validate:"required"`
 	InfluxEnabled      bool        `yaml:"enable_influx"`
 	EnableETCDRegistry bool        `yaml:"enable_etcd_registry"`
+	OffsetStorageURI   string      `yaml:"offset_storage_uri"`
 	ETCD               *ETCD       `yaml:"etcd"`
 	Influx             interface{} `yaml:"influx"`
 }

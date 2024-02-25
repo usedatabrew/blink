@@ -29,7 +29,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/twmb/franz-go v1.15.2
 	github.com/usedatabrew/message v0.0.3
-	github.com/usedatabrew/pglogicalstream v0.0.22
+	github.com/usedatabrew/pglogicalstream v0.0.23
 	github.com/usedatabrew/tango v0.0.5
 	github.com/wagslane/go-rabbitmq v0.12.4
 	github.com/zeebo/assert v1.3.0
