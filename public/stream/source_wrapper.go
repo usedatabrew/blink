@@ -7,9 +7,9 @@ import (
 	"github.com/usedatabrew/blink/internal/sources/mongo_stream"
 	"github.com/usedatabrew/blink/internal/sources/playground"
 	"github.com/usedatabrew/blink/internal/sources/postgres_cdc"
+	"github.com/usedatabrew/blink/internal/sources/postgres_incr_sync"
 	"github.com/usedatabrew/blink/internal/sources/websockets"
 	"github.com/usedatabrew/blink/internal/stream_context"
-
 	"gopkg.in/yaml.v3"
 )
 
@@ -17,21 +17,26 @@ import (
 // measure performance, build proper configuration and control the context
 type SourceWrapper struct {
 	sourceDriver sources.DataSource
+	pluginType   sources.SourceDriver
+	config       config.Configuration
 	stream       chan sources.MessageEvent
 	ctx          *stream_context.Context
 }
 
 func NewSourceWrapper(pluginType sources.SourceDriver, config config.Configuration) SourceWrapper {
 	loader := SourceWrapper{
-		stream: make(chan sources.MessageEvent),
+		stream:     make(chan sources.MessageEvent),
+		config:     config,
+		pluginType: pluginType,
 	}
-	loadedDriver := loader.LoadDriver(pluginType, config)
-	loader.sourceDriver = loadedDriver
+
 	return loader
 }
 
 func (p *SourceWrapper) Init(appctx *stream_context.Context) error {
 	p.ctx = appctx
+	loadedDriver := p.LoadDriver(p.pluginType, p.config)
+	p.sourceDriver = loadedDriver
 	return p.sourceDriver.Connect(appctx.GetContext())
 }
 
@@ -108,6 +113,14 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 		}
 
 		return airtable.NewAirTableSourcePlugin(driverConfig, config.Source.StreamSchema)
+	case sources.PostgresIncremental:
+		driverConfig, err := ReadDriverConfig[postgres_incr_sync.Config](config.Source.Config, postgres_incr_sync.Config{})
+
+		if err != nil {
+			panic("cannot ready driver config")
+		}
+
+		return postgres_incr_sync.NewPostgresIncrSourcePlugin(p.ctx, driverConfig, config.Source.StreamSchema)
 	default:
 		p.ctx.Logger.WithPrefix("Source driver loader").Fatal("Failed to load driver", "driver", driver)
 	}
