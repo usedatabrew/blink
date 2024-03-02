@@ -135,11 +135,21 @@ func (p *SourcePlugin) Start() {
 							Err:     err,
 						}
 					}
-					newOffset := streamStoredOffset + int64(rowsFetched)
-					p.logger.Infof("Fetched %d storing new offset %d", rowsFetched, newOffset)
-					err = p.appCtx.OffsetStorage().SetOffsetForPipeline(offset_storage.BuildKey(p.appCtx.PipelineId(), stream.StreamName), newOffset)
-					if err != nil {
-						p.logger.Fatalf("Failed to store the offset %s", err.Error())
+					if rowsFetched == 0 && streamStoredOffset == 0 {
+						//p.logger.Infof("Fetched %d storing new offset %d", rowsFetched, newOffset)
+						p.logger.Info("No rows fetched after the initial connection. Waiting for the first new rows to appear")
+						p.logger.Info("Storing default offset", "offset", offset)
+						err = p.appCtx.OffsetStorage().SetOffsetForPipeline(offset_storage.BuildKey(p.appCtx.PipelineId(), stream.StreamName), offset)
+						if err != nil {
+							p.logger.Fatalf("Failed to store the offset %s", err.Error())
+						}
+					} else {
+						newOffset := streamStoredOffset + int64(rowsFetched)
+						p.logger.Infof("Fetched %d storing new offset %d", rowsFetched, newOffset)
+						err = p.appCtx.OffsetStorage().SetOffsetForPipeline(offset_storage.BuildKey(p.appCtx.PipelineId(), stream.StreamName), newOffset)
+						if err != nil {
+							p.logger.Fatalf("Failed to store the offset %s", err.Error())
+						}
 					}
 				}
 			}
