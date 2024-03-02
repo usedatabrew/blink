@@ -89,6 +89,8 @@ func (p *SourcePlugin) Start() {
 					if streamStoredOffset == 0 {
 						offset = p.selectLastRecordId(stream.StreamName)
 						p.logger.Info("Snapshot streaming is disabled. Starting sync form the offset", "offset", offset)
+					} else {
+						offset = streamStoredOffset
 					}
 				} else {
 					if streamStoredOffset > 0 {
@@ -104,7 +106,7 @@ func (p *SourcePlugin) Start() {
 					builder := array.NewRecordBuilder(memory.DefaultAllocator, arrowSchema)
 					pkForStream := p.streamPks[stream.StreamName]
 					selectColumns := strings.Join(p.streamColumnsToSelect[stream.StreamName], ", ")
-					q := fmt.Sprintf("SELECT %s FROM %s ORDER BY %s ASC LIMIT 10000 OFFSET %d", selectColumns, stream.StreamName, pkForStream, offset)
+					q := fmt.Sprintf("SELECT %s FROM %s WHERE %s > %d ORDER BY %s ASC LIMIT 10000", selectColumns, stream.StreamName, pkForStream, offset, pkForStream)
 					rows, err := p.pgConn.Query(p.ctx, q)
 					if err != nil {
 						p.appCtx.Logger.Fatalf("Failed to query data for offset %s", err.Error())
@@ -138,6 +140,11 @@ func (p *SourcePlugin) Start() {
 
 					if rowsFetched == 0 {
 						p.logger.Info("No rows were fetched, waiting for the data to appear...")
+						p.logger.Info("Updating offset", "offset", offset)
+						err = p.appCtx.OffsetStorage().SetOffsetForPipeline(offset_storage.BuildKey(p.appCtx.PipelineId(), stream.StreamName), offset)
+						if err != nil {
+							p.logger.Fatalf("Failed to store the offset %s", err.Error())
+						}
 						continue
 					}
 
