@@ -118,12 +118,11 @@ func (p *Plugin) flushMetrics() {
 	t := time.Now()
 
 	for proc, counters := range p.procMetrics {
-
 		executionTimePoint := influxdb3.NewPointWithMeasurement("blink_data").
 			SetTag("group", p.groupName).
 			SetTag("pipeline", strconv.Itoa(p.pipelineId)).
 			SetTag("processor", proc).
-			SetField("execution_time", p.procExecutionTimeMetrics).
+			SetField("execution_time", p.procExecutionTimeMetrics[proc].Value()).
 			SetTimestamp(t)
 
 		if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, executionTimePoint); err != nil {
@@ -156,7 +155,7 @@ func (p *Plugin) flushMetrics() {
 			SetTag("group", p.groupName).
 			SetTag("pipeline", strconv.Itoa(p.pipelineId)).
 			SetTag("processor", proc).
-			SetField("sent_messages", counters[2].Count()).
+			SetField("received_messages", counters[2].Count()).
 			SetTimestamp(t)
 
 		if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, receivedMessagesPoint); err != nil {
