@@ -135,8 +135,13 @@ func (p *SourcePlugin) Start() {
 							Err:     err,
 						}
 					}
+
+					if rowsFetched == 0 {
+						p.logger.Info("No rows were fetched, waiting for the data to appear...")
+						continue
+					}
+
 					if rowsFetched == 0 && streamStoredOffset == 0 {
-						//p.logger.Infof("Fetched %d storing new offset %d", rowsFetched, newOffset)
 						p.logger.Info("No rows fetched after the initial connection. Waiting for the first new rows to appear")
 						p.logger.Info("Storing default offset", "offset", offset)
 						err = p.appCtx.OffsetStorage().SetOffsetForPipeline(offset_storage.BuildKey(p.appCtx.PipelineId(), stream.StreamName), offset)
