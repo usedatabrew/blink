@@ -2,7 +2,9 @@ package stream
 
 import (
 	"errors"
+	"fmt"
 	"github.com/usedatabrew/blink/config"
+	"github.com/usedatabrew/blink/internal/offset_storage"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/service_registry"
 	"github.com/usedatabrew/blink/internal/stream_context"
@@ -25,8 +27,14 @@ type Stream struct {
 }
 
 func InitFromConfig(config config.Configuration) (*Stream, error) {
-	streamContext := stream_context.CreateContext()
+	streamContext := stream_context.CreateContext(config.Service.PipelineId)
 	streamContext.Logger.Info("Bootstrapping blink Stream-ETL")
+
+	if config.Service.OffsetStorageURI != "" {
+		offsetStorage := offset_storage.NewOffsetStorage(config.Service.OffsetStorageURI)
+		fmt.Println(offsetStorage)
+		streamContext.SetOffsetStorage(offsetStorage)
+	}
 
 	var processorList []string
 	for _, proc := range config.Processors {
@@ -57,7 +65,7 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	s := &Stream{}
 	s.ctx = streamContext
 	if config.Service.ETCD != nil {
-		s.registry = service_registry.NewServiceRegistry(s.ctx, *config.Service.ETCD, config.Service.PipelineId)
+		s.registry = service_registry.NewServiceRegistry(s.ctx, *config.Service.ETCD, int(config.Service.PipelineId))
 		s.registry.Start()
 	}
 
@@ -153,7 +161,6 @@ func (s *Stream) Start() error {
 						return nil, nil
 					}
 					return s.processors[procIndex].Process(i.(*message.Message))
-
 				}
 				return nil, nil
 			},

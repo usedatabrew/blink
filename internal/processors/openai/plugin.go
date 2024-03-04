@@ -45,13 +45,13 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 	if msg.GetStream() != p.config.StreamName {
 		return msg, nil
 	}
-	if p.rateLimiterTick != nil && p.messagesProcessedWithinALimit >= p.config.LimitPerMinute {
-		p.logger.Info("Rate limit wait")
-		<-p.rateLimiterTick.C
-		p.mutx.Lock()
-		p.messagesProcessedWithinALimit = 0
-		p.mutx.Unlock()
-	}
+	//if p.rateLimiterTick != nil && p.messagesProcessedWithinALimit >= p.config.LimitPerMinute {
+	//	p.logger.Info("Rate limit wait")
+	//	<-p.rateLimiterTick.C
+	//	p.mutx.Lock()
+	//	p.messagesProcessedWithinALimit = 0
+	//	p.mutx.Unlock()
+	//}
 
 	processedMessage, err := p.processMessage(context, msg)
 	if err != nil {
@@ -67,7 +67,12 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 func (p *Plugin) processMessage(context context.Context, msg *message.Message) (*message.Message, error) {
 	sourceFieldValue := msg.Data.AccessProperty(p.config.SourceField)
 
-	prompt := fmt.Sprintf("Strictly follow the instructions. Take the data: %s and respond after doing following: %s . Provide the shortest response possible \n Do not explain your actions.", sourceFieldValue, p.prompt)
+	command := "You are data pipeline assistant. You take the data from the user and perform various checks and " +
+		"analysis. You are capable of checking the data for different patterns, harmful content, etc " +
+		"You must strictly follow a given instruction:" + p.prompt +
+		"Your responses must always be short, without any explanation, unless your wants you to do so." +
+		"You should never explain your thoughts or process. You need to respond with an answer only" +
+		"Yours response will most likely used in database field to try to assume the correct form of response based on the instructions given"
 
 	resp, err := p.client.CreateChatCompletion(
 		context,
@@ -76,17 +81,18 @@ func (p *Plugin) processMessage(context context.Context, msg *message.Message) (
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
-					Content: prompt,
+					Content: fmt.Sprintf("%v", sourceFieldValue),
+				},
+				{
+					Role:    openai.ChatMessageRoleAssistant,
+					Content: command,
 				},
 			},
 		},
 	)
 
 	if err != nil {
-		fmt.Printf("ChatCompletion error: %v\n", err)
-		if err != nil {
-			return msg, nil
-		}
+		return nil, err
 	}
 
 	msg.Data.SetProperty(p.config.TargetField, resp.Choices[0].Message.Content)

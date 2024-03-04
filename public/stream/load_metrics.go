@@ -21,7 +21,7 @@ func loadInfluxMetrics(config interface{}) (metrics.Metrics, error) {
 
 func loadPrometheusMetrics(baseCfg config.Configuration) (metrics.Metrics, error) {
 	var targetConfig prometheus.Config
-	targetConfig.PipelineId = baseCfg.Service.PipelineId
+	targetConfig.PipelineId = int(baseCfg.Service.PipelineId)
 	targetConfig.GroupName = "local-worker-group"
 
 	return prometheus.NewPlugin(targetConfig)
