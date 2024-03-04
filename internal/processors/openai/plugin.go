@@ -92,10 +92,7 @@ func (p *Plugin) processMessage(context context.Context, msg *message.Message) (
 	)
 
 	if err != nil {
-		fmt.Printf("ChatCompletion error: %v\n", err)
-		if err != nil {
-			return msg, nil
-		}
+		return nil, err
 	}
 
 	msg.Data.SetProperty(p.config.TargetField, resp.Choices[0].Message.Content)

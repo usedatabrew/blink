@@ -3,7 +3,6 @@ package offset_storage
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"github.com/redis/go-redis/v9"
 	"net/url"
 )
@@ -20,7 +19,6 @@ func NewOffsetStorage(storageURI string) OffsetStorage {
 
 	passwd, _ := parsedRedisUrl.User.Password()
 	op := &redis.Options{Addr: parsedRedisUrl.Host, Password: passwd, TLSConfig: &tls.Config{MinVersion: tls.VersionTLS12}}
-	fmt.Println(parsedRedisUrl.Host, passwd)
 	client := redis.NewClient(op)
 
 	return &Storage{

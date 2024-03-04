@@ -161,7 +161,6 @@ func (s *Stream) Start() error {
 						return nil, nil
 					}
 					return s.processors[procIndex].Process(i.(*message.Message))
-
 				}
 				return nil, nil
 			},

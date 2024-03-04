@@ -2,6 +2,7 @@ package influx
 
 import (
 	"context"
+	"github.com/usedatabrew/blink/internal/logger"
 	"strconv"
 	"time"
 
@@ -198,6 +199,8 @@ func (p *Plugin) flushMetrics() {
 		SetTag("pipeline", strconv.Itoa(p.pipelineId)).
 		SetField("source_errors", p.sourceErrorsCounter.Count()).
 		SetTimestamp(t)
+
+	logger.GetInstance().Info("Flushing metrics", "received_messages", p.receivedCounter.Count(), "sent_messages", p.sentCounter.Count())
 
 	if err := p.client.WritePointsWithOptions(context.Background(), &p.writeOptions, point); err != nil {
 		panic(err)
