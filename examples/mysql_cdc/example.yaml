@@ -1,0 +1,46 @@
+service:
+  id: 32333
+  pipeline_id: 32333
+  enable_etcd_registry: true
+  etcd:
+    host: http://etcd-server.internal:2379
+  reload_on_restart: false
+source:
+  driver: mysql_cdc
+  config:
+    host: 127.0.0.1
+    port: 3306
+    database: db
+    user: root
+    password: test
+    flavor: mysql
+    stream_snapshot: true
+    tables:
+      - lights
+  stream_schema:
+    - stream: flights
+      columns:
+        - name: id
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: true
+          nullable: false
+        - name: created_at
+          databrewType: String
+          nativeConnectorType: varchar
+          pk: false
+          nullable: true
+        - name: payment_method
+          databrewType: String
+          nativeConnectorType: character varying
+          pk: false
+          nullable: false
+        - name: duration
+          databrewType: Int32
+          nativeConnectorType: integer
+          pk: false
+          nullable: false
+
+sink:
+  driver: stdout
+  config: { }

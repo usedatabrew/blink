@@ -8,4 +8,5 @@ const (
 	WebSockets  SourceDriver = "websocket"
 	AirTable    SourceDriver = "airtable"
 	Playground  SourceDriver = "playground"
+	MysqlCDC    SourceDriver = "mysql_cdc"
 )
