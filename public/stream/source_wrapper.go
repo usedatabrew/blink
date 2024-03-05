@@ -5,6 +5,7 @@ import (
 	"github.com/usedatabrew/blink/internal/sources"
 	"github.com/usedatabrew/blink/internal/sources/airtable"
 	"github.com/usedatabrew/blink/internal/sources/mongo_stream"
+	"github.com/usedatabrew/blink/internal/sources/mysql_cdc"
 	"github.com/usedatabrew/blink/internal/sources/playground"
 	"github.com/usedatabrew/blink/internal/sources/postgres_cdc"
 	"github.com/usedatabrew/blink/internal/sources/postgres_incr_sync"
@@ -72,6 +73,8 @@ func (p *SourceWrapper) GetPluginConfigs(driver sources.SourceDriver, config *ya
 		return ReadDriverConfig[postgres_cdc.Config](config, postgres_cdc.Config{})
 	case sources.MongoStream:
 		return ReadDriverConfig[mongo_stream.Config](config, mongo_stream.Config{})
+	case sources.MysqlCDC:
+		return ReadDriverConfig[mysql_cdc.Config](config, mysql_cdc.Config{})
 	}
 
 	return nil, nil
@@ -82,26 +85,26 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 	case sources.Playground:
 		driverConfig, err := ReadDriverConfig[playground.Config](config.Source.Config, playground.Config{})
 		if err != nil {
-			panic("can read driver config")
+			panic("cannot read driver config")
 		}
 		return playground.NewPlaygroundSourcePlugin(driverConfig, config.Source.StreamSchema)
 	case sources.PostgresCDC:
 		driverConfig, err := ReadDriverConfig[postgres_cdc.Config](config.Source.Config, postgres_cdc.Config{})
 		if err != nil {
-			panic("can read driver config")
+			panic("cannot read driver config")
 		}
 		return postgres_cdc.NewPostgresSourcePlugin(driverConfig, config.Source.StreamSchema)
 	case sources.WebSockets:
 		driverConfig, err := ReadDriverConfig[websockets.Config](config.Source.Config, websockets.Config{})
 		if err != nil {
-			panic("can read driver config")
+			panic("cannot read driver config")
 		}
 		return websockets.NewWebSocketSourcePlugin(driverConfig, config.Source.StreamSchema)
 	case sources.MongoStream:
 		driverConfig, err := ReadDriverConfig[mongo_stream.Config](config.Source.Config, mongo_stream.Config{})
 
 		if err != nil {
-			panic("cannot ready driver config")
+			panic("cannot read driver config")
 		}
 
 		return mongo_stream.NewMongoStreamSourcePlugin(driverConfig, config.Source.StreamSchema)
@@ -109,10 +112,18 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Co
 		driverConfig, err := ReadDriverConfig[airtable.Config](config.Source.Config, airtable.Config{})
 
 		if err != nil {
-			panic("cannot ready driver config")
+			panic("cannot read driver config")
 		}
 
 		return airtable.NewAirTableSourcePlugin(driverConfig, config.Source.StreamSchema)
+	case sources.MysqlCDC:
+		driverConfig, err := ReadDriverConfig[mysql_cdc.Config](config.Source.Config, mysql_cdc.Config{})
+
+		if err != nil {
+			panic("cannot read driver config")
+		}
+
+		return mysql_cdc.NewMysqlSourcePlugin(driverConfig, config.Source.StreamSchema)
 	case sources.PostgresIncremental:
 		driverConfig, err := ReadDriverConfig[postgres_incr_sync.Config](config.Source.Config, postgres_incr_sync.Config{})
 
