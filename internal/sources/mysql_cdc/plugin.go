@@ -27,17 +27,23 @@ type ProcessEventParams struct {
 
 type SourcePlugin struct {
 	config         Config
-	inputSchema    []schema.StreamSchema
+	inputSchema    map[string]schema.StreamSchema
 	outputSchema   map[string]DataTableSchema
 	messagesStream chan sources.MessageEvent
 	canal          *canal.Canal
 	canal.DummyEventHandler
 }
 
-func NewMysqlSourcePlugin(config Config, schema []schema.StreamSchema) sources.DataSource {
+func NewMysqlSourcePlugin(config Config, sCh []schema.StreamSchema) sources.DataSource {
+	iSchema := make(map[string]schema.StreamSchema)
+
+	for _, stream := range sCh {
+		iSchema[stream.StreamName] = stream
+	}
+
 	instance := &SourcePlugin{
 		config:         config,
-		inputSchema:    schema,
+		inputSchema:    iSchema,
 		messagesStream: make(chan sources.MessageEvent),
 	}
 
@@ -99,6 +105,10 @@ func (p *SourcePlugin) OnRow(e *canal.RowsEvent) error {
 		return nil
 	}
 
+	if _, ok := p.inputSchema[e.Table.Name]; !ok {
+		return nil
+	}
+
 	switch e.Action {
 	case canal.InsertAction:
 		return p.processEvent(e, ProcessEventParams{initValue: 0, incrementValue: 1})
@@ -112,15 +122,7 @@ func (p *SourcePlugin) OnRow(e *canal.RowsEvent) error {
 }
 
 func (p *SourcePlugin) processEvent(e *canal.RowsEvent, params ProcessEventParams) error {
-	var currentInputSchema schema.StreamSchema
-
-	for _, schema := range p.inputSchema {
-		if e.Table.Name == schema.StreamName {
-			currentInputSchema = schema
-			break
-		}
-	}
-
+	inputSchema := p.inputSchema[e.Table.Name]
 	outputSchema := p.outputSchema[e.Table.Name]
 
 	builder := array.NewRecordBuilder(memory.DefaultAllocator, outputSchema.Schema)
@@ -129,7 +131,7 @@ func (p *SourcePlugin) processEvent(e *canal.RowsEvent, params ProcessEventParam
 		for i, v := range e.Rows[i] {
 			outputIndex := -1
 
-			for inputSchemaIndex, inputSchemaColumn := range currentInputSchema.Columns {
+			for inputSchemaIndex, inputSchemaColumn := range inputSchema.Columns {
 				if e.Table.Columns[i].Name == inputSchemaColumn.Name {
 					outputIndex = inputSchemaIndex
 				}
