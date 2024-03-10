@@ -10,6 +10,7 @@ RUN cd cmd/blink && go build
 
 FROM alpine as certs
 RUN apk update && apk add ca-certificates
+RUN apk add mysql-client
 
 FROM busybox
 
