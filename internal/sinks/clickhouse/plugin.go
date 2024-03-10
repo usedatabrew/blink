@@ -90,7 +90,7 @@ func (p *SinkPlugin) Write(m *message.Message) error {
 	err := p.connection.AsyncInsert(p.ctx.GetContext(), statement, false, colValues...)
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return nil

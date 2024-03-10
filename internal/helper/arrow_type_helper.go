@@ -232,60 +232,42 @@ func ArrowToCockroach(t arrow.DataType) string {
 }
 
 func ArrowToClickHouse(t arrow.DataType) string {
-	switch dt := t.(type) {
+	switch t.(type) {
 	case *arrow.BooleanType:
-		return "boolean"
-	case *arrow.Int8Type:
-		return "smallint"
-	case *arrow.Int16Type:
-		return "smallint"
-	case *arrow.Int32Type:
-		return "int"
-	case *arrow.Int64Type:
-		return "bigint"
+		return "bool"
 	case *arrow.Uint8Type:
-		return "smallint"
+		return "UInt8"
 	case *arrow.Uint16Type:
-		return "int"
+		return "UInt16"
 	case *arrow.Uint32Type:
-		return "bigint"
+		return "UInt32"
 	case *arrow.Uint64Type:
-		return "numeric(20,0)"
+		return "UInt64"
+	case *arrow.Int8Type:
+		return "Int8"
+	case *arrow.Int16Type:
+		return "Int16"
+	case *arrow.Int32Type:
+		return "Int32"
+	case *arrow.Int64Type:
+		return "Int64"
 	case *arrow.Float32Type:
-		return "real"
+		return "Float32"
 	case *arrow.Float64Type:
-		return "double precision"
+		return "Float64"
 	case arrow.DecimalType:
-		return "numeric(" + strconv.Itoa(int(dt.GetPrecision())) + "," + strconv.Itoa(int(dt.GetScale())) + ")"
+		return "Decimal"
 	case *arrow.StringType:
-		return "text"
-	case *arrow.BinaryType:
-		return "bytea"
-	case *arrow.LargeBinaryType:
-		return "bytea"
+		return "String"
+	case *arrow.Date32Type:
+		return "Date32"
+	case *arrow.Date64Type:
+		return "Date64"
 	case *arrow.TimestampType:
-		return "timestamp without time zone"
-	case *arrow.Time32Type, *arrow.Time64Type:
-		return "time without time zone"
-	case *arrow.Date32Type, *arrow.Date64Type:
-		return "date"
-	case *cqtypes.UUIDType:
-		return "uuid"
+		return "DateTime"
 	case *cqtypes.JSONType:
-		return "jsonb"
-	case *cqtypes.MACType:
-		return "macaddr"
-	case *cqtypes.InetType:
-		return "inet"
-	case *arrow.ListType:
-		return ArrowToPg10(dt.Elem()) + "[]"
-	case *arrow.FixedSizeListType:
-		return ArrowToPg10(dt.Elem()) + "[]"
-	case *arrow.LargeListType:
-		return ArrowToPg10(dt.Elem()) + "[]"
-	case *arrow.MapType:
-		return "text"
+		return "JSON"
 	default:
-		return "text"
+		return "String"
 	}
 }

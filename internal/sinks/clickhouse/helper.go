@@ -11,12 +11,12 @@ import (
 
 func generateCreateTableStatement(table string, columns []schema.Column) string {
 	statement := fmt.Sprintf("CREATE TABLE IF NOT EXISTS \"%s\" (\n", table)
-	primaryKey := ""
+	var primaryKeys []string
 
 	for idx, column := range columns {
 		statement += fmt.Sprintf("  %s %s", column.Name, helper.ArrowToClickHouse(helper.MapPlainTypeToArrow(column.DatabrewType)))
 		if column.PK {
-			primaryKey = column.Name
+			primaryKeys = append(primaryKeys, column.Name)
 		}
 		if !column.Nullable {
 			statement += " NOT NULL"
@@ -29,7 +29,7 @@ func generateCreateTableStatement(table string, columns []schema.Column) string 
 	statement += "\n)"
 
 	statement += " ENGINE = Memory()\n"
-	statement += fmt.Sprintf("PRIMARY KEY(%s)", primaryKey)
+	statement += fmt.Sprintf("PRIMARY KEY(%v)", primaryKeys)
 
 	return statement
 }
