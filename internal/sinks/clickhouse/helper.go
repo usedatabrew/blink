@@ -28,7 +28,7 @@ func generateCreateTableStatement(table string, columns []schema.Column) string 
 
 	statement += "\n)"
 
-	statement += " ENGINE = Memory()\n"
+	statement += " ENGINE = MergeTree()\n"
 	statement += fmt.Sprintf("PRIMARY KEY(%v)", primaryKeys)
 
 	return statement
