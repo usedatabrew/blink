@@ -4,6 +4,7 @@ import (
 	"github.com/usedatabrew/blink/config"
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/sinks"
+	"github.com/usedatabrew/blink/internal/sinks/clickhouse"
 	"github.com/usedatabrew/blink/internal/sinks/kafka"
 	"github.com/usedatabrew/blink/internal/sinks/mongodb"
 	"github.com/usedatabrew/blink/internal/sinks/nats"
@@ -108,6 +109,14 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 		}
 
 		return rabbit_mq.NewRabbitMqSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
+	case sinks.ClickHouse:
+		driverConfig, err := ReadDriverConfig[clickhouse.Config](cfg.Sink.Config, clickhouse.Config{})
+
+		if err != nil {
+			panic("can't read driver config")
+		}
+
+		return clickhouse.NewClickHouseSinkPlugin(driverConfig, p.ctx)
 	default:
 		p.ctx.Logger.WithPrefix("Sink loader").Fatal("Failed to load driver", "driver", driver)
 	}

@@ -1,12 +1,13 @@
 package helper
 
 import (
+	"reflect"
+	"strconv"
+
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/apache/arrow/go/v14/arrow/array"
 	"github.com/charmbracelet/log"
 	cqtypes "github.com/cloudquery/plugin-sdk/v4/types"
-	"reflect"
-	"strconv"
 )
 
 func IsPrimitiveType(fieldType string) bool {
@@ -223,6 +224,65 @@ func ArrowToCockroach(t arrow.DataType) string {
 		return ArrowToCockroach(dt.Elem()) + "[]"
 	case *arrow.LargeListType:
 		return ArrowToCockroach(dt.Elem()) + "[]"
+	case *arrow.MapType:
+		return "text"
+	default:
+		return "text"
+	}
+}
+
+func ArrowToClickHouse(t arrow.DataType) string {
+	switch dt := t.(type) {
+	case *arrow.BooleanType:
+		return "boolean"
+	case *arrow.Int8Type:
+		return "smallint"
+	case *arrow.Int16Type:
+		return "smallint"
+	case *arrow.Int32Type:
+		return "int"
+	case *arrow.Int64Type:
+		return "bigint"
+	case *arrow.Uint8Type:
+		return "smallint"
+	case *arrow.Uint16Type:
+		return "int"
+	case *arrow.Uint32Type:
+		return "bigint"
+	case *arrow.Uint64Type:
+		return "numeric(20,0)"
+	case *arrow.Float32Type:
+		return "real"
+	case *arrow.Float64Type:
+		return "double precision"
+	case arrow.DecimalType:
+		return "numeric(" + strconv.Itoa(int(dt.GetPrecision())) + "," + strconv.Itoa(int(dt.GetScale())) + ")"
+	case *arrow.StringType:
+		return "text"
+	case *arrow.BinaryType:
+		return "bytea"
+	case *arrow.LargeBinaryType:
+		return "bytea"
+	case *arrow.TimestampType:
+		return "timestamp without time zone"
+	case *arrow.Time32Type, *arrow.Time64Type:
+		return "time without time zone"
+	case *arrow.Date32Type, *arrow.Date64Type:
+		return "date"
+	case *cqtypes.UUIDType:
+		return "uuid"
+	case *cqtypes.JSONType:
+		return "jsonb"
+	case *cqtypes.MACType:
+		return "macaddr"
+	case *cqtypes.InetType:
+		return "inet"
+	case *arrow.ListType:
+		return ArrowToPg10(dt.Elem()) + "[]"
+	case *arrow.FixedSizeListType:
+		return ArrowToPg10(dt.Elem()) + "[]"
+	case *arrow.LargeListType:
+		return ArrowToPg10(dt.Elem()) + "[]"
 	case *arrow.MapType:
 		return "text"
 	default:
