@@ -11,4 +11,5 @@ const (
 	NatsSinkType      SinkDriver = "nats"
 	RabbitMqSinkType  SinkDriver = "rabbitmq"
 	RedisSinkType     SinkDriver = "redis"
+	ClickHouse        SinkDriver = "clickhouse"
 )

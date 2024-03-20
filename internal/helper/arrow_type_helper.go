@@ -1,12 +1,13 @@
 package helper
 
 import (
+	"reflect"
+	"strconv"
+
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/apache/arrow/go/v14/arrow/array"
 	"github.com/charmbracelet/log"
 	cqtypes "github.com/cloudquery/plugin-sdk/v4/types"
-	"reflect"
-	"strconv"
 )
 
 func IsPrimitiveType(fieldType string) bool {
@@ -227,5 +228,46 @@ func ArrowToCockroach(t arrow.DataType) string {
 		return "text"
 	default:
 		return "text"
+	}
+}
+
+func ArrowToClickHouse(t arrow.DataType) string {
+	switch t.(type) {
+	case *arrow.BooleanType:
+		return "bool"
+	case *arrow.Uint8Type:
+		return "UInt8"
+	case *arrow.Uint16Type:
+		return "UInt16"
+	case *arrow.Uint32Type:
+		return "UInt32"
+	case *arrow.Uint64Type:
+		return "UInt64"
+	case *arrow.Int8Type:
+		return "Int8"
+	case *arrow.Int16Type:
+		return "Int16"
+	case *arrow.Int32Type:
+		return "Int32"
+	case *arrow.Int64Type:
+		return "Int64"
+	case *arrow.Float32Type:
+		return "Float32"
+	case *arrow.Float64Type:
+		return "Float64"
+	case arrow.DecimalType:
+		return "Decimal"
+	case *arrow.StringType:
+		return "String"
+	case *arrow.Date32Type:
+		return "Date32"
+	case *arrow.Date64Type:
+		return "Date64"
+	case *arrow.TimestampType:
+		return "DateTime"
+	case *cqtypes.JSONType:
+		return "JSON"
+	default:
+		return "String"
 	}
 }
