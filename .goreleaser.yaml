@@ -31,7 +31,7 @@ builds:
 archives:
   - name_template: "blink_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
-project_name: blink
+project_name: datablink
 
 # Check https://goreleaser.com/customization/homebrew/
 brews:
