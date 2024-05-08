@@ -35,7 +35,7 @@ func (p *Plugin) Process(context context.Context, msg *message.Message) (*messag
 	if err != nil {
 		fmt.Printf("OpenAI moderation error: %v\n", err)
 		if err != nil {
-			return msg, nil
+			return nil, err
 		}
 	}
 

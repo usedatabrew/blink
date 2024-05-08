@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// SourceWrapper wraps plan source plugin in order to
+// SourceWrapper wraps source plugin in order to
 // measure performance, build proper configuration and control the context
 type SourceWrapper struct {
 	sourceDriver sources.DataSource
@@ -67,71 +67,71 @@ func (p *SourceWrapper) SetStreamContext(ctx *stream_context.Context) {
 	p.ctx = ctx
 }
 
-func (p *SourceWrapper) GetPluginConfigs(driver sources.SourceDriver, config *yaml.Node) (any, error) {
+func (p *SourceWrapper) GetPluginConfigs(driver sources.SourceDriver, fcg *yaml.Node) (any, error) {
 	switch driver {
 	case sources.PostgresCDC:
-		return ReadDriverConfig[postgres_cdc.Config](config, postgres_cdc.Config{})
+		return config.ReadDriverConfig[postgres_cdc.Config](fcg, postgres_cdc.Config{})
 	case sources.MongoStream:
-		return ReadDriverConfig[mongo_stream.Config](config, mongo_stream.Config{})
+		return config.ReadDriverConfig[mongo_stream.Config](fcg, mongo_stream.Config{})
 	case sources.MysqlCDC:
-		return ReadDriverConfig[mysql_cdc.Config](config, mysql_cdc.Config{})
+		return config.ReadDriverConfig[mysql_cdc.Config](fcg, mysql_cdc.Config{})
 	}
 
 	return nil, nil
 }
 
-func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, config config.Configuration) sources.DataSource {
+func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, fcg config.Configuration) sources.DataSource {
 	switch driver {
 	case sources.Playground:
-		driverConfig, err := ReadDriverConfig[playground.Config](config.Source.Config, playground.Config{})
+		driverConfig, err := config.ReadDriverConfig[playground.Config](fcg.Source.Config, playground.Config{})
 		if err != nil {
 			panic("cannot read driver config")
 		}
-		return playground.NewPlaygroundSourcePlugin(driverConfig, config.Source.StreamSchema)
+		return playground.NewPlaygroundSourcePlugin(driverConfig, fcg.Source.StreamSchema)
 	case sources.PostgresCDC:
-		driverConfig, err := ReadDriverConfig[postgres_cdc.Config](config.Source.Config, postgres_cdc.Config{})
+		driverConfig, err := config.ReadDriverConfig[postgres_cdc.Config](fcg.Source.Config, postgres_cdc.Config{})
 		if err != nil {
 			panic("cannot read driver config")
 		}
-		return postgres_cdc.NewPostgresSourcePlugin(driverConfig, config.Source.StreamSchema)
+		return postgres_cdc.NewPostgresSourcePlugin(driverConfig, fcg.Source.StreamSchema)
 	case sources.WebSockets:
-		driverConfig, err := ReadDriverConfig[websockets.Config](config.Source.Config, websockets.Config{})
+		driverConfig, err := config.ReadDriverConfig[websockets.Config](fcg.Source.Config, websockets.Config{})
 		if err != nil {
 			panic("cannot read driver config")
 		}
-		return websockets.NewWebSocketSourcePlugin(driverConfig, config.Source.StreamSchema)
+		return websockets.NewWebSocketSourcePlugin(driverConfig, fcg.Source.StreamSchema)
 	case sources.MongoStream:
-		driverConfig, err := ReadDriverConfig[mongo_stream.Config](config.Source.Config, mongo_stream.Config{})
+		driverConfig, err := config.ReadDriverConfig[mongo_stream.Config](fcg.Source.Config, mongo_stream.Config{})
 
 		if err != nil {
 			panic("cannot read driver config")
 		}
 
-		return mongo_stream.NewMongoStreamSourcePlugin(driverConfig, config.Source.StreamSchema)
+		return mongo_stream.NewMongoStreamSourcePlugin(driverConfig, fcg.Source.StreamSchema)
 	case sources.AirTable:
-		driverConfig, err := ReadDriverConfig[airtable.Config](config.Source.Config, airtable.Config{})
+		driverConfig, err := config.ReadDriverConfig[airtable.Config](fcg.Source.Config, airtable.Config{})
 
 		if err != nil {
 			panic("cannot read driver config")
 		}
 
-		return airtable.NewAirTableSourcePlugin(driverConfig, config.Source.StreamSchema)
+		return airtable.NewAirTableSourcePlugin(driverConfig, fcg.Source.StreamSchema)
 	case sources.MysqlCDC:
-		driverConfig, err := ReadDriverConfig[mysql_cdc.Config](config.Source.Config, mysql_cdc.Config{})
+		driverConfig, err := config.ReadDriverConfig[mysql_cdc.Config](fcg.Source.Config, mysql_cdc.Config{})
 
 		if err != nil {
 			panic("cannot read driver config")
 		}
 
-		return mysql_cdc.NewMysqlSourcePlugin(driverConfig, config.Source.StreamSchema)
+		return mysql_cdc.NewMysqlSourcePlugin(driverConfig, fcg.Source.StreamSchema)
 	case sources.PostgresIncremental:
-		driverConfig, err := ReadDriverConfig[postgres_incr_sync.Config](config.Source.Config, postgres_incr_sync.Config{})
+		driverConfig, err := config.ReadDriverConfig[postgres_incr_sync.Config](fcg.Source.Config, postgres_incr_sync.Config{})
 
 		if err != nil {
 			panic("cannot ready driver config")
 		}
 
-		return postgres_incr_sync.NewPostgresIncrSourcePlugin(p.ctx, driverConfig, config.Source.StreamSchema)
+		return postgres_incr_sync.NewPostgresIncrSourcePlugin(p.ctx, driverConfig, fcg.Source.StreamSchema)
 	default:
 		p.ctx.Logger.WithPrefix("Source driver loader").Fatal("Failed to load driver", "driver", driver)
 	}

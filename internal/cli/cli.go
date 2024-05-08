@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
+	"github.com/usedatabrew/blink/config"
 	"github.com/usedatabrew/blink/public/server"
 	"github.com/usedatabrew/blink/public/stream"
 	"os"
@@ -27,7 +28,7 @@ var cmdStart = &cobra.Command{
 		}
 
 		var streamService *stream.Stream
-		serviceConfiguration, err := stream.ReadInitConfigFromYaml(configFile)
+		serviceConfiguration, err := config.ReadInitConfigFromYaml(configFile)
 		streamService, err = stream.InitFromConfig(serviceConfiguration)
 		if err != nil {
 			panic(err)

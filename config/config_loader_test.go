@@ -1,18 +1,18 @@
-package stream
+package config
 
 import (
-  "github.com/usedatabrew/blink/config"
-	"gopkg.in/yaml.v3"
 	"log"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 )
 
-func TestReadConfigAsYaml(t *testing.T) {
-	yamlData := `
+var yamlData = `
 service:
   enable_influx: true
   reload_on_restart: false
-
+  etcd:
+    host: #{secret.etcd/host}
 source:
   driver: postgres_cdc
   schema:
@@ -36,15 +36,18 @@ source:
     database: mocks
     tables:
       - flights
-
+secrets:
+  storage_type: mock_secret_storage
+  config:
+    some_setting: value
 target:
   plugin: stdout
-  config: {}
+  config:
+    some_setting: value
 `
 
-	var (
-		cfg config.Configuration
-	)
+func TestReadConfigAsYaml(t *testing.T) {
+	var cfg Configuration
 
 	// Unmarshal the YAML into the custom struct
 	err := yaml.Unmarshal([]byte(yamlData), &cfg)
@@ -54,5 +57,19 @@ target:
 
 	if cfg.Source.Driver != "postgres_cdc" {
 		t.Fatal("Invalid driver in config")
+	}
+}
+
+func Test_resolveSecrets(t *testing.T) {
+	resolvedSecrets := resolveSecrets([]byte(yamlData))
+	var cfg Configuration
+
+	err := yaml.Unmarshal(resolvedSecrets, &cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if cfg.Service.ETCD.Host != "value_secret.etcd/host" {
+		t.Fatal("Invalid ETCD host in config")
 	}
 }

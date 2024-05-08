@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/usedatabrew/blink/internal/processors"
 	"github.com/usedatabrew/blink/internal/schema"
+	"github.com/usedatabrew/blink/internal/secret"
 	"github.com/usedatabrew/blink/internal/sinks"
 	"github.com/usedatabrew/blink/internal/sources"
 )
@@ -10,6 +11,7 @@ import (
 type Configuration struct {
 	Service    Service     `yaml:"service" validate:"required"`
 	Source     Source      `yaml:"source" validate:"required"`
+	Secrets    Secrets     `yaml:"secrets"`
 	Processors []Processor `yaml:"processors"`
 	Sink       Sink        `yaml:"sink" validate:"required"`
 }
@@ -34,6 +36,11 @@ type Service struct {
 
 type ETCD struct {
 	Host string `yaml:"host" validate:"required,http_url"`
+}
+
+type Secrets struct {
+	StorageType secret.SecretsStorageType `yaml:"storage_type"`
+	Config      interface{}               `yaml:"config"`
 }
 
 type Source struct {

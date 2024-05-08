@@ -58,43 +58,43 @@ func (p *SinkWrapper) SetStreamContext(ctx *stream_context.Context) {
 func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configuration) sinks.DataSink {
 	switch driver {
 	case sinks.StdOutSinkType:
-		driverConfig, err := ReadDriverConfig[stdout.Config](cfg.Sink.Config, stdout.Config{})
+		driverConfig, err := config.ReadDriverConfig[stdout.Config](cfg.Sink.Config, stdout.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return stdout.NewStdOutSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.KafkaSinkType:
-		driverConfig, err := ReadDriverConfig[kafka.Config](cfg.Sink.Config, kafka.Config{})
+		driverConfig, err := config.ReadDriverConfig[kafka.Config](cfg.Sink.Config, kafka.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return kafka.NewKafkaSinkPlugin(driverConfig, cfg.Source.StreamSchema)
 	case sinks.WebSocketSinkType:
-		driverConfig, err := ReadDriverConfig[websocket.Config](cfg.Sink.Config, websocket.Config{})
+		driverConfig, err := config.ReadDriverConfig[websocket.Config](cfg.Sink.Config, websocket.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return websocket.NewWebSocketSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.RedisSinkType:
-		driverConfig, err := ReadDriverConfig[redis.Config](cfg.Sink.Config, redis.Config{})
+		driverConfig, err := config.ReadDriverConfig[redis.Config](cfg.Sink.Config, redis.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return redis.NewRedisSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.MongoDBSinkType:
-		driverConfig, err := ReadDriverConfig[mongodb.Config](cfg.Sink.Config, mongodb.Config{})
+		driverConfig, err := config.ReadDriverConfig[mongodb.Config](cfg.Sink.Config, mongodb.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return mongodb.NewMongoDBSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.PostgresSinkType:
-		driverConfig, err := ReadDriverConfig[postgres.Config](cfg.Sink.Config, postgres.Config{})
+		driverConfig, err := config.ReadDriverConfig[postgres.Config](cfg.Sink.Config, postgres.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return postgres.NewPostgresSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.NatsSinkType:
-		driverConfig, err := ReadDriverConfig[nats.Config](cfg.Sink.Config, nats.Config{})
+		driverConfig, err := config.ReadDriverConfig[nats.Config](cfg.Sink.Config, nats.Config{})
 
 		if err != nil {
 			panic("can't read driver config")
@@ -102,7 +102,7 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 
 		return nats.NewNatsSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.RabbitMqSinkType:
-		driverConfig, err := ReadDriverConfig[rabbit_mq.Config](cfg.Sink.Config, rabbit_mq.Config{})
+		driverConfig, err := config.ReadDriverConfig[rabbit_mq.Config](cfg.Sink.Config, rabbit_mq.Config{})
 
 		if err != nil {
 			panic("can't read driver config")
@@ -110,7 +110,7 @@ func (p *SinkWrapper) LoadDriver(driver sinks.SinkDriver, cfg config.Configurati
 
 		return rabbit_mq.NewRabbitMqSinkPlugin(driverConfig, cfg.Source.StreamSchema, p.ctx)
 	case sinks.ClickHouse:
-		driverConfig, err := ReadDriverConfig[clickhouse.Config](cfg.Sink.Config, clickhouse.Config{})
+		driverConfig, err := config.ReadDriverConfig[clickhouse.Config](cfg.Sink.Config, clickhouse.Config{})
 
 		if err != nil {
 			panic("can't read driver config")

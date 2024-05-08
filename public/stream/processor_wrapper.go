@@ -2,6 +2,9 @@ package stream
 
 import (
 	"errors"
+	"time"
+
+	"github.com/usedatabrew/blink/config"
 	"github.com/usedatabrew/blink/internal/metrics"
 	"github.com/usedatabrew/blink/internal/processors"
 	"github.com/usedatabrew/blink/internal/processors/ai_content_moderation"
@@ -12,10 +15,9 @@ import (
 	"github.com/usedatabrew/blink/internal/schema"
 	"github.com/usedatabrew/blink/internal/stream_context"
 	"github.com/usedatabrew/message"
-	"time"
 )
 
-// ProcessorWrapper wraps plan sink writer plugin in order to
+// ProcessorWrapper wraps processor writer plugin in order to
 // measure performance, build proper configuration and control the context
 type ProcessorWrapper struct {
 	processorDriver processors.DataProcessor
@@ -65,31 +67,31 @@ func (p *ProcessorWrapper) SetStreamContext(ctx *stream_context.Context) {
 func (p *ProcessorWrapper) LoadDriver(driver processors.ProcessorDriver, cfg interface{}) (processors.DataProcessor, error) {
 	switch driver {
 	case processors.OpenAIProcessor:
-		driverConfig, err := ReadDriverConfig[openai.Config](cfg, openai.Config{})
+		driverConfig, err := config.ReadDriverConfig[openai.Config](cfg, openai.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return openai.NewOpenAIPlugin(p.ctx, driverConfig)
 	case processors.SQLProcessor:
-		driverConfig, err := ReadDriverConfig[sqlproc.Config](cfg, sqlproc.Config{})
+		driverConfig, err := config.ReadDriverConfig[sqlproc.Config](cfg, sqlproc.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return sqlproc.NewSqlTransformPlugin(p.ctx, driverConfig)
 	case processors.HttpProcessor:
-		driverConfig, err := ReadDriverConfig[http.Config](cfg, http.Config{})
+		driverConfig, err := config.ReadDriverConfig[http.Config](cfg, http.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return http.NewHttpPlugin(p.ctx, driverConfig)
 	case processors.AIContentModeratorProcessor:
-		driverConfig, err := ReadDriverConfig[ai_content_moderation.Config](cfg, ai_content_moderation.Config{})
+		driverConfig, err := config.ReadDriverConfig[ai_content_moderation.Config](cfg, ai_content_moderation.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}
 		return ai_content_moderation.NewAIContentModerationPlugin(p.ctx, driverConfig)
 	case processors.LogProcessor:
-		driverConfig, err := ReadDriverConfig[logProc.Config](cfg, logProc.Config{})
+		driverConfig, err := config.ReadDriverConfig[logProc.Config](cfg, logProc.Config{})
 		if err != nil {
 			panic("can read driver config")
 		}

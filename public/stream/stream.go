@@ -2,7 +2,6 @@ package stream
 
 import (
 	"errors"
-	"fmt"
 	"github.com/usedatabrew/blink/config"
 	"github.com/usedatabrew/blink/internal/offset_storage"
 	"github.com/usedatabrew/blink/internal/schema"
@@ -32,7 +31,6 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 
 	if config.Service.OffsetStorageURI != "" {
 		offsetStorage := offset_storage.NewOffsetStorage(config.Service.OffsetStorageURI)
-		fmt.Println(offsetStorage)
 		streamContext.SetOffsetStorage(offsetStorage)
 	}
 

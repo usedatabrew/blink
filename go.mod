@@ -12,6 +12,7 @@ require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.20.0
 	github.com/InfluxCommunity/influxdb3-go v0.4.0
 	github.com/apache/arrow/go/v14 v14.0.1
+	github.com/aws/aws-sdk-go v1.52.3
 	github.com/barkimedes/go-deepcopy v0.0.0-20220514131651-17c30cfc62df
 	github.com/blastrain/vitess-sqlparser v0.0.0-20201030050434-a139afbb1aba
 	github.com/charmbracelet/log v0.3.1
@@ -72,6 +73,7 @@ require (
 	github.com/jackc/pglogrepl v0.0.0-20230826184802-9ed16cb201f6 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/juju/errors v0.0.0-20170703010042-c7d06af17c68 // indirect
 	github.com/klauspost/compress v1.17.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
