@@ -4,7 +4,7 @@ env:
 # Check https://goreleaser.com/customization/hooks/
 before:
   hooks:
-  - go mod download
+    - go mod download
 
 # Check https://goreleaser.com/customization/build/
 builds:
@@ -35,8 +35,8 @@ project_name: blink
 
 # Check https://goreleaser.com/customization/homebrew/
 brews:
-  - homepage: 'https://github.com/usedatabrew/blink'
-    description: 'Open Source stream processing framework'
+  - homepage: "https://github.com/usedatabrew/blink"
+    description: "Open Source stream processing framework"
     folder: Formula
     commit_author:
       name: le-vlad
