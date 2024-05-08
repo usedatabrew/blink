@@ -7,7 +7,7 @@ import (
 
 type SecretsStorageType string
 
-const AwsSecretStorage SecretsStorageType = "aws_secret_storage"
+const AwsSecretStorage SecretsStorageType = "aws_secret_manager"
 const MockSecretStorage SecretsStorageType = "mock_secret_storage"
 
 type Secrets struct{}

@@ -69,7 +69,7 @@ func Test_resolveSecrets(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	if cfg.Service.ETCD.Host != "value_secret.etcd/host" {
+	if cfg.Service.ETCD.Host != "value_etcd/host" {
 		t.Fatal("Invalid ETCD host in config")
 	}
 }

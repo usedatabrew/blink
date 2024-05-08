@@ -1,6 +1,8 @@
 package secretstorage
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -8,9 +10,9 @@ import (
 )
 
 type AwsSecretManagerConfig struct {
-	SecretKey   string `yaml:"secret_key"`
-	SecretKeyID string `yaml:"secret_key_id"`
-	Region      string `yaml:"region"`
+	SecretKey   string `yaml:"aws_secret_key"`
+	SecretKeyID string `yaml:"aws_secret_key_id"`
+	Region      string `yaml:"aws_region"`
 }
 
 type AwsSecretManager struct {
@@ -35,6 +37,7 @@ func NewAwsSecretManager(config AwsSecretManagerConfig) *AwsSecretManager {
 }
 
 func (a *AwsSecretManager) Retrieve(key string) (string, error) {
+	fmt.Println("Rertienving secret from AWS Secret Manager", key)
 	v, err := a.secretsmanager.GetSecretValue(&secretsmanager.GetSecretValueInput{
 		SecretId: aws.String(key),
 	})

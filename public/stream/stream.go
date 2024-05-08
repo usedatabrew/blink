@@ -2,6 +2,9 @@ package stream
 
 import (
 	"errors"
+	"sync"
+	"time"
+
 	"github.com/usedatabrew/blink/config"
 	"github.com/usedatabrew/blink/internal/offset_storage"
 	"github.com/usedatabrew/blink/internal/schema"
@@ -9,8 +12,6 @@ import (
 	"github.com/usedatabrew/blink/internal/stream_context"
 	"github.com/usedatabrew/message"
 	"github.com/usedatabrew/tango"
-	"sync"
-	"time"
 )
 
 type Stream struct {
@@ -32,6 +33,8 @@ func InitFromConfig(config config.Configuration) (*Stream, error) {
 	if config.Service.OffsetStorageURI != "" {
 		offsetStorage := offset_storage.NewOffsetStorage(config.Service.OffsetStorageURI)
 		streamContext.SetOffsetStorage(offsetStorage)
+	} else {
+		streamContext.Logger.Warn("No offset storage URI provided. Offset will not be stored")
 	}
 
 	var processorList []string

@@ -74,11 +74,12 @@ func resolveSecrets(config []byte) []byte {
 	}
 
 	secretStorage := secret.NewSecrets(conf.Secrets.StorageType, conf.Secrets.Config)
-
 	replaced := secretsRegex.ReplaceAllFunc(config, func(content []byte) []byte {
 		var value string
 		if len(content) > 4 {
-			varName := string(content[2 : len(content)-1])
+			// 9 - removes #{secret.
+			// -1 - removes }
+			varName := string(content[9 : len(content)-1])
 			secretValue, err := secretStorage.Retrieve(varName)
 			if err != nil {
 				logger.GetInstance().Fatalf("Failed to resolve secret value. Error: %s", err.Error())

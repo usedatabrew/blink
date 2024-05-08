@@ -39,7 +39,7 @@ type ETCD struct {
 }
 
 type Secrets struct {
-	StorageType secret.SecretsStorageType `yaml:"storage_type"`
+	StorageType secret.SecretsStorageType `yaml:"storage_type" validate:"required"`
 	Config      interface{}               `yaml:"config"`
 }
 
