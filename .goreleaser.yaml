@@ -37,6 +37,7 @@ project_name: datablink
 brews:
   - homepage: "https://github.com/usedatabrew/blink"
     description: "Open Source stream processing framework"
+    name: datablink
     folder: Formula
     commit_author:
       name: le-vlad
