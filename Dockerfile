@@ -6,7 +6,7 @@ COPY . .
 
 RUN go mod tidy
 
-RUN cd cmd/blink && go build
+RUN go build
 
 FROM alpine as certs
 RUN apk update && apk add ca-certificates
