@@ -4,10 +4,6 @@ go 1.21.1
 
 toolchain go1.21.3
 
-replace github.com/coreos/bbolt v1.3.4 => go.etcd.io/bbolt v1.3.4
-
-replace go.etcd.io/bbolt v1.3.4 => github.com/coreos/bbolt v1.3.4
-
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.20.0
 	github.com/InfluxCommunity/influxdb3-go v0.4.0
