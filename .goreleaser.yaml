@@ -10,7 +10,7 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
-    main: ./cmd/blink
+    main: ./
     goos:
       - darwin
       - linux
@@ -32,16 +32,3 @@ archives:
   - name_template: "blink_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
 project_name: datablink
-
-# Check https://goreleaser.com/customization/homebrew/
-brews:
-  - homepage: "https://github.com/usedatabrew/blink"
-    description: "Open Source stream processing framework"
-    name: datablink
-    folder: Formula
-    commit_author:
-      name: le-vlad
-      email: len.vladislavs@gmail.com
-    repository:
-      owner: usedatabrew
-      name: blink
