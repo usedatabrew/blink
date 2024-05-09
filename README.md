@@ -35,7 +35,7 @@ docker run -v ./blink.yaml:/app/blink.yaml usedatabrew/blink start
 ### Install Golang binary
 
 ```shell
-go install github.com/usedatabrew/blink@v1.16.7
+go install github.com/usedatabrew/blink@v1.16.8
 ```
 
 ### Running Blink locally
