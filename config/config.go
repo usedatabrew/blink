@@ -11,7 +11,7 @@ import (
 type Configuration struct {
 	Service    Service     `yaml:"service" validate:"required"`
 	Source     Source      `yaml:"source" validate:"required"`
-	Secrets    Secrets     `yaml:"secrets"`
+	Secrets    *Secrets    `yaml:"secrets"`
 	Processors []Processor `yaml:"processors"`
 	Sink       Sink        `yaml:"sink" validate:"required"`
 }

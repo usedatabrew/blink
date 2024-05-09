@@ -44,30 +44,30 @@ To run Blink locally - you have to create a config file that will define streams
 
 ```yaml
 service:
-  id: 123
-  pipeline_id: 1234
-  stream_schema:
-    - stream: crypto_price_change
-      columns:
-        - name: name
-          databrewType: String
-          pk: true
-          nullable: false
-        - name: price
-          databrewType: Float64
-          pk: false
-          nullable: false
-
+  pipeline_id: 1
 source:
-  driver: websocket
+  driver: playground
   config:
-    url: ws://databrew-ws-gateway.fly.dev/ws
-
+    data_type: market
+    publish_interval: 1
+    historical_batch: false
+  stream_schema:
+    - stream: market
+      columns:
+        - name: company
+          nativeConnectorType: String
+          databrewType: String
+          nullable: false
+          pk: false
+        - name: currency
+          nativeConnectorType: String
+          databrewType: String
+          nullable: false
+          pk: false
 processors:
   - driver: sql
     config:
-      query: "select * from streams.crypto_price_change where name = 'BTC'"
-
+      query: "select * from streams.market where currency = 'USD'"
 sink:
   driver: stdout
   config: {}

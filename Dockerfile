@@ -17,7 +17,7 @@ FROM busybox
 WORKDIR /app
 
 COPY --from=certs /etc/ssl/certs /etc/ssl/certs
-COPY --from=build /app/cmd/blink/blink /app/
+COPY --from=build /app/blink /app/
 
 ENV GOMAXPROCS=2
 

@@ -69,7 +69,7 @@ func resolveSecrets(config []byte) []byte {
 	}
 
 	// Skip replacing if no secrets provided
-	if conf.Secrets.StorageType == "" {
+	if conf.Secrets == nil || conf.Secrets.StorageType == "" {
 		return config
 	}
 
