@@ -17,7 +17,7 @@ require (
 	github.com/go-playground/validator/v10 v10.14.0
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/websocket v1.5.0
-	github.com/jackc/pgx/v5 v5.4.3
+	github.com/jackc/pgx/v5 v5.5.4
 	github.com/jaswdr/faker v1.19.1
 	github.com/mehanizm/airtable v0.3.1
 	github.com/nats-io/nats.go v1.32.0
