@@ -28,7 +28,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/twmb/franz-go v1.15.2
 	github.com/usedatabrew/message v0.0.3
-	github.com/usedatabrew/pglogicalstream v0.0.23
+	github.com/usedatabrew/pglogicalstream v0.0.28
 	github.com/usedatabrew/tango v0.0.5
 	github.com/wagslane/go-rabbitmq v0.12.4
 	github.com/zeebo/assert v1.3.0
@@ -66,7 +66,7 @@ require (
 	github.com/influxdata/line-protocol/v2 v2.2.1 // indirect
 	github.com/ivancorrales/knoa v0.0.2 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
-	github.com/jackc/pglogrepl v0.0.0-20230826184802-9ed16cb201f6 // indirect
+	github.com/jackc/pglogrepl v0.0.0-20240307033717-828fbfe908e9 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
