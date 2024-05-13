@@ -8,7 +8,7 @@
 
 ---
 
-[![Create release](https://github.com/usedatabrew/blink/actions/workflows/release.yaml/badge.svg)](https://github.com/usedatabrew/blink/actions/workflows/release.yaml)
+[![Build on push to main](https://github.com/usedatabrew/blink/actions/workflows/build_main.yaml/badge.svg)](https://github.com/usedatabrew/blink/actions/workflows/build_main.yaml)
 ![Latest version (latest semver)](https://img.shields.io/docker/v/usedatabrew/blink)
 
 Blink ETL gives you the ability to create truly flexible data pipelines to implement even-driven architecture, database replication, and data lakes
@@ -33,6 +33,8 @@ docker run -v ./blink.yaml:/app/blink.yaml usedatabrew/blink start
 ```
 
 ### Install Golang binary
+
+![Latest version (latest semver)](https://img.shields.io/docker/v/usedatabrew/blink)
 
 ```shell
 go install github.com/usedatabrew/blink@v1.16.8
