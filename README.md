@@ -37,7 +37,7 @@ docker run -v ./blink.yaml:/app/blink.yaml usedatabrew/blink start
 ![Latest version (latest semver)](https://img.shields.io/docker/v/usedatabrew/blink)
 
 ```shell
-go install github.com/usedatabrew/blink@v1.16.8
+go install github.com/usedatabrew/blink@v1.16.9
 ```
 
 ### Running Blink locally
