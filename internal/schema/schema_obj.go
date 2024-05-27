@@ -1,10 +1,11 @@
 package schema
 
 import (
+	"slices"
+
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/barkimedes/go-deepcopy"
 	"github.com/usedatabrew/blink/internal/helper"
-	"slices"
 )
 
 type StreamSchemaObj struct {
@@ -87,7 +88,6 @@ func (s *StreamSchemaObj) RemoveFields(streamName string, columnNames []string) 
 
 func (s *StreamSchemaObj) getLastSchemaDeepCopy() []StreamSchema {
 	streamSchema := s.streamSchemaVersions[s.lastVersion]
-	//var streamSchemaCopy = make([]StreamSchema, len(streamSchema))
 	streamSchemaCopy, err := deepcopy.Anything(streamSchema)
 	if err != nil {
 		panic(err)

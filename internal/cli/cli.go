@@ -2,12 +2,13 @@ package cli
 
 import (
 	"errors"
+	"os"
+
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/usedatabrew/blink/config"
 	"github.com/usedatabrew/blink/public/server"
 	"github.com/usedatabrew/blink/public/stream"
-	"os"
 )
 
 var configFileLocation string
@@ -52,7 +53,6 @@ func init() {
 }
 
 func Start() {
-
 	rootCmd.AddCommand(cmdStart)
 	err := rootCmd.Execute()
 	if err != nil {
