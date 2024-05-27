@@ -11,7 +11,8 @@
 [![Build on push to main](https://github.com/usedatabrew/blink/actions/workflows/build_main.yaml/badge.svg)](https://github.com/usedatabrew/blink/actions/workflows/build_main.yaml)
 ![Latest version (latest semver)](https://img.shields.io/docker/v/usedatabrew/blink)
 
-Blink ETL gives you the ability to create truly flexible data pipelines to implement even-driven architecture, database replication, and data lakes
+Blink gives your ability to create event driven systems by adopting CDC or enabling integration with third-party systems like
+AirTable or stripe to stream your data directly to your systems. 
 
 # Table of Contents
 
