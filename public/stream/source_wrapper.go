@@ -4,6 +4,7 @@ import (
 	"github.com/usedatabrew/blink/config"
 	"github.com/usedatabrew/blink/internal/sources"
 	"github.com/usedatabrew/blink/internal/sources/airtable"
+	"github.com/usedatabrew/blink/internal/sources/kafka"
 	"github.com/usedatabrew/blink/internal/sources/mongo_stream"
 	"github.com/usedatabrew/blink/internal/sources/mysql_cdc"
 	"github.com/usedatabrew/blink/internal/sources/playground"
@@ -11,7 +12,6 @@ import (
 	"github.com/usedatabrew/blink/internal/sources/postgres_incr_sync"
 	"github.com/usedatabrew/blink/internal/sources/websockets"
 	"github.com/usedatabrew/blink/internal/stream_context"
-	"gopkg.in/yaml.v3"
 )
 
 // SourceWrapper wraps source plugin in order to
@@ -67,19 +67,6 @@ func (p *SourceWrapper) SetStreamContext(ctx *stream_context.Context) {
 	p.ctx = ctx
 }
 
-func (p *SourceWrapper) GetPluginConfigs(driver sources.SourceDriver, fcg *yaml.Node) (any, error) {
-	switch driver {
-	case sources.PostgresCDC:
-		return config.ReadDriverConfig[postgres_cdc.Config](fcg, postgres_cdc.Config{})
-	case sources.MongoStream:
-		return config.ReadDriverConfig[mongo_stream.Config](fcg, mongo_stream.Config{})
-	case sources.MysqlCDC:
-		return config.ReadDriverConfig[mysql_cdc.Config](fcg, mysql_cdc.Config{})
-	}
-
-	return nil, nil
-}
-
 func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, fcg config.Configuration) sources.DataSource {
 	switch driver {
 	case sources.Playground:
@@ -128,10 +115,18 @@ func (p *SourceWrapper) LoadDriver(driver sources.SourceDriver, fcg config.Confi
 		driverConfig, err := config.ReadDriverConfig[postgres_incr_sync.Config](fcg.Source.Config, postgres_incr_sync.Config{})
 
 		if err != nil {
-			panic("cannot ready driver config")
+			panic("cannot read driver config")
 		}
 
 		return postgres_incr_sync.NewPostgresIncrSourcePlugin(p.ctx, driverConfig, fcg.Source.StreamSchema)
+	case sources.Kafka:
+		driverConfig, err := config.ReadDriverConfig[kafka.Config](fcg.Source.Config, kafka.Config{})
+
+		if err != nil {
+			panic("cannot read driver config")
+		}
+
+		return kafka.NewKafkaSourcePlugin(driverConfig, fcg.Source.StreamSchema)
 	default:
 		p.ctx.Logger.WithPrefix("Source driver loader").Fatal("Failed to load driver", "driver", driver)
 	}
