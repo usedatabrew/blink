@@ -3,6 +3,7 @@ package mongo_stream
 import (
 	"context"
 	"fmt"
+
 	"github.com/apache/arrow/go/v14/arrow"
 	"github.com/apache/arrow/go/v14/arrow/array"
 	"github.com/apache/arrow/go/v14/arrow/memory"
@@ -26,15 +27,12 @@ type SourcePlugin struct {
 }
 
 func NewMongoStreamSourcePlugin(config Config, schema []schema.StreamSchema) sources.DataSource {
-	instance := &SourcePlugin{
+	return &SourcePlugin{
 		config:        config,
 		inputSchema:   schema,
+		outputSchema:  sources.BuildOutputSchema(schema),
 		messageStream: make(chan sources.MessageEvent),
 	}
-
-	instance.buildOutputSchema()
-
-	return instance
 }
 
 func (p *SourcePlugin) Connect(ctx context.Context) error {
@@ -160,14 +158,4 @@ func (p *SourcePlugin) process(stream string, data map[string]interface{}, snaps
 		Message: m,
 		Err:     nil,
 	}
-}
-
-func (p *SourcePlugin) buildOutputSchema() {
-	outputSchemas := make(map[string]*arrow.Schema)
-	for _, collection := range p.inputSchema {
-		outputSchema := collection.AsArrow()
-		outputSchemas[collection.StreamName] = outputSchema
-	}
-
-	p.outputSchema = outputSchemas
 }

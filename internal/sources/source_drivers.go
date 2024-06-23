@@ -10,4 +10,5 @@ const (
 	AirTable            SourceDriver = "airtable"
 	Playground          SourceDriver = "playground"
 	MysqlCDC            SourceDriver = "mysql_cdc"
+	Kafka               SourceDriver = "kafka"
 )
