@@ -2,11 +2,13 @@ package kafka
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sasl/aws"
 	"github.com/twmb/franz-go/pkg/sasl/plain"
@@ -48,11 +50,11 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 	options := []kgo.Opt{
 		kgo.AllowAutoTopicCreation(),
 	}
-	for _, op := range s.GetConfig() {
-		options = append(options, op)
-	}
+
+	options = append(options, s.GetConfig()...)
 
 	client, err := kgo.NewClient(options...)
+
 	if err != nil {
 		panic(err)
 	}
@@ -62,6 +64,15 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	admin := kadm.NewClient(client)
+	defer admin.Close()
+
+	_, err = admin.CreateTopics(s.ctx, 1, -1, nil, s.writerConfig.TopicName)
+	if err != nil {
+		panic(err)
+	}
+
 	s.writer = client
 
 	return nil
@@ -135,6 +146,7 @@ func (s *SinkPlugin) SetExpectedSchema(schema []schema.StreamSchema) {
 
 func (s *SinkPlugin) GetConfig() []kgo.Opt {
 	opts := []kgo.Opt{
+		kgo.DialTLSConfig(new(tls.Config)),
 		kgo.SeedBrokers(s.writerConfig.Brokers...),
 		kgo.ProducerBatchMaxBytes(int32(6000000)),
 	}
