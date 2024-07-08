@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -106,8 +107,8 @@ func (p *SourcePlugin) GetConfig() []kgo.Opt {
 	}
 
 	opts := []kgo.Opt{
+		kgo.DialTLSConfig(new(tls.Config)),
 		kgo.SeedBrokers(p.config.Brokers...),
-		kgo.ConsumerGroup(p.config.ConsumerGroup),
 		kgo.ConsumeTopics(topics...),
 		kgo.ConsumeResetOffset(kgo.NewOffset().AtStart()),
 	}
