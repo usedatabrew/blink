@@ -21,6 +21,7 @@ import (
 type SinkPlugin struct {
 	ctx          context.Context
 	writer       *kgo.Client
+	admin        *kadm.Client
 	writerConfig Config
 	schema       []schema.StreamSchema
 
@@ -66,7 +67,6 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 	}
 
 	admin := kadm.NewClient(client)
-	defer admin.Close()
 
 	_, err = admin.CreateTopics(s.ctx, 1, -1, nil, s.writerConfig.TopicName)
 	if err != nil {
@@ -74,6 +74,7 @@ func (s *SinkPlugin) Connect(ctx context.Context) error {
 	}
 
 	s.writer = client
+	s.admin = admin
 
 	return nil
 }
@@ -190,5 +191,6 @@ func (s *SinkPlugin) GetConfig() []kgo.Opt {
 func (s *SinkPlugin) Stop() {
 	close(s.done)
 	s.writer.Close()
+	s.admin.Close()
 	s.ctx.Done()
 }
